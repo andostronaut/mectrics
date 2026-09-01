@@ -18,7 +18,7 @@ enum MenuBarComponent: String, CaseIterable, Identifiable {
     // Battery
     case batteryIcon, batteryIconValue, health, cycles
     // Network
-    case netActivity, netDown, netUp
+    case netActivity, netActivityGraph, netDown, netUp
 
     var id: String { rawValue }
 
@@ -31,7 +31,7 @@ enum MenuBarComponent: String, CaseIterable, Identifiable {
             .value, .batteryIcon, .batteryIconValue, .health, .cycles
         ]
         case .disk:      return [.value, .ring, .usedBytes, .freeBytes]
-        case .network:   return [.netActivity, .netDown, .netUp]
+        case .network:   return [.netActivity, .netActivityGraph, .netDown, .netUp]
         default:         return [.value]
         }
     }
@@ -62,6 +62,11 @@ enum MenuBarComponent: String, CaseIterable, Identifiable {
         case .health:      return String(localized: "component.health", defaultValue: "Health")
         case .cycles:      return String(localized: "component.cycles", defaultValue: "Cycles")
         case .netActivity: return String(localized: "component.activity", defaultValue: "Activity")
+        case .netActivityGraph:
+            return String(
+                localized: "component.activityGraph",
+                defaultValue: "Activity + Graph"
+            )
         case .netDown:     return String(localized: "component.download", defaultValue: "Download")
         case .netUp:       return String(localized: "component.upload", defaultValue: "Upload")
         }
@@ -70,7 +75,13 @@ enum MenuBarComponent: String, CaseIterable, Identifiable {
     /// True when the component draws a trend chart next to its value, so its item
     /// needs sample history to render.
     var drawsSparkline: Bool {
-        self == .valueGraph
+        self == .valueGraph || self == .netActivityGraph
+    }
+
+    /// True when the component draws the two-line stacked ↓/↑ rates, which are set in a
+    /// smaller font than a single-line value and measured as the wider of the two lines.
+    var drawsStackedRates: Bool {
+        self == .netActivity || self == .netActivityGraph
     }
 
     /// True when the component already draws the module's own hardware glyph, so the
@@ -101,7 +112,7 @@ enum MenuBarComponent: String, CaseIterable, Identifiable {
             return "9999"
         case .temperature:
             return "125°"
-        case .netActivity, .netDown, .netUp:
+        case .netActivity, .netActivityGraph, .netDown, .netUp:
             return "↓999M"
         case .value, .valueGraph:
             switch module {
@@ -169,6 +180,8 @@ extension MenuBarText {
             return .text("\(Int(cycles))")
         case .netActivity:
             return .text(string(for: .network, sample: sample))
+        case .netActivityGraph:
+            return .textGraph(string(for: .network, sample: sample))
         case .netDown:
             return .text("↓\(MetricFormat.menuRate(sample.detail["down"] ?? 0))")
         case .netUp:

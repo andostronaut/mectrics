@@ -7,6 +7,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.7.0] — 2026-08-31
+
+### Added
+
+- Network can now show a graph in the menu bar, next to its stacked ↓/↑ rates — the same
+  value-plus-trend pairing CPU, Memory, and GPU already offer. Pick **Activity + Graph** for
+  Network in **Settings → Menu Bar**; the plain **Activity** item is unchanged, so no
+  existing menu bar widens on update.
+
+### Changed
+
+- Network charts are scaled against a 1 MB/s floor instead of purely against the highest
+  value on screen. A chart that re-fits itself to the quietest minute turns a few KB/s of
+  background chatter into a full-height wave, which in the menu bar — where there is no
+  axis to read — looks like heavy traffic. An idle Mac now draws a flat line, and a real
+  transfer still scales to its own peak. This applies to the network popover too.
+
 ## [1.6.1] — 2026-08-04
 
 ### Fixed

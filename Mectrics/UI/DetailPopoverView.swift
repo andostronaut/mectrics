@@ -60,8 +60,12 @@ struct DetailPopoverView: View {
                 accent: model.accentColor
             )
         } else if moduleID != .battery {
-            SparklineView(values: model.history(moduleID, count: 60), accent: model.accentColor)
-                .frame(height: 40)
+            SparklineView(
+                values: model.history(moduleID, count: 60),
+                accent: model.accentColor,
+                scaleFloor: SparklineScale.floor(for: moduleID)
+            )
+            .frame(height: 40)
         }
         if moduleID == .cpu {
             CoreBarsView(values: coreValues, accent: model.accentColor)

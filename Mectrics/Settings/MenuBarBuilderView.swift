@@ -384,7 +384,7 @@ private struct MenuBarComponentPreview: View {
         case .batteryIcon:      return 18
         // Body + gap + terminal nub, as drawn by `labelledBatteryPreview`.
         case .batteryIconValue: return 27
-        case .valueGraph:
+        case .valueGraph, .netActivityGraph:
             return textWidth(component, module) + sparklineGap + sparklineWidth
         default:
             return textWidth(component, module)
@@ -395,9 +395,9 @@ private struct MenuBarComponentPreview: View {
         _ component: MenuBarComponent,
         _ module: MetricID
     ) -> CGFloat {
-        // The stacked network item is drawn on one line here, so its template is the
-        // two rates side by side rather than the single line the menu bar reserves.
-        let template = component == .netActivity
+        // The stacked network items are drawn on one line here, so their template is
+        // the two rates side by side rather than the single line the menu bar reserves.
+        let template = component.drawsStackedRates
             ? "↓999M ↑999M"
             : component.template(for: module)
         let measured = (template as NSString)
@@ -410,12 +410,13 @@ private struct MenuBarComponentPreview: View {
     @ViewBuilder
     private var componentPreview: some View {
         switch component {
-        case .valueGraph:
+        case .valueGraph, .netActivityGraph:
             HStack(spacing: ExperienceSpacing.xSmall) {
                 previewLabel
                 SparklineView(
                     values: model.history(id, count: 30),
-                    accent: model.accentColor
+                    accent: model.accentColor,
+                    scaleFloor: SparklineScale.floor(for: id)
                 )
                 .frame(width: 26, height: 13)
             }

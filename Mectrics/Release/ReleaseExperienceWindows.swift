@@ -35,6 +35,7 @@ struct ReleaseHighlight: Identifiable {
 enum ReleaseHighlights {
     static func notes(for version: String) -> [ReleaseHighlight] {
         switch version {
+        case "1.7.0": return oneSevenZero
         case "1.6.1": return oneSixZero + oneSixOne
         case "1.6.0": return oneSixZero
         case "1.5.0": return oneFiveZero
@@ -44,6 +45,23 @@ enum ReleaseHighlights {
 
     static var current: [ReleaseHighlight] {
         notes(for: Bundle.main.marketingVersion)
+    }
+
+    private static var oneSevenZero: [ReleaseHighlight] {
+        [
+            ReleaseHighlight(
+                id: "networkGraph",
+                symbol: "chart.xyaxis.line",
+                title: String(
+                    localized: "whatsNew.1_7_0.networkGraph.title",
+                    defaultValue: "Network has a graph now"
+                ),
+                description: String(
+                    localized: "whatsNew.1_7_0.networkGraph.description",
+                    defaultValue: "Throughput can be charted beside its rates, the way CPU, Memory and GPU already are. The chart is scaled against a fixed floor rather than against the last minute, so an idle Mac draws a flat line instead of turning background chatter into a peak. Choose Activity + Graph for Network in Settings."
+                )
+            )
+        ]
     }
 
     private static var oneSixOne: [ReleaseHighlight] {

@@ -74,12 +74,14 @@ a Mac mini. **A missing reading shows a dash, never a fabricated `0`.**
 | **Memory** | Usage %, used memory, temperature | ✅ |
 | **GPU** | Utilization %, temperature | ✅ |
 | **Battery** | Level with charge indicator, icon, health, cycles | — |
-| **Network** | Stacked ↓/↑ activity, download only, upload only | — |
+| **Network** | Stacked ↓/↑ activity with or without a graph, download only, upload only | ✅ |
 | **Disk** | Usage %, ring, used, free | — |
 | **Fans** | Fastest fan RPM | — |
 
-Sparklines are drawn for the three metrics where a trend is genuinely informative. The rest
-show a value, because a chart of your disk's fill level is decoration.
+Sparklines are drawn for the four metrics where a trend is genuinely informative. The rest
+show a value, because a chart of your disk's fill level is decoration. The network chart is
+scaled against a fixed 1 MB/s floor rather than against whatever the last minute happened to
+contain, so an idle Mac reads as idle instead of turning background chatter into a peak.
 
 A module can contribute **several independent items** — Battery can show its icon *and* its
 health side by side. You pick components by clicking a live preview chip in the menu bar

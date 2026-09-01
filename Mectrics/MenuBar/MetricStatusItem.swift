@@ -18,6 +18,8 @@ final class MetricStatusItem: NSObject {
 
     private let textFont: NSFont
     private let reservedTextWidth: CGFloat
+    /// Lower bound for this module's sparkline y-axis — see `SparklineScale`.
+    private let sparklineFloor: Double
     /// Base (untinted) SF Symbol for the optional embedded module icon.
     private let iconSymbol: NSImage?
     /// Everything the last drawn image was derived from. Handing AppKit an image
@@ -37,8 +39,8 @@ final class MetricStatusItem: NSObject {
     /// The font a component's text is drawn in. Width stability is checked against
     /// this, so it lives here rather than being duplicated by whoever measures.
     static func font(for component: MenuBarComponent) -> NSFont {
-        // The stacked network activity item uses a small two-line font.
-        component == .netActivity
+        // The stacked network activity items use a small two-line font.
+        component.drawsStackedRates
             ? .monospacedDigitSystemFont(ofSize: 8.5, weight: .semibold)
             : .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
     }
@@ -63,6 +65,7 @@ final class MetricStatusItem: NSObject {
         self.item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.textFont = Self.font(for: component)
         self.reservedTextWidth = Self.reservedTextWidth(for: component, module: id)
+        self.sparklineFloor = SparklineScale.floor(for: id)
         self.iconSymbol = NSImage(
             systemSymbolName: MetricSymbol.name(for: id),
             accessibilityDescription: nil
@@ -132,6 +135,7 @@ final class MetricStatusItem: NSObject {
             component: component,
             font: textFont,
             samples: samples,
+            sparklineFloor: sparklineFloor,
             accent: accent,
             reservedTextWidth: reservedTextWidth,
             icon: (showIcon && !component.drawsModuleGlyph) ? iconSymbol : nil,
@@ -159,6 +163,7 @@ final class MetricStatusItem: NSObject {
 
     private static func render(visual: MenuBarVisual?, state: MetricDataState,
                                component: MenuBarComponent, font: NSFont, samples: [Double],
+                               sparklineFloor: Double,
                                accent: NSColor, reservedTextWidth: CGFloat,
                                icon: NSImage?, appearance: NSAppearance) -> NSImage {
         let attrs: [NSAttributedString.Key: Any] = [
@@ -198,7 +203,7 @@ final class MetricStatusItem: NSObject {
                     drawTextBlock(text, attrs: attrs, slot: slot)
                     drawSparkline(samples, in: NSRect(x: slot + gap, y: 3,
                                                       width: sparkWidth, height: height - 6),
-                                  accent: accent)
+                                  floor: sparklineFloor, accent: accent)
                 case .coreBars(let values):
                     drawCoreBars(values, in: NSRect(x: offset, y: 3,
                                                     width: contentWidth, height: height - 6),
@@ -256,7 +261,7 @@ final class MetricStatusItem: NSObject {
         reservedTextWidth: CGFloat
     ) -> CGFloat {
         switch component {
-        case .valueGraph:
+        case .valueGraph, .netActivityGraph:
             return reservedTextWidth + gap + sparkWidth
         case .coreBars:
             return CGFloat(max(ProcessInfo.processInfo.processorCount, 2)) * 4
@@ -364,9 +369,10 @@ final class MetricStatusItem: NSObject {
         (text as NSString).draw(at: NSPoint(x: x, y: baselineY), withAttributes: attrs)
     }
 
-    private static func drawSparkline(_ values: [Double], in rect: NSRect, accent: NSColor) {
+    private static func drawSparkline(_ values: [Double], in rect: NSRect,
+                                      floor: Double, accent: NSColor) {
         guard values.count > 1 else { return }
-        let maxV = max(values.max() ?? 1, 0.0001)
+        let maxV = SparklineScale.maximum(of: values, floor: floor)
         let stepX = rect.width / CGFloat(values.count - 1)
 
         func point(_ i: Int) -> NSPoint {

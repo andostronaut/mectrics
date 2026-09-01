@@ -5039,6 +5039,47 @@
         }
       }
     },
+    "component.activityGraph": {
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Activity + Graph"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actividad + gráfica"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activité + graphique"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atividade + Gráfico"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активность + график"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etkinlik + Grafik"
+          }
+        }
+      }
+    },
     "component.coreBars": {
       "extractionState": "extracted_with_value",
       "localizations": {
@@ -15463,6 +15504,88 @@
           "stringUnit": {
             "state": "translated",
             "value": "O Mectrics pode verificar se existe uma versão mais recente em vez de esperar você olhar. Ele pergunta primeiro, a requisição não diz nada sobre você ou seu Mac, e nada se instala sozinho. Mude quando quiser nos ajustes."
+          }
+        }
+      }
+    },
+    "whatsNew.1_7_0.networkGraph.title": {
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Network has a graph now"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ağ artık grafik çiziyor"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У сети теперь есть график"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La red ya tiene gráfica"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le réseau a maintenant un graphique"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A rede agora tem gráfico"
+          }
+        }
+      }
+    },
+    "whatsNew.1_7_0.networkGraph.description": {
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Throughput can be charted beside its rates, the way CPU, Memory and GPU already are. The chart is scaled against a fixed floor rather than against the last minute, so an idle Mac draws a flat line instead of turning background chatter into a peak. Choose Activity + Graph for Network in Settings."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ağ trafiği artık hızlarının yanında grafik olarak da çizilebiliyor — CPU, Bellek ve GPU’da olduğu gibi. Grafik son dakikanın en yüksek değerine değil sabit bir tabana göre ölçekleniyor, yani boştaki bir Mac arka plan trafiğini tepe noktasına çevirmek yerine düz bir çizgi çiziyor. Ayarlar’da Ağ için Etkinlik + Grafik’i seç."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропускную способность теперь можно показывать графиком рядом со скоростями — так же, как у процессора, памяти и графики. График масштабируется по фиксированной нижней границе, а не по последней минуте, поэтому простаивающий Mac рисует ровную линию, а не превращает фоновый трафик в пик. Выберите «Активность + график» для сети в настройках."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El tráfico puede dibujarse junto a sus velocidades, igual que ya ocurre con CPU, memoria y GPU. La gráfica se escala contra un mínimo fijo y no contra el último minuto, así que un Mac inactivo traza una línea plana en vez de convertir el ruido de fondo en un pico. Elige «Actividad + gráfica» para Red en los ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le débit peut être tracé à côté de ses vitesses, comme le font déjà le processeur, la mémoire et le GPU. Le graphique est mis à l’échelle par rapport à un plancher fixe plutôt qu’à la dernière minute : un Mac au repos trace donc une ligne plate au lieu de transformer le trafic de fond en pic. Choisissez « Activité + graphique » pour Réseau dans les réglages."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O tráfego pode ser desenhado ao lado das suas taxas, como já acontece com CPU, memória e GPU. O gráfico é escalado contra um piso fixo em vez do último minuto, então um Mac ocioso traça uma linha reta em vez de transformar o tráfego de fundo num pico. Escolha «Atividade + Gráfico» para Rede nos ajustes."
           }
         }
       }
