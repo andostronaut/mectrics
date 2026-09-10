@@ -47,7 +47,7 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
 - Never hardcode user-facing prose as a plain `String` without localization.
 - App strings live in `Mectrics/Resources/Localizable.xcstrings`; widget strings live in
   `MectricsWidget/Localizable.xcstrings`. Both catalogs ship English, Turkish, Russian,
-  Spanish, French, and Brazilian Portuguese.
+  Spanish, French, Brazilian Portuguese, and Simplified Chinese.
 - The General Settings language picker is backed by `AppLanguage`. Adding a language means
   adding its case and identifier there, then translating every entry in both catalogs.
 - Module display names: use `MetricID.localizedName` (app layer), not the package's

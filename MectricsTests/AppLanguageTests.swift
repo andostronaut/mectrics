@@ -33,7 +33,7 @@ final class AppLanguageTests: XCTestCase {
     func testExpectedLanguagesAreAvailableAlongsideSystemDefault() {
         XCTAssertEqual(
             AppLanguage.allCases.map(\.rawValue),
-            ["system", "en", "tr", "ru", "es", "fr", "pt-BR"]
+            ["system", "en", "tr", "ru", "es", "fr", "pt-BR", "zh-Hans"]
         )
     }
 

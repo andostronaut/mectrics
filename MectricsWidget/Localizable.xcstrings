@@ -32,6 +32,12 @@
             "state": "translated",
             "value": "Canlı ölçümleri görmek için uygulamayı bir kez açın."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先打开一次 App，小组件才能显示实时读数。"
+          }
         }
       }
     },
@@ -62,6 +68,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mectrics"
+          }
+        },
+        "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "Mectrics"
@@ -99,6 +111,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mectrics Genel Bakış"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mectrics 概览"
           }
         }
       }
@@ -141,6 +159,12 @@
             "state": "translated",
             "value": "%1$@, %2$@"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@，%2$@"
+          }
         }
       }
     },
@@ -182,6 +206,12 @@
             "state": "translated",
             "value": "Pil"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电池"
+          }
         }
       }
     },
@@ -219,6 +249,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
+          }
+        },
+        "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "CPU"
@@ -264,6 +300,12 @@
             "state": "translated",
             "value": "Disk"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘"
+          }
         }
       }
     },
@@ -305,6 +347,12 @@
             "state": "translated",
             "value": "Fanlar"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "风扇"
+          }
         }
       }
     },
@@ -342,6 +390,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU"
+          }
+        },
+        "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "GPU"
@@ -387,6 +441,12 @@
             "state": "translated",
             "value": "Bellek"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存"
+          }
         }
       }
     },
@@ -427,6 +487,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ağ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络"
           }
         }
       }
@@ -469,6 +535,12 @@
             "state": "translated",
             "value": "Sensörler"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "传感器"
+          }
         }
       }
     },
@@ -502,6 +574,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac’inizin güncel sistem ölçümlerini bir bakışta görün."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一眼看到 Mac 最新的系统数据。"
           }
         }
       }
@@ -544,6 +622,12 @@
             "state": "translated",
             "value": "Veri alınıyor"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "采集中"
+          }
         }
       }
     },
@@ -584,6 +668,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Devre dışı"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已停用"
           }
         }
       }
@@ -626,6 +716,12 @@
             "state": "translated",
             "value": "İlgilenilmesi gerekiyor"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要留意"
+          }
         }
       }
     },
@@ -666,6 +762,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Canlı"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时"
           }
         }
       }
@@ -708,6 +810,12 @@
             "state": "translated",
             "value": "İzin gerekli"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要权限"
+          }
         }
       }
     },
@@ -748,6 +856,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son Ölçüm"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最后一次"
           }
         }
       }
@@ -790,6 +904,12 @@
             "state": "translated",
             "value": "Kullanılamıyor"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不可用"
+          }
         }
       }
     },
@@ -823,6 +943,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mectrics bekleniyor"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待 Mectrics"
           }
         }
       }

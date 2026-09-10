@@ -7,6 +7,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.8.0] — 2026-09-10
+
+### Added
+
+- **Simplified Chinese.** The interface is now available in 简体中文 — every string in the
+  app and the widget, not a partial pass. Choose **Settings → General → Language**. Chinese
+  readers were already the largest group arriving at the project, and until now the app
+  they arrived at could not speak to them.
+
 ## [1.7.0] — 2026-08-31
 
 ### Added

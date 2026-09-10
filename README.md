@@ -153,8 +153,9 @@ Mectrics has no Dock icon and no window — after launching, look for it in the 
 
 Updates are checked only when you ask, under **Settings → General → Check for Updates…**.
 
-The interface is available in English, Turkish, Russian, Spanish, French, and Brazilian
-Portuguese. Choose **Settings → General → Language**, then relaunch Mectrics when prompted.
+The interface is available in English, Turkish, Russian, Spanish, French, Brazilian
+Portuguese, and Simplified Chinese. Choose **Settings → General → Language**, then relaunch
+Mectrics when prompted.
 
 ### Headless automation
 

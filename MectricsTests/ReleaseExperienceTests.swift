@@ -109,6 +109,7 @@ final class ReleaseExperienceTests: XCTestCase {
     }
 
     func testReleaseNotesBelongToTheVersionTheyShippedIn() {
+        XCTAssertFalse(ReleaseHighlights.notes(for: "1.8.0").isEmpty)
         XCTAssertFalse(ReleaseHighlights.notes(for: "1.7.0").isEmpty)
         XCTAssertFalse(ReleaseHighlights.notes(for: "1.6.0").isEmpty)
         XCTAssertFalse(ReleaseHighlights.notes(for: "1.6.1").isEmpty)
@@ -136,7 +137,7 @@ final class ReleaseExperienceTests: XCTestCase {
     }
 
     func testReleaseNoteIdentifiersAreUnique() {
-        for version in ["1.5.0", "1.6.0", "1.6.1", "1.7.0"] {
+        for version in ["1.5.0", "1.6.0", "1.6.1", "1.7.0", "1.8.0"] {
             let ids = ReleaseHighlights.notes(for: version).map(\.id)
             XCTAssertEqual(ids.count, Set(ids).count, version)
         }

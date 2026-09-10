@@ -35,6 +35,7 @@ struct ReleaseHighlight: Identifiable {
 enum ReleaseHighlights {
     static func notes(for version: String) -> [ReleaseHighlight] {
         switch version {
+        case "1.8.0": return oneEightZero
         case "1.7.0": return oneSevenZero
         case "1.6.1": return oneSixZero + oneSixOne
         case "1.6.0": return oneSixZero
@@ -45,6 +46,23 @@ enum ReleaseHighlights {
 
     static var current: [ReleaseHighlight] {
         notes(for: Bundle.main.marketingVersion)
+    }
+
+    private static var oneEightZero: [ReleaseHighlight] {
+        [
+            ReleaseHighlight(
+                id: "simplifiedChinese",
+                symbol: "character.bubble",
+                title: String(
+                    localized: "whatsNew.1_8_0.simplifiedChinese.title",
+                    defaultValue: "Mectrics speaks Chinese"
+                ),
+                description: String(
+                    localized: "whatsNew.1_8_0.simplifiedChinese.description",
+                    defaultValue: "Simplified Chinese joins the six languages already here — every string in the app and the widget, not a partial pass. Choose it under Settings → General → Language."
+                )
+            )
+        ]
     }
 
     private static var oneSevenZero: [ReleaseHighlight] {
