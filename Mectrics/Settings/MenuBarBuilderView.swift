@@ -3,12 +3,13 @@ import MetricsKit
 
 /// Menu bar tab of the settings window.
 ///
-/// The pane reads top-down: a read-only preview of the menu bar as it will look, one
-/// row per module for choosing what that module shows, then appearance. Each row is a
-/// set of independent chips rather than a single choice, because a module can put
-/// several items in the menu bar at once — Battery can show its icon and its health
-/// side by side. Every chip draws the real thing it will add, so the choice is made
-/// from what can actually be seen.
+/// The pane reads top-down: the style (separate items or a single icon), a read-only
+/// preview of the menu bar as it will look, one row per module for choosing what that
+/// module shows, then appearance. Each row is a set of independent chips rather than a
+/// single choice, because a module can put several items in the menu bar at once —
+/// Battery can show its icon and its health side by side. Every chip draws the real
+/// thing it will add, so the choice is made from what can actually be seen. Under the
+/// single icon the rows become plain switches for the dashboard's cards instead.
 ///
 /// **Live values are read only by the small leaf views at the bottom of this file.**
 /// Nothing in this view's own body touches `AppModel.latest`, so a new sample cannot
@@ -24,6 +25,20 @@ struct MenuBarBuilderView: View {
     var body: some View {
         Form {
             Section {
+                Picker(
+                    String(localized: "builder.style.label", defaultValue: "Style"),
+                    selection: $model.menuBarStyle
+                ) {
+                    ForEach(MenuBarStyle.allCases) { style in
+                        Text(style.localizedName).tag(style)
+                    }
+                }
+                .pickerStyle(.segmented)
+            } footer: {
+                Text(model.menuBarStyle.localizedDescription)
+            }
+
+            Section {
                 previewStrip
             } header: {
                 Text("Preview")
@@ -31,27 +46,54 @@ struct MenuBarBuilderView: View {
                 Text("Hold Command and drag an item in the menu bar to reorder it.")
             }
 
-            Section {
-                ForEach(model.availableModules, id: \.self) { id in
-                    moduleRow(id)
-                }
-            } header: {
-                HStack {
-                    Text("Modules")
-                    Spacer()
-                    presetsMenu
-                }
-            } footer: {
-                Text(
-                    String(
-                        localized: "builder.modules.footer",
-                        defaultValue: "Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
+            switch model.menuBarStyle {
+            case .items:
+                Section {
+                    ForEach(model.availableModules, id: \.self) { id in
+                        moduleRow(id)
+                    }
+                } header: {
+                    HStack {
+                        Text("Modules")
+                        Spacer()
+                        presetsMenu
+                    }
+                } footer: {
+                    Text(
+                        String(
+                            localized: "builder.modules.footer",
+                            defaultValue: "Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
+                        )
                     )
-                )
+                }
+            case .singleIcon:
+                Section {
+                    ForEach(model.availableModules, id: \.self) { id in
+                        DashboardModuleRow(model: model, id: id)
+                    }
+                } header: {
+                    Text(
+                        String(
+                            localized: "builder.dashboard.header",
+                            defaultValue: "Dashboard"
+                        )
+                    )
+                } footer: {
+                    Text(
+                        String(
+                            localized: "builder.dashboard.footer",
+                            defaultValue: "Every module turned on here gets a card in the dashboard. GPU and Fans cost more energy to read, so they are read less often."
+                        )
+                    )
+                }
             }
 
             Section {
-                Toggle("Show module icons", isOn: $model.showMenuBarIcons)
+                // The single icon draws no module icons, so the switch would do
+                // nothing there.
+                if model.menuBarStyle == .items {
+                    Toggle("Show module icons", isOn: $model.showMenuBarIcons)
+                }
                 Picker("Chart color", selection: $model.accentChoice) {
                     ForEach(AccentChoice.allCases) { choice in
                         Text(choice.localizedName).tag(choice)
@@ -126,18 +168,32 @@ struct MenuBarBuilderView: View {
             if model.compactHealthEnabled {
                 CompactHealthPreview(model: model)
             }
-            ForEach(model.orderedEnabledItems.indices, id: \.self) { index in
-                let entry = model.orderedEnabledItems[index]
-                MenuBarPreviewItem(
-                    model: model,
-                    id: entry.module,
-                    component: entry.component
-                )
-            }
-            if model.orderedEnabledItems.isEmpty && !model.compactHealthEnabled {
-                Text("Nothing in the menu bar yet. Pick a look for a module below.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+            switch model.menuBarStyle {
+            case .items:
+                ForEach(model.orderedEnabledItems.indices, id: \.self) { index in
+                    let entry = model.orderedEnabledItems[index]
+                    MenuBarPreviewItem(
+                        model: model,
+                        id: entry.module,
+                        component: entry.component
+                    )
+                }
+                if model.orderedEnabledItems.isEmpty && !model.compactHealthEnabled {
+                    Text("Nothing in the menu bar yet. Pick a look for a module below.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            case .singleIcon:
+                // Monochrome, like the template image the menu bar draws.
+                MectricsGlyphView(showsTip: false)
+                    .frame(width: 22, height: 15)
+                    .accessibilityElement()
+                    .accessibilityLabel(
+                        String(
+                            localized: "dashboard.statusItem.accessibilityLabel",
+                            defaultValue: "Mectrics"
+                        )
+                    )
             }
             Spacer(minLength: 0)
         }
@@ -177,6 +233,34 @@ struct MenuBarBuilderView: View {
             }
         }
         .accessibilityElement(children: .contain)
+    }
+}
+
+/// One dashboard card switch. Its own body reads the membership, so turning one card
+/// on or off re-evaluates this row alone.
+private struct DashboardModuleRow: View {
+    let model: AppModel
+    let id: MetricID
+
+    var body: some View {
+        Toggle(
+            isOn: Binding(
+                get: { model.isDashboardModuleEnabled(id) },
+                set: { enabled in
+                    if enabled != model.isDashboardModuleEnabled(id) {
+                        model.toggleDashboardModule(id)
+                    }
+                }
+            )
+        ) {
+            HStack(spacing: ExperienceSpacing.small) {
+                Label(
+                    id.localizedName,
+                    systemImage: MetricSymbol.name(for: id)
+                )
+                ModuleHealthBadge(model: model, id: id)
+            }
+        }
     }
 }
 

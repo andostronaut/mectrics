@@ -92,4 +92,24 @@ enum PerformanceSignposts {
             signpostID: id
         )
     }
+
+    static func beginDashboardPopover() -> OSSignpostID {
+        let id = OSSignpostID(log: log)
+        os_signpost(
+            .begin,
+            log: log,
+            name: "Dashboard Popover Presentation",
+            signpostID: id
+        )
+        return id
+    }
+
+    static func endDashboardPopover(_ id: OSSignpostID) {
+        os_signpost(
+            .end,
+            log: log,
+            name: "Dashboard Popover Presentation",
+            signpostID: id
+        )
+    }
 }

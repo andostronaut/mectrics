@@ -7,6 +7,8 @@ struct DetailPopoverView: View {
     let moduleID: MetricID
     var showsGlobalActions = true
     var honorsEnabledState = false
+    /// Outer width, padding included. The dashboard hosts this view at its own width.
+    var width: CGFloat = 290
     @State private var copyConfirmationVisible = false
 
     private var sample: MetricSample? { model.latest[moduleID] }
@@ -47,7 +49,7 @@ struct DetailPopoverView: View {
             }
         }
         .padding(ExperienceSpacing.medium)
-        .frame(width: 290)
+        .frame(width: width)
     }
 
     @ViewBuilder
@@ -232,20 +234,13 @@ struct DetailPopoverView: View {
 
     // MARK: - Value formatting
 
+    /// The dashboard's reading for the same module, so a card and the detail it
+    /// opens show the same number. Temperatures keep the detail's decimal.
     private var primaryValueString: String {
-        guard let sample else { return "–" }
-        switch moduleID {
-        case .cpu, .memory, .disk, .gpu:
-            return MetricFormat.percent(sample.value, decimals: 1)
-        case .battery:
-            return "\(Int((sample.value * 100).rounded()))%"
-        case .fans:
-            return "\(Int((sample.detail["maxRpm"] ?? 0).rounded())) RPM"
-        case .network:
-            return MetricFormat.bytesPerSecond(sample.value)
-        case .sensors:
+        if moduleID == .sensors, let sample {
             return String(format: "%.1f°C", sample.value)
         }
+        return DashboardFormat.primaryValue(for: moduleID, sample: sample)
     }
 
     /// Row label/value pairs. Labels are localized; values are numeric/units.
@@ -269,8 +264,9 @@ struct DetailPopoverView: View {
                 r.append((String(localized: "cpu.temperature", defaultValue: "Temperature"),
                           String(format: "%.1f°C", t)))
             }
+            // Since boot, sleep included — the dashboard's Device card says the same.
             r.append((String(localized: "cpu.uptime", defaultValue: "Uptime"),
-                      Self.uptimeString))
+                      DashboardFormat.uptime(SystemUptime.sinceBoot)))
             return r
         case .memory:
             var r: [(String, String)] = [
@@ -295,24 +291,20 @@ struct DetailPopoverView: View {
             }
             return r
         case .battery:
-            let charging = (d["charging"] ?? 0) > 0
-            let chargingLabel = charging
-                ? String(localized: "battery.charging", defaultValue: "Charging")
-                : String(localized: "battery.onBattery", defaultValue: "On battery")
+            // The same answer as the dashboard's Battery card: a Mac held at its
+            // charge limit is plugged in, not on battery, though it is not charging.
+            let status = BatteryPowerStatus.resolve(d, isOnBattery: model.isOnBattery)
             var r: [(String, String)] = [
-                (String(localized: "battery.status", defaultValue: "Status"), chargingLabel)
+                (String(localized: "battery.status", defaultValue: "Status"), status.localizedName)
             ]
-            // Time estimate: IOPS value first, AppleSmartBattery TimeRemaining as
-            // fallback; macOS sometimes has no estimate at all ("Calculating…").
-            let ips = charging ? d["timeToFull"] : d["timeToEmpty"]
-            let estimate = (ips ?? -1) > 0 ? ips : d["smartTimeRemaining"]
-            let label = charging
-                ? String(localized: "battery.timeToFull", defaultValue: "Time to full")
-                : String(localized: "battery.timeRemaining", defaultValue: "Time remaining")
-            if let estimate, estimate > 0 {
-                r.append((label, Self.minutesString(estimate)))
-            } else {
-                r.append((label, String(localized: "battery.calculating", defaultValue: "Calculating…")))
+            // Plugged in without charging there is nothing to count down to. Otherwise
+            // macOS sometimes has no estimate at all ("Calculating…").
+            if let label = status.estimateLabel {
+                if let estimate = status.estimate(in: d) {
+                    r.append((label, DashboardFormat.duration(minutes: estimate)))
+                } else {
+                    r.append((label, String(localized: "battery.calculating", defaultValue: "Calculating…")))
+                }
             }
             if let h = d["healthPercent"] {
                 r.append((String(localized: "battery.health", defaultValue: "Health"), "\(Int(h))%"))
@@ -412,24 +404,6 @@ struct DetailPopoverView: View {
     }
 
     // MARK: - System info formatting
-
-    /// Minutes → "2h 15m" / "45m".
-    private static func minutesString(_ minutes: Double) -> String {
-        let total = Int(minutes)
-        let hours = total / 60
-        let mins = total % 60
-        return hours > 0 ? "\(hours)h \(mins)m" : "\(mins)m"
-    }
-
-    private static var uptimeString: String {
-        let uptime = Int(ProcessInfo.processInfo.systemUptime)
-        let days = uptime / 86_400
-        let hours = (uptime % 86_400) / 3_600
-        let minutes = (uptime % 3_600) / 60
-        if days > 0 { return "\(days)d \(hours)h" }
-        if hours > 0 { return "\(hours)h \(minutes)m" }
-        return "\(minutes)m"
-    }
 
     /// Kernel pressure level (1/2/4) → user-facing label. A value the kernel does not
     /// define is shown as a dash rather than guessed at.

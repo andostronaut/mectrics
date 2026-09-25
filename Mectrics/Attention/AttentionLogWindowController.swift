@@ -285,7 +285,8 @@ private extension AlertConditionState {
     }
 }
 
-private extension AttentionSeverity {
+extension AttentionSeverity {
+    /// The severity in words, shared with the dashboard's health banner.
     var localizedName: String {
         switch self {
         case .info:

@@ -70,12 +70,28 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   `0%` / `0`. Do not offer a component whose data this Mac cannot report.
 - Components are picked by clicking a live preview chip, not from a select box — the
   user chooses what they can see.
+- **Two styles, each with its own choices.** `MenuBarStyle.items` (one item per component,
+  the default for new installs and upgrades) and `.singleIcon` (one logo item that opens
+  the dashboard popover). The single icon keeps its cards in `dashboardModules` and
+  **never edits `enabledComponents`**, so switching back restores the exact layout. The
+  persisted raw values never change.
+- `enabledModules` and `setEnabled(_:for:)` are style-aware: they mean the *watched* set
+  (`MenuBarStyle.watchedModules`) — modules with an item, or with a dashboard card under the
+  single icon. Sampling, widgets, summaries, onboarding, and recovery actions go through
+  them, never through `enabledComponents` directly.
+- **The logo item is fixed-width and static.** `MectricsStatusItem` has a fixed, even
+  length, so its even-sided template image sits on whole pixels at 1x. Image, label, and
+  tooltip are assigned once at construction; a template follows light, dark, and tinted
+  menu bars by itself, so it is never reassigned.
 
 ## 4. Surfaces and Settings
 
 - **The menu bar is the only live surface.** The always-on-top floating panel and its
-  global hotkey were removed; the optional **Compact Health** item is the supported
-  overview. Do not reintroduce a second always-visible rendering surface.
+  global hotkey were removed; the supported overviews live in the menu bar — the optional
+  **Compact Health** item, and the single icon's dashboard. The dashboard is a transient
+  popover in the shared `NSPopover`, on screen only from a click until the next click
+  elsewhere. Do not reintroduce a second always-visible rendering surface.
+- The Compact Health item is independent of the menu bar style and appears in both.
 - The bundled CLI is a headless **automation interface**, not a second live dashboard. It
   reuses the app's saved rules, offers event streaming and one-shot checks, and keeps
   standard output pipe-safe. `check` and alert streaming sample only the metrics they need;
@@ -176,7 +192,19 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   tears down and re-creates every `NSStatusItem`, which means new windows and new
   structural regions in the window server. Component availability therefore only grows
   within a session: a sensor that reads out of range for one cycle is a failed read, not
-  hardware that vanished, and the item already renders a dash for a missing value.
+  hardware that vanished, and the item already renders a dash for a missing value. Under
+  the single icon no component change touches the list (`MenuBarStyle.itemKeys` is
+  empty), and a dashboard module turned on or off calls `onWatchedModulesChanged`, which
+  republishes widgets and updates Energy Guard — never `onModulesChanged`.
+- **Every visibility report is balanced and batched.** A popover reports its modules
+  visible as one set and hidden as the same set (`onDetailVisibilityChanged`,
+  `AppModel.setVisibleDetailModules`), so opening the dashboard is one forced refresh, not
+  one per card. Every way a popover ends — toggled, replaced, dismissed by AppKit, or
+  orphaned by a rebuild, which closes it first — reports hidden exactly once. Popover and
+  detail-window visibility are tracked apart, because both can show the same module.
+- **A closed popover releases its content.** Its window is only ordered out, so a view
+  tree kept in it would go on observing the model and running `.task` loops off screen.
+  Every opening installs fresh content.
 - **A Settings pane's own body must never read a value that changes every cycle.**
   Live readings belong to small leaf views (`MenuBarComponentPreview`, `AlertRuleLiveLine`,
   `AlertRuleSummary`), and those leaves reserve a fixed width from the same template the
@@ -186,9 +214,10 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   view needs but a sample does not change (`componentOptions`,
   `availableSystemAlertSignals`).
 - **Reading the SMC is the most expensive thing this app does**, so it is sampled only
-  where a temperature is actually on screen: a `.temperature` menu bar component, an open
-  popover or detail window for CPU/Memory/GPU, the menu bar builder, or a rule that asks
-  for `.sensors` directly. A module merely having a menu bar item does not earn it.
+  where a temperature is actually on screen: a `.temperature` menu bar component or the
+  menu bar builder (separate items only), an open popover, dashboard, or detail window for
+  CPU/Memory/GPU, or a rule that asks for `.sensors` directly. A module merely having a
+  menu bar item or a dashboard card does not earn it.
 - Prefer `IORegistryEntryCreateCFProperty` over `IORegistryEntryCreateCFProperties`:
   copying a driver's whole property dictionary to read one key is orders of magnitude
   more expensive.
@@ -199,7 +228,10 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
 2. Return `isAvailable = false` when the hardware/permission is absent (module auto-hides).
 3. Add it to `MetricsKit.coreProviders()`.
 4. Add menu-bar text in `MenuBarText` (+ a stable template in `MetricStatusItem`).
-5. Add popover rows + primary value in `DetailPopoverView` (localized labels).
+5. Add popover rows in `DetailPopoverView` (localized labels), the primary value in
+   `DashboardFormat.primaryValue(for:sample:)` (shared by the detail and the dashboard),
+   and a dashboard card in `DashboardPopoverView`. A `.heavy` provider stays out of
+   `MenuBarStyle.defaultDashboardModules`.
 6. Add a sanity test in `MetricsKitTests`.
 
 ## 7. Build / test / run

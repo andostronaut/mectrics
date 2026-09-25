@@ -7,6 +7,36 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **A compact menu bar: one icon instead of separate items.** Choose **Settings → Menu Bar →
+  Style → Compact** and the menu bar holds one Mectrics logo in place of an item per reading.
+  Clicking it opens a dashboard of cards — CPU, Memory, Battery, Network, and Disk unless
+  you choose otherwise — each showing its value with a chart, a ring, or the figures behind
+  it, and a last card with the macOS version and uptime. GPU and Fans can be added in the
+  same pane but start switched off, because they are among the most expensive readings the
+  app takes. Clicking a card opens that module's full detail inside the same popover. It is
+  for a menu bar that is already crowded, or for anyone who would rather have the numbers
+  one click away than always in view. Your separate-items layout is kept exactly as it was
+  and comes back when you switch back to **Separate**, and nothing changes on update:
+  separate items stay the default. Compact Health works the same in both styles.
+
+### Fixed
+
+- Uptime in the CPU detail now counts from startup, sleep included, as the `uptime` command
+  and System Information do. It showed the time the Mac had been awake, which stops while
+  it sleeps, so on a laptop that sleeps every night it fell further behind every day. Uptime
+  and battery time estimates are also written with your language's own unit abbreviations
+  rather than English letters in every language.
+- The Battery detail now says **Plugged in** when the Mac is on its adapter without
+  charging — held at a charge limit, or full — and leaves out a time estimate it has no use
+  for. It went by the charging flag alone, so a Mac sitting on its charger at 80% was
+  reported as **On battery**, with a time-remaining row that did not apply.
+- Closing a module's popover no longer stops the readings that module's detail window still
+  shows. Both reported to one list of what was on screen, so closing either one took the
+  module off it, and a CPU, Memory, or GPU detail window left open went on showing the
+  temperature from the moment the popover closed.
+
 ## [1.8.0] — 2026-09-10
 
 ### Added

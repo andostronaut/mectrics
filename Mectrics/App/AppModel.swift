@@ -20,6 +20,12 @@ final class AppModel {
     /// The latest sample per module (read by the menu bar + popover).
     var latest: [MetricID: MetricSample] = [:]
 
+    /// Whether the battery, not the adapter, is powering the Mac: the system's
+    /// providing power source, which the battery's charging flag cannot tell apart
+    /// from a Mac held at its charge limit. AppDelegate reads it at launch and again
+    /// on every power-source notification, so no view has to; nil until then.
+    var isOnBattery: Bool?
+
     /// Consecutive provider attempts that returned no sample. Short interruptions keep
     /// the last valid value; repeated failures become an explicit error state.
     private(set) var consecutiveSamplingFailures: [MetricID: Int] = [:]
@@ -28,21 +34,91 @@ final class AppModel {
 
     /// Enabled menu bar items: per module, which components are shown. A module may
     /// contribute several items at once (e.g. Battery icon + Battery health).
+    ///
+    /// The single-icon style never edits this, so switching back to separate items
+    /// restores exactly the layout that was there before.
     var enabledComponents: [MetricID: Set<MenuBarComponent>] {
         didSet {
             persistEnabledComponents()
-            for id in enabledModules
-                where (oldValue[id] ?? []).isEmpty && !(enabledComponents[id] ?? []).isEmpty {
-                consecutiveSamplingFailures[id] = 0
-            }
+            resetFailuresForNewlyWatchedModules(
+                previouslyWatched: MenuBarStyle.watchedModules(
+                    style: menuBarStyle,
+                    available: availableModules,
+                    enabledComponents: oldValue,
+                    dashboardModules: dashboardModules
+                )
+            )
             refreshActiveMetrics()
-            if enabledComponents != oldValue { onModulesChanged?() }
+            // Under the single icon a component edit changes no status item.
+            if menuBarStyle == .items && enabledComponents != oldValue {
+                onModulesChanged?()
+            }
         }
     }
 
-    /// Modules with at least one component in the menu bar (popover/panel scope).
+    /// Separate items per component, or one logo item that opens the dashboard.
+    var menuBarStyle: MenuBarStyle {
+        didSet {
+            defaults.set(menuBarStyle.rawValue, forKey: Self.menuBarStyleKey)
+            guard menuBarStyle != oldValue else { return }
+            resetFailuresForNewlyWatchedModules(
+                previouslyWatched: MenuBarStyle.watchedModules(
+                    style: oldValue,
+                    available: availableModules,
+                    enabledComponents: enabledComponents,
+                    dashboardModules: dashboardModules
+                )
+            )
+            refreshActiveMetrics()
+            // The status item list changes, so this is a genuine rebuild.
+            onModulesChanged?()
+        }
+    }
+
+    /// Modules with a card in the dashboard popover (single-icon style). Kept apart
+    /// from `enabledComponents` so neither style's choices overwrite the other's.
+    var dashboardModules: Set<MetricID> {
+        didSet {
+            defaults.set(
+                dashboardModules.map(\.rawValue).sorted(),
+                forKey: Self.dashboardModulesKey
+            )
+            guard dashboardModules != oldValue else { return }
+            resetFailuresForNewlyWatchedModules(
+                previouslyWatched: MenuBarStyle.watchedModules(
+                    style: menuBarStyle,
+                    available: availableModules,
+                    enabledComponents: enabledComponents,
+                    dashboardModules: oldValue
+                )
+            )
+            refreshActiveMetrics()
+            // The watched set changed but no status item did, so the menu bar is left
+            // alone — it is rebuilt only when its list of items changes.
+            if menuBarStyle == .singleIcon { onWatchedModulesChanged?() }
+        }
+    }
+
+    /// Modules the app watches: with at least one component in the menu bar, or with
+    /// a card in the dashboard under the single icon. Sampling, widgets, summaries, and
+    /// the popovers all scope to this.
     var enabledModules: Set<MetricID> {
-        Set(availableModules.filter { !(enabledComponents[$0] ?? []).isEmpty })
+        MenuBarStyle.watchedModules(
+            style: menuBarStyle,
+            available: availableModules,
+            enabledComponents: enabledComponents,
+            dashboardModules: dashboardModules
+        )
+    }
+
+    /// A module that starts being watched begins with a clean failure count, so an
+    /// error from before it was switched off does not greet it on its way back.
+    private func resetFailuresForNewlyWatchedModules(
+        previouslyWatched: Set<MetricID>
+    ) {
+        for id in enabledModules.subtracting(previouslyWatched) {
+            consecutiveSamplingFailures[id] = 0
+        }
     }
 
     /// Menu bar items in display order: module order, then the component order
@@ -55,12 +131,21 @@ final class AppModel {
         }
     }
 
-    /// Called when the enabled-module set changes, so the menu bar can be rebuilt
+    /// Called when the menu bar's list of status items changes, so it can be rebuilt
     /// (wired by AppDelegate).
     @ObservationIgnored var onModulesChanged: (() -> Void)?
 
+    /// Called when the watched modules change without any status item changing — a
+    /// dashboard module turned on or off under the single icon. Lighter than
+    /// `onModulesChanged`: nothing in the menu bar is torn down (wired by AppDelegate).
+    @ObservationIgnored var onWatchedModulesChanged: (() -> Void)?
+
     /// Called when a view asks for the settings window (wired by AppDelegate).
     @ObservationIgnored var onOpenSettings: (() -> Void)?
+
+    /// Opens Settings on the Menu Bar pane, where the dashboard's modules are chosen
+    /// (wired by AppDelegate).
+    @ObservationIgnored var onOpenMenuBarSettings: (() -> Void)?
 
     /// Called by the Help menu to present the optional onboarding again.
     @ObservationIgnored var onOpenOnboarding: (() -> Void)?
@@ -221,6 +306,23 @@ final class AppModel {
         enabledComponents[id] = set
     }
 
+    func isDashboardModuleEnabled(_ id: MetricID) -> Bool {
+        dashboardModules.contains(id)
+    }
+
+    func toggleDashboardModule(_ id: MetricID) {
+        if dashboardModules.contains(id) {
+            dashboardModules.remove(id)
+        } else if availableModules.contains(id) {
+            dashboardModules.insert(id)
+        }
+    }
+
+    /// The dashboard's modules in card order (the menu bar's module order).
+    var orderedDashboardModules: [MetricID] {
+        availableModules.filter { dashboardModules.contains($0) }
+    }
+
     /// Component choices worth offering for a module. Battery health and cycle count
     /// and temperatures are hidden when this Mac does not report them, so the
     /// builder never offers a look that can only ever render a dash.
@@ -263,7 +365,8 @@ final class AppModel {
     )
 
     /// Recomputes the cached option lists. Returns true when the menu bar's own list
-    /// of items changed and it therefore has to be rebuilt.
+    /// of items changed and it therefore has to be rebuilt — never under the single
+    /// icon, whose one item does not depend on which components exist.
     ///
     /// Availability only ever grows within a session. A sensor that reads out of range
     /// for one cycle — an idle GPU reporting nothing is routine — is a failed read, not
@@ -273,7 +376,6 @@ final class AppModel {
     /// re-creates every status item.
     @discardableResult
     private func refreshComponentOptions() -> Bool {
-        let previousItems = enabledItemKeys
         var options = componentOptions
         for id in availableModules {
             let discovered = Self.componentOptions(
@@ -292,13 +394,15 @@ final class AppModel {
             availableSystemAlertSignals.insert(.batteryService)
         }
         guard options != componentOptions else { return false }
+        // Read before the new options land — and only now, not on every cycle.
+        let previousItems = menuBarItemKeys
         componentOptions = options
-        return enabledItemKeys != previousItems
+        return menuBarItemKeys != previousItems
     }
 
-    /// Identity of every menu bar item, in display order.
-    private var enabledItemKeys: [String] {
-        orderedEnabledItems.map { "\($0.module.rawValue)|\($0.component.rawValue)" }
+    /// Identity of every metric status item the menu bar shows, in display order.
+    private var menuBarItemKeys: [String] {
+        MenuBarStyle.itemKeys(style: menuBarStyle, orderedItems: orderedEnabledItems)
     }
 
     /// Temperature belonging to a hardware-domain module, if the SMC exposes a
@@ -326,20 +430,22 @@ final class AppModel {
         refreshActiveMetrics()
     }
 
-    /// Modules whose popover or detail window is on screen. Those surfaces show a
-    /// temperature, so the SMC is worth reading while one of them is open.
+    /// Modules whose popover, dashboard card, or detail window is on screen. Those
+    /// surfaces show a temperature, so the SMC is worth reading while one is open.
     private var visibleDetailModules: Set<MetricID> = []
 
-    func setDetailVisible(_ id: MetricID, _ visible: Bool) {
-        let updated = visible
-            ? visibleDetailModules.union([id])
-            : visibleDetailModules.subtracting([id])
-        guard updated != visibleDetailModules else { return }
-        visibleDetailModules = updated
+    /// Replaces the on-screen modules in one step. The dashboard shows several at once,
+    /// and a forced pass reads every active provider — the SMC included — so one
+    /// opening asks for one pass, not one per card. Back-to-back passes would also
+    /// measure CPU load and network rates over a few milliseconds.
+    func setVisibleDetailModules(_ ids: Set<MetricID>) {
+        guard ids != visibleDetailModules else { return }
+        let gained = !ids.isSubset(of: visibleDetailModules)
+        visibleDetailModules = ids
         refreshActiveMetrics()
         // A newly opened surface should show a temperature immediately rather than
         // waiting for the next heavy cycle.
-        if visible { engine.requestRefresh(includingHeavy: true) }
+        if gained { engine.requestRefresh(includingHeavy: true) }
     }
 
     private let defaults = UserDefaults.standard
@@ -349,6 +455,8 @@ final class AppModel {
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
     private static let compactHealthEnabledKey = "compactHealthEnabled"
+    private static let menuBarStyleKey = "menuBarStyle"
+    private static let dashboardModulesKey = "dashboardModules"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
     private static let answeredUpdateChecksKey = "hasAnsweredAutomaticUpdateChecks"
     private static let alertsKey = AlertConfigurationStorage.thresholdRulesKey
@@ -392,25 +500,44 @@ final class AppModel {
         self.systemAlertRules = Self.loadSystemAlertRules(from: defaults)
         self.enabledComponents = Self.loadEnabledComponents(
             from: defaults, available: available.filter { $0 != .sensors })
+        // Separate items stay the default for new installs and upgrades alike, so
+        // nobody's menu bar changes on update.
+        self.menuBarStyle = MenuBarStyle(
+            rawValue: defaults.string(forKey: Self.menuBarStyleKey) ?? ""
+        ) ?? .items
+        self.dashboardModules = MenuBarStyle.dashboardModules(
+            stored: defaults.array(forKey: Self.dashboardModulesKey) as? [String],
+            available: available.filter { $0 != .sensors }
+        )
         refreshComponentOptions()
         refreshActiveMetrics()
         PerformanceSignposts.providersReady(count: availableProviders.count)
     }
 
-    /// Modules in menu bar order (CPU, Memory, Battery ...).
+    /// Watched modules in menu bar order (CPU, Memory, Battery ...).
     var orderedEnabledModules: [MetricID] {
-        availableModules.filter { enabledModules.contains($0) }
+        let enabled = enabledModules
+        return availableModules.filter(enabled.contains)
     }
 
-    /// Module-level switch (onboarding): enabling adds the default component if the
-    /// module has none; disabling removes all of its components.
+    /// Module-level switch (onboarding, recovery actions). With separate items,
+    /// enabling adds the default component if the module has none and disabling
+    /// removes all of its components; under the single icon it adds the module to the
+    /// dashboard or takes it out.
     func setEnabled(_ enabled: Bool, for id: MetricID) {
-        if enabled {
-            if (enabledComponents[id] ?? []).isEmpty {
-                enabledComponents[id] = [.default(for: id)]
+        switch menuBarStyle {
+        case .singleIcon:
+            if enabled != dashboardModules.contains(id) {
+                toggleDashboardModule(id)
             }
-        } else {
-            enabledComponents[id] = []
+        case .items:
+            if enabled {
+                if (enabledComponents[id] ?? []).isEmpty {
+                    enabledComponents[id] = [.default(for: id)]
+                }
+            } else {
+                enabledComponents[id] = []
+            }
         }
     }
 
@@ -472,9 +599,9 @@ final class AppModel {
         refreshActiveMetrics()
     }
 
-    /// Samples visible modules plus metrics required by enabled alerts. Temperature
+    /// Samples watched modules plus metrics required by enabled alerts. Temperature
     /// readings stay active when CPU, memory, or GPU is visible because their
-    /// popovers and optional menu bar components show them.
+    /// popovers, the dashboard, and optional menu bar components show them.
     private func refreshActiveMetrics() {
         var active = enabledModules
         if onboardingPreviewActive {
@@ -485,18 +612,22 @@ final class AppModel {
         }
         // Reading the SMC is the most expensive thing this app does, so a temperature
         // is sampled only where one is actually on screen: a `.temperature` menu bar
-        // component, an open popover or detail window for a hardware-domain module, or
-        // the builder previewing every module. A module merely *having* a menu bar item
-        // does not earn it — its popover is closed, and nothing in the item shows a
-        // temperature. A rule watching that module needs no temperature of its own
-        // either: the CPU temperature rule asks for `.sensors` directly, and thermal
-        // pressure comes from ProcessInfo, not the SMC.
-        let showsTemperature = [MetricID.cpu, .memory, .gpu].contains { id in
-            enabledComponents[id]?.contains(.temperature) ?? false
-        }
+        // component (separate items only — the single icon shows none), an open
+        // popover, dashboard, or detail window for a hardware-domain module, or the
+        // builder previewing temperature chips (separate items only — under the
+        // single icon it shows switches and health badges, never a temperature). A
+        // module merely *having* a menu bar item does not earn it — its popover is
+        // closed, and nothing in the item shows a temperature. A rule watching that
+        // module needs no temperature of its own either: the CPU temperature rule asks
+        // for `.sensors` directly, and thermal pressure comes from ProcessInfo, not the
+        // SMC.
+        let showsTemperature = menuBarStyle == .items
+            && [MetricID.cpu, .memory, .gpu].contains { id in
+                enabledComponents[id]?.contains(.temperature) ?? false
+            }
         if showsTemperature
             || !visibleDetailModules.isDisjoint(with: [.cpu, .memory, .gpu])
-            || builderPreviewActive {
+            || (builderPreviewActive && menuBarStyle == .items) {
             active.insert(.sensors)
         }
         for (id, rule) in alertRules where rule.enabled {
