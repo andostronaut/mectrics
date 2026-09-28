@@ -33,6 +33,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   opens with what is wrong at the top. Nothing is lost: the switch that added that item now
   keeps the Mectrics icon in the menu bar when nothing is grouped into it, and a Mac that
   had it on keeps an item in the same slot.
+- **Settings → Menu Bar** now reads as a list of what your menu bar holds, with the
+  Mectrics icon as a row of its own: the readings grouped into it sit under it, and you
+  add and remove them from there. Each module's placement is a pop-up rather than three
+  buttons repeated down the page, and the grouped choice is named for where the module
+  goes — **Mectrics icon** — instead of the unanswerable *Grouped*.
 - Cards can be taken off the dashboard from the dashboard: hover a card for its remove
   button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
   your Mac reports is listed along with what it costs to read.

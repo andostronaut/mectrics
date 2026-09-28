@@ -152,6 +152,194 @@
         }
       }
     },
+    "builder.mectricsRow.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a reading"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okuma ekle"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить показатель"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir una lectura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une mesure"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar uma leitura"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加读数"
+          }
+        }
+      }
+    },
+    "builder.mectricsRow.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing grouped yet — it shows the health badge alone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz bir şey toplanmadı — yalnızca sağlık işaretini gösterir."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока ничего не сгруппировано — показывает только отметку состояния."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay nada agrupado: muestra solo el distintivo de estado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien de regroupé pour l’instant — elle n’affiche que le badge de santé."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada agrupado ainda — exibe apenas o selo de saúde."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未归入任何内容——仅显示健康标记。"
+          }
+        }
+      }
+    },
+    "builder.mectricsRow.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mectrics icon"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mectrics simgesi"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значок Mectrics"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icono de Mectrics"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icône Mectrics"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone do Mectrics"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mectrics 图标"
+          }
+        }
+      }
+    },
+    "builder.mectricsRow.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@ from the Mectrics icon"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ögesini Mectrics simgesinden çıkar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать %@ со значка Mectrics"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar %@ del icono de Mectrics"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@ de l’icône Mectrics"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover %@ do ícone do Mectrics"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 Mectrics 图标中移除 %@"
+          }
+        }
+      }
+    },
     "builder.modules.placementFooter": {
       "extractionState": "manual",
       "localizations": {
@@ -195,6 +383,53 @@
           "stringUnit": {
             "state": "translated",
             "value": "每个模块可以占据自己的菜单栏项目，或成为 Mectrics 图标仪表板中的一张卡片。只有当这台 Mac 报告所需硬件时，模块才会出现。温度位于 CPU、内存和 GPU 内。"
+          }
+        }
+      }
+    },
+    "builder.placement.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerleşim"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размещение"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubicación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emplacement"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posição"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位置"
           }
         }
       }
@@ -299,43 +534,43 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Grouped"
+            "value": "Mectrics icon"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toplu"
+            "value": "Mectrics simgesi"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сгруппировано"
+            "value": "Значок Mectrics"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agrupado"
+            "value": "Icono de Mectrics"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Regroupé"
+            "value": "Icône Mectrics"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agrupado"
+            "value": "Ícone do Mectrics"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "合并"
+            "value": "Mectrics 图标"
           }
         }
       }

@@ -27,9 +27,11 @@ enum MenuBarPlacement: String, CaseIterable, Identifiable {
                 defaultValue: "Menu bar"
             )
         case .grouped:
+            // Named for where it goes, not for what happens to it: "Grouped" left the
+            // obvious question — grouped into what? — unanswered on screen.
             return String(
                 localized: "placement.grouped",
-                defaultValue: "Grouped"
+                defaultValue: "Mectrics icon"
             )
         case .off:
             return String(localized: "placement.off", defaultValue: "Off")

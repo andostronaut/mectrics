@@ -82,6 +82,18 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   second and Disk only when asked can have exactly that, which a single global mode could
   not express. The two sets stay the source of truth rather than a third stored placement
   that could disagree with them, and the persisted raw values never change.
+- **The Mectrics icon is a row in the modules list, not a switch elsewhere.** It is one
+  of the things the menu bar holds, so it reads like the modules beside it: a name, the
+  same placement pop-up, and its contents underneath — the readings grouped into it,
+  added and removed from that row. Placement is a pop-up and never a segmented control:
+  three segments repeated down a list of modules read as a wall, and only one of them is
+  ever the answer. The grouped placement is named for **where a module goes** ("Mectrics
+  icon"), never for what happens to it ("Grouped"), which left the obvious question
+  unanswered on screen.
+- **A preset describes the whole menu bar**, so applying one empties the Mectrics icon as
+  well as setting components. Presets stay on one axis — how much detail you want — so
+  none of them groups anything; a "one icon" preset would be a second axis, which is the
+  mistake this set was rebuilt to undo.
 - **Placement is exclusive, and moving a module keeps its components.** A module is in one
   place, so "where do I see Disk?" has one answer. Grouping it leaves `enabledComponents`
   alone, so moving it back restores the items it was showing instead of resetting it.

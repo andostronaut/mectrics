@@ -33,6 +33,9 @@ struct MenuBarBuilderView: View {
             }
 
             Section {
+                // The Mectrics icon is one of the things in the menu bar, so it reads
+                // as a row in the same list rather than as a switch somewhere else.
+                MectricsItemRow(model: model)
                 ForEach(model.availableModules, id: \.self) { id in
                     moduleRow(id)
                 }
@@ -48,29 +51,6 @@ struct MenuBarBuilderView: View {
                         localized: "builder.modules.placementFooter",
                         defaultValue: "Each module takes its own menu bar item, or a card in the Mectrics icon's dashboard. Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
                     )
-                )
-            }
-
-            Section {
-                Toggle(
-                    String(
-                        localized: "builder.mectricsItem.label",
-                        defaultValue: "Always show the Mectrics icon"
-                    ),
-                    isOn: $model.mectricsItemEnabled
-                )
-                .disabled(!model.groupedModules.isEmpty)
-            } footer: {
-                Text(
-                    model.groupedModules.isEmpty
-                        ? String(
-                            localized: "builder.mectricsItem.footer",
-                            defaultValue: "The icon takes on a badge when an alert becomes active, and opens a dashboard of whatever you group into it. Grouping a module shows it whether this is on or not."
-                        )
-                        : String(
-                            localized: "builder.mectricsItem.footer.grouped",
-                            defaultValue: "The icon is in the menu bar because modules are grouped into it. It also carries the health badge."
-                        )
                 )
             }
 
@@ -117,14 +97,22 @@ struct MenuBarBuilderView: View {
         .fixedSize()
     }
 
+    /// A preset describes the whole menu bar, so it empties the Mectrics icon as well as
+    /// setting the components. Writing the components alone would leave a module grouped
+    /// from before, and the preset would claim it was in the menu bar while the icon
+    /// still held it.
+    ///
+    /// The presets themselves stay on one axis — how much detail you want — so none of
+    /// them groups anything. A "one icon" preset would be a second axis, which is the
+    /// mistake this set was rebuilt to undo.
     private func apply(_ preset: MenuBarLayoutPreset) {
-        let prior = model.enabledComponents
-        let replacement = preset.resolved(
-            available: Set(model.availableModules)
-        )
-        guard replacement != prior else { return }
+        let priorComponents = model.enabledComponents
+        let priorGrouped = model.groupedModules
+        let components = preset.resolved(available: Set(model.availableModules))
+        guard components != priorComponents || !priorGrouped.isEmpty else { return }
         undoManager?.registerUndo(withTarget: model) { target in
-            target.enabledComponents = prior
+            target.groupedModules = priorGrouped
+            target.enabledComponents = priorComponents
         }
         undoManager?.setActionName(
             String(
@@ -132,7 +120,9 @@ struct MenuBarBuilderView: View {
                 defaultValue: "Apply Menu Bar Preset"
             )
         )
-        model.enabledComponents = replacement
+        // Ungroup first, so no module is briefly in two places at once.
+        model.groupedModules = []
+        model.enabledComponents = components
     }
 
     // MARK: - Preview strip
@@ -187,8 +177,13 @@ struct MenuBarBuilderView: View {
     private func moduleRow(_ id: MetricID) -> some View {
         VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
             LabeledContent {
+                // A pop-up, not a segmented control: three segments repeated down the
+                // whole list read as a wall, and only one of them is ever the answer.
                 Picker(
-                    id.localizedName,
+                    String(
+                        localized: "builder.placement.label",
+                        defaultValue: "Placement"
+                    ),
                     selection: Binding(
                         get: { model.placement(of: id) },
                         set: { model.setPlacement($0, for: id) }
@@ -198,7 +193,7 @@ struct MenuBarBuilderView: View {
                         Text(placement.localizedName).tag(placement)
                     }
                 }
-                .pickerStyle(.segmented)
+                .pickerStyle(.menu)
                 .labelsHidden()
                 .fixedSize()
             } label: {
@@ -223,6 +218,150 @@ struct MenuBarBuilderView: View {
                 }
             }
         }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+/// The Mectrics icon as a row in the modules list.
+///
+/// It is one of the things the menu bar holds, so it reads like the modules beside it:
+/// a name, the same placement pop-up, and its contents underneath. What a module shows
+/// as component chips, this shows as the readings grouped into it — and they can be
+/// added and taken out from right here, which is where someone looking at the icon's
+/// row expects to do it.
+///
+/// Its placement offers only Menu bar and Off, and even Off is unavailable while
+/// something is grouped inside: an icon holding readings cannot be the one thing not
+/// in the menu bar. A control that cannot act is hidden rather than dimmed elsewhere in
+/// this pane, but here the pop-up still answers "where is this?", so it stays and says
+/// so (AGENTS.md §4).
+private struct MectricsItemRow: View {
+    @Bindable var model: AppModel
+
+    private var grouped: [MetricID] { model.orderedDashboardModules }
+    private var addable: [MetricID] {
+        model.availableModules.filter { model.placement(of: $0) != .grouped }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
+            LabeledContent {
+                Picker(
+                    String(
+                        localized: "builder.placement.label",
+                        defaultValue: "Placement"
+                    ),
+                    selection: Binding(
+                        get: { model.showsMectricsItem ? MenuBarPlacement.ownItems : .off },
+                        set: { model.mectricsItemEnabled = $0 == .ownItems }
+                    )
+                ) {
+                    Text(MenuBarPlacement.ownItems.localizedName)
+                        .tag(MenuBarPlacement.ownItems)
+                    Text(MenuBarPlacement.off.localizedName)
+                        .tag(MenuBarPlacement.off)
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .fixedSize()
+                .disabled(!grouped.isEmpty)
+            } label: {
+                HStack(spacing: ExperienceSpacing.small) {
+                    MectricsLogoPreview(model: model)
+                    Text(
+                        String(
+                            localized: "builder.mectricsRow.label",
+                            defaultValue: "Mectrics icon"
+                        )
+                    )
+                }
+            }
+            contents
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder
+    private var contents: some View {
+        HStack(spacing: ExperienceSpacing.small) {
+            if grouped.isEmpty {
+                Text(
+                    String(
+                        localized: "builder.mectricsRow.empty",
+                        defaultValue: "Nothing grouped yet — it shows the health badge alone."
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } else {
+                ForEach(grouped, id: \.self) { id in
+                    GroupedModuleChip(id: id) {
+                        model.setPlacement(.off, for: id)
+                    }
+                }
+            }
+            Spacer(minLength: 0)
+            if !addable.isEmpty {
+                Menu {
+                    ForEach(addable, id: \.self) { id in
+                        Button(id.localizedName) {
+                            model.setPlacement(.grouped, for: id)
+                        }
+                    }
+                } label: {
+                    Label(
+                        String(
+                            localized: "builder.mectricsRow.add",
+                            defaultValue: "Add a reading"
+                        ),
+                        systemImage: "plus"
+                    )
+                    .labelStyle(.iconOnly)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .help(String(
+                    localized: "builder.mectricsRow.add",
+                    defaultValue: "Add a reading"
+                ))
+            }
+        }
+    }
+}
+
+/// One reading inside the Mectrics icon, with the control that takes it out.
+private struct GroupedModuleChip: View {
+    let id: MetricID
+    let onRemove: () -> Void
+
+    var body: some View {
+        HStack(spacing: ExperienceSpacing.xSmall) {
+            Label(id.localizedName, systemImage: MetricSymbol.name(for: id))
+                .labelStyle(.titleAndIcon)
+                .font(.caption)
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    // A real target rather than a glyph's own bounds.
+                    .frame(width: 16, height: 16)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                String(
+                    localized: "builder.mectricsRow.remove",
+                    defaultValue: "Remove \(id.localizedName) from the Mectrics icon"
+                )
+            )
+        }
+        .padding(.leading, ExperienceSpacing.small)
+        .padding(.trailing, ExperienceSpacing.xSmall)
+        .padding(.vertical, ExperienceSpacing.xSmall)
+        .background(
+            Capsule().fill(.secondary.opacity(ExperienceSurface.subtleFillOpacity))
+        )
         .accessibilityElement(children: .contain)
     }
 }

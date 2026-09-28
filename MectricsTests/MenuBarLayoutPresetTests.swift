@@ -153,4 +153,18 @@ final class MenuBarLayoutPresetTests: XCTestCase {
             ]
         )
     }
+
+    /// Presets describe the whole menu bar, so none of them groups anything: they vary
+    /// along one axis — how much detail you want — and where a module goes is another.
+    /// Mixing the two is the mistake this set was rebuilt to undo.
+    func testNoPresetGroupsAnything() {
+        for preset in MenuBarLayoutPreset.all {
+            let placed = Set(preset.entries.map(\.metricID))
+            XCTAssertFalse(placed.isEmpty, preset.id)
+            // Every module a preset names takes items of its own, so resolving it can
+            // only ever produce components — never a module the icon would swallow.
+            let resolved = preset.resolved(available: placed)
+            XCTAssertEqual(Set(resolved.keys), placed, preset.id)
+        }
+    }
 }
