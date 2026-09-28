@@ -1,6 +1,53 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "builder.chip.last": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The last look stays on. Use the pop-up to take this module out of the menu bar."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son görünüm açık kalır. Bu modülü menü çubuğundan çıkarmak için açılır menüyü kullan."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последний вид остаётся включённым. Чтобы убрать модуль из строки меню, используйте всплывающее меню."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El último aspecto permanece activo. Usa el menú desplegable para sacar este módulo de la barra de menús."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le dernier affichage reste actif. Utilisez le menu local pour retirer ce module de la barre des menus."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O último visual permanece ativo. Use o menu suspenso para tirar este módulo da barra de menus."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最后一种外观会保持开启。要把该模块移出菜单栏，请使用弹出菜单。"
+          }
+        }
+      }
+    },
     "builder.modules.placementFooter": {
       "extractionState": "manual",
       "localizations": {

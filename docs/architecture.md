@@ -156,10 +156,13 @@ restores the items it was showing instead of resetting it to a default. An upgra
 nothing: a stored `enabledComponents` is read as it always was, and `groupedModules`
 starts empty for anyone who already had a menu bar.
 
-**The Dashboard is always there and cannot be switched off.** It is the app's one
-permanent item, for two reasons that both matter: its health badge is the only thing in
-Mectrics that speaks up without being asked, and an `LSUIElement` agent whose entire menu
-bar can be emptied has no way back into its own settings. So `MenuBarPlacement.itemKeys`
+**The Dashboard is always there and cannot be switched off.** The reason is that this app
+has nowhere else to be: no Dock icon, no main window, so a menu bar that could be emptied
+would leave an `LSUIElement` agent invisible and reachable only by launching it again. Its
+health badge is sometimes given as a second reason and should not be: every alert rule
+ships disabled, so on a clean install that badge never fires until someone configures a
+rule. The cost is real — someone who wants CPU alone in their menu bar carries an icon
+they never open — so if this is revisited, revisit it on invisibility, not on health. So `MenuBarPlacement.itemKeys`
 always leads with it, its row in Settings carries no placement control — its place is
 stated as text — and grouping a module can never create or remove a status item.
 

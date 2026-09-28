@@ -82,14 +82,26 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   second and Disk only when asked can have exactly that, which a single global mode could
   not express. The two sets stay the source of truth rather than a third stored placement
   that could disagree with them, and the persisted raw values never change.
+- **The Dashboard is always in the menu bar and cannot be switched off**, because the app
+  has nowhere else to be: no Dock icon, no window, so an empty menu bar is an invisible
+  app. Not because of the health badge — every alert rule ships disabled, so on a clean
+  install it never fires until a rule is configured. The cost is real: someone who wants
+  CPU alone carries an icon they never open. `MenuBarPlacement.itemKeys` always leads with
+  it, its row in Settings carries no placement control, and grouping a module can never
+  create or remove a status item — only `onWatchedModulesChanged`, never
+  `onModulesChanged`.
 - **The Dashboard is a row in the modules list, not a switch elsewhere.** It is one
-  of the things the menu bar holds, so it reads like the modules beside it: a name, the
-  same placement pop-up, and its contents underneath — the readings grouped into it,
-  added and removed from that row. Placement is a pop-up and never a segmented control:
-  three segments repeated down a list of modules read as a wall, and only one of them is
-  ever the answer. The grouped placement is named for **where a module goes** ("Mectrics
-  icon"), never for what happens to it ("Grouped"), which left the obvious question
-  unanswered on screen.
+  of the things the menu bar holds, so it reads like the modules beside it: a name, its
+  place, and its contents underneath — the readings grouped into it, added and removed
+  from that row. Placement is a pop-up and never a segmented control: three segments
+  repeated down a list of modules read as a wall, and only one of them is ever the answer.
+  The grouped placement is named for **where a module goes** ("Dashboard"), never for what
+  happens to it ("Grouped"), which left the obvious question unanswered on screen.
+- **The last look on stays on.** Clearing a module's only component used to drop it to
+  `.off`, so the row collapsed under the pointer and the chips being edited vanished with
+  it. One control, one decision: the chips choose which looks, the pop-up beside them
+  takes the module out. The sole remaining chip is disabled and says why rather than
+  swallowing the click.
 - **No presets.** They were removed: a ready-made layout answers "how much detail" while
   the pane now asks "where does each module go", and a control that replaces every answer
   at once is a poor fit for a list you read row by row. Do not reintroduce them without an
@@ -132,10 +144,8 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
 - **One health indicator, and it is the Dashboard.** The separate Compact Health item
   is gone. It read the same `healthConditions` and showed the same worst condition as the
   dashboard's banner, so it was two icons answering one question — the duplication that
-  retired the floating panel. The state now rides on the Dashboard as a badge. The
-  switch that used to add that item now decides whether the Dashboard stays in the
-  menu bar with nothing grouped into it, and a Mac that had Compact Health on keeps an
-  item in the same slot without being asked.
+  retired the floating panel. The state now rides on the Dashboard as a badge, and the
+  switch that used to add that item is gone with it: the Dashboard is always there.
 - **Removing is on the surface; adding is in Settings.** The dashboard can take its own
   cards off, because that is the common errand and the card is right there. It never
   offers the modules it is *not* showing — a popover that did would become the pane it

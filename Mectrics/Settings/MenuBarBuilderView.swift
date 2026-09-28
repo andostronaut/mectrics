@@ -391,6 +391,7 @@ private struct MenuBarComponentChip: View {
 
     var body: some View {
         let isActive = model.isComponentEnabled(component, for: id)
+        let isLocked = model.isOnlyEnabledComponent(component, for: id)
         Button {
             model.toggleComponent(component, for: id)
         } label: {
@@ -445,9 +446,10 @@ private struct MenuBarComponentChip: View {
             )
         }
         .buttonStyle(.plain)
-        .help(isActive
-              ? String(localized: "builder.chip.remove", defaultValue: "Click to remove from the menu bar")
-              : String(localized: "builder.chip.add", defaultValue: "Click to add to the menu bar"))
+        // The last look on cannot be switched off — the pop-up is what takes the module
+        // out — so the chip says so instead of swallowing the click.
+        .disabled(isLocked)
+        .help(helpText(isActive: isActive, isLocked: isLocked))
         .accessibilityLabel(
             String(
                 localized: "builder.component.accessibilityLabel",
@@ -458,6 +460,18 @@ private struct MenuBarComponentChip: View {
                             ? String(localized: "builder.active", defaultValue: "In menu bar")
                             : String(localized: "builder.inactive", defaultValue: "Not in menu bar"))
         .accessibilityAddTraits(isActive ? .isSelected : [])
+    }
+
+    private func helpText(isActive: Bool, isLocked: Bool) -> String {
+        if isLocked {
+            return String(
+                localized: "builder.chip.last",
+                defaultValue: "The last look stays on. Use the pop-up to take this module out of the menu bar."
+            )
+        }
+        return isActive
+            ? String(localized: "builder.chip.remove", defaultValue: "Click to remove from the menu bar")
+            : String(localized: "builder.chip.add", defaultValue: "Click to add to the menu bar")
     }
 }
 

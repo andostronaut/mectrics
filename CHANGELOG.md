@@ -28,6 +28,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **The Dashboard icon is always there and cannot be switched off.** Its health badge is
   the only thing in Mectrics that speaks up without being asked, and an app with no menu
   bar items left would have no way back into its own settings.
+- A module's last look can no longer be switched off from the chips. Clearing it used to
+  drop the module out of the menu bar, so the row collapsed while you were still editing
+  it. The pop-up beside the chips is what takes a module out.
 - **Menu bar presets are gone.** A ready-made layout answered "how much detail do you
   want" while the pane now asks "where does each module go", and replacing every answer at
   once fits a list you read row by row badly.

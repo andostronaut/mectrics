@@ -286,10 +286,28 @@ final class AppModel {
         enabledComponents[id]?.contains(component) ?? false
     }
 
+    /// Turns a look on or off, except that **the last one on stays on**.
+    ///
+    /// A module in the menu bar has to draw something, so clearing its last look used to
+    /// drop it to `.off` — the row collapsed under the pointer and the chips that were
+    /// being edited disappeared with it. One control, one decision: the chips choose
+    /// which looks, and the pop-up beside them is what takes the module out.
     func toggleComponent(_ component: MenuBarComponent, for id: MetricID) {
         var set = enabledComponents[id] ?? []
-        if set.contains(component) { set.remove(component) } else { set.insert(component) }
+        if set.contains(component) {
+            guard set.count > 1 || placement(of: id) != .ownItems else { return }
+            set.remove(component)
+        } else {
+            set.insert(component)
+        }
         enabledComponents[id] = set
+    }
+
+    /// True when this look is the only one left, so the chip showing it says it cannot
+    /// be switched off rather than swallowing the click.
+    func isOnlyEnabledComponent(_ component: MenuBarComponent, for id: MetricID) -> Bool {
+        placement(of: id) == .ownItems
+            && enabledComponents[id] == [component]
     }
 
     func placement(of id: MetricID) -> MenuBarPlacement {

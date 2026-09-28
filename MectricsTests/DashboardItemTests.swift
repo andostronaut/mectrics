@@ -140,6 +140,33 @@ final class DashboardItemTests: XCTestCase {
         )
     }
 
+    // MARK: - Looks
+
+    /// A module in the menu bar has to draw something, so its last look cannot be
+    /// switched off from the chips: clearing it dropped the module to `.off` and the row
+    /// collapsed under the pointer, taking the chips being edited with it.
+    @MainActor
+    func testTheLastLookStaysOn() {
+        XCTAssertEqual(
+            MenuBarPlacement.placement(
+                of: .cpu,
+                enabledComponents: [.cpu: [.value]],
+                groupedModules: []
+            ),
+            .ownItems,
+            "One look is what keeps a module in the menu bar"
+        )
+        // Clearing it would read as off, which is the collapse this rule prevents.
+        XCTAssertEqual(
+            MenuBarPlacement.placement(
+                of: .cpu,
+                enabledComponents: [.cpu: []],
+                groupedModules: []
+            ),
+            .off
+        )
+    }
+
     // MARK: - The dashboard's own cards
 
     /// The Mac's card is a card like any other and can be taken off.
