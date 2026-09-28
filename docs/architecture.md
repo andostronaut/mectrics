@@ -144,7 +144,7 @@ Where a module appears is a choice **per module**, not one mode for the whole me
 Bar:
 
 - **Menu bar** (`.ownItems`) — one status item per chosen component, always in view.
-- **Grouped** (`.grouped`) — a card in the Mectrics item's [dashboard](#the-dashboard),
+- **Grouped** (`.grouped`) — a card in the Dashboard item's [dashboard](#the-dashboard),
   a click away.
 - **Off** — not shown, and not sampled for the menu bar's sake.
 
@@ -156,11 +156,11 @@ disagree with them. Grouping a module leaves its components alone, so moving it 
 restores the items it was showing instead of resetting it to a default. Nothing is grouped
 unless it was asked for, so an update leaves every existing menu bar exactly as it was.
 
-There is exactly one health indicator, and it is the Mectrics item. The separate Compact
+There is exactly one health indicator, and it is the Dashboard item. The separate Compact
 Health item is gone: it read the same `healthConditions` and showed the same worst
 condition as the dashboard's banner, so it was two icons answering one question — the
 duplication that retired the floating panel. The switch that used to add that item now
-decides whether the Mectrics icon stays in the menu bar with nothing grouped into it, and
+decides whether the Dashboard item stays in the menu bar with nothing grouped into it, and
 a Mac that had Compact Health switched on keeps an item in the same slot without being
 asked.
 
@@ -216,7 +216,7 @@ changing theme redraws it on the next cycle. Every colour is resolved inside
 `secondaryLabelColor`, and resolving that against the wrong appearance put a light-grey
 badge on a light menu bar.
 
-The Mectrics item is **one entry in the item list however many cards it holds**
+The Dashboard item is **one entry in the item list however many cards it holds**
 (`MenuBarPlacement.itemKeys`), so grouping or ungrouping a module goes through
 `AppModel.onWatchedModulesChanged` — republish the widgets, update Energy Guard, adjust
 what an open dashboard reports as visible — rather than `onModulesChanged`, which would
@@ -226,7 +226,7 @@ itself.
 
 ## The dashboard
 
-The Mectrics item opens `DashboardPopoverView` in the same shared `NSPopover` the module
+The Dashboard item opens `DashboardPopoverView` in the same shared `NSPopover` the module
 popovers use, so a click on another item replaces its content rather than
 stacking a second popover, and it is dismissed the same way. It is a popover, not a panel:
 it is on screen from a click until the next click elsewhere, and is not the always-visible
@@ -312,9 +312,9 @@ without answering a question the menu bar could not, and it dragged along per-di
 placement, a global hotkey, and two layout modes.
 
 A single stable-width status item replaced it, quiet until an alert routed to it
-activates — today that is the Mectrics item's health badge. Real-time
+activates — today that is the Dashboard item's health badge. Real-time
 viewing therefore lives entirely in the menu bar and its popovers, and no second
-always-visible surface should be reintroduced. The Mectrics item's dashboard is one of
+always-visible surface should be reintroduced. The Dashboard item's dashboard is one of
 those popovers: it gathers every grouped reading in one place, but only between a click
 and the next click elsewhere, and the worst condition routed to health leads it as a
 banner.
@@ -323,7 +323,7 @@ That banner is why the Compact Health item no longer exists. The two read the sa
 `healthConditions` and showed the same worst condition, one in a banner and one in an icon
 beside it — the duplication this section exists to record. The state rides on the Mectrics
 icon as a badge instead, so one icon means one icon. Nothing was lost with the item: its
-switch became the one that keeps the Mectrics icon in the menu bar when nothing is grouped
+switch became the one that keeps the Dashboard item in the menu bar when nothing is grouped
 into it.
 
 The bundled `mectrics` CLI is a read-only automation interface for unattended machines,
@@ -443,7 +443,7 @@ Three things dominate, and none of them is arithmetic on a sample:
    bitmap. An item whose render inputs are unchanged costs nothing, which is why
    `MetricStatusItem` compares them first — a menu bar of items that never change measures
    at 0% CPU. The price is per *changed* item per cycle, so the honest way to reduce it is
-   to change fewer things, not to sample less often. The Mectrics item pays it only when
+   to change fewer things, not to sample less often. The Dashboard item pays it only when
    its health badge changes, which is a severity transition and not a cycle, so a menu bar
    of grouped modules costs nothing per cycle at all.
 2. **Rebuilding the menu bar.** `MenuBarController.rebuild()` destroys and re-creates every

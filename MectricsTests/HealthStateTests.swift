@@ -128,10 +128,10 @@ final class HealthStateTests: XCTestCase {
 
     @MainActor
     func testMenuBarSlotHasOneInvariantLength() {
-        XCTAssertEqual(MectricsStatusItem.fixedLength, 26)
+        XCTAssertEqual(DashboardStatusItem.fixedLength, 26)
         XCTAssertTrue(
             Set(HealthState.allCases.map { _ in
-                MectricsStatusItem.fixedLength
+                DashboardStatusItem.fixedLength
             }).count == 1
         )
     }

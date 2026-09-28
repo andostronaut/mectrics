@@ -58,7 +58,7 @@ final class AppModel {
         }
     }
 
-    /// Modules shown as a card in the Mectrics item's dashboard rather than as items of
+    /// Modules shown as a card in the Dashboard's dashboard rather than as items of
     /// their own. Kept apart from `enabledComponents` so a module moving between the two
     /// never destroys the components it had.
     var groupedModules: Set<MetricID> {
@@ -68,9 +68,9 @@ final class AppModel {
                 forKey: Self.groupedModulesKey
             )
             guard groupedModules != oldValue else { return }
-            let hadItem = Self.showsMectricsItem(
+            let hadItem = Self.showsDashboardItem(
                 grouped: oldValue,
-                enabledForHealth: mectricsItemEnabled
+                enabledForHealth: dashboardItemEnabled
             )
             resetFailuresForNewlyWatchedModules(
                 previouslyWatched: MenuBarPlacement.watchedModules(
@@ -80,10 +80,10 @@ final class AppModel {
                 )
             )
             refreshActiveMetrics()
-            // Adding the first card creates the Mectrics item, and taking the last one
+            // Adding the first card creates the Dashboard, and taking the last one
             // away can remove it — those are the only card changes the menu bar has to
             // be rebuilt for. Otherwise the watched set changed and no status item did.
-            if hadItem == showsMectricsItem {
+            if hadItem == showsDashboardItem {
                 onWatchedModulesChanged?()
             } else {
                 onModulesChanged?()
@@ -186,20 +186,20 @@ final class AppModel {
 
     /// Optional one-item health summary. Existing metric items and their layout are
     /// preserved when this is toggled.
-    /// Keep the Mectrics item in the menu bar even with no module grouped into it, for
+    /// Keep the Dashboard in the menu bar even with no module grouped into it, for
     /// its health badge alone. Grouping a module shows the item whatever this says.
     ///
     /// This is what the Compact Health switch became. That item watched the same
     /// conditions and showed the same worst one as the dashboard's banner, so it was two
-    /// icons answering one question; the answer now rides on the Mectrics icon, and this
+    /// icons answering one question; the answer now rides on the Dashboard, and this
     /// switch decides whether that icon is there when nothing else calls for it.
-    var mectricsItemEnabled: Bool {
+    var dashboardItemEnabled: Bool {
         didSet {
             defaults.set(
-                mectricsItemEnabled,
-                forKey: Self.mectricsItemEnabledKey
+                dashboardItemEnabled,
+                forKey: Self.dashboardItemEnabledKey
             )
-            guard mectricsItemEnabled != oldValue else { return }
+            guard dashboardItemEnabled != oldValue else { return }
             // Only matters when no card is already keeping the item on screen.
             if groupedModules.isEmpty { onModulesChanged?() }
         }
@@ -207,23 +207,23 @@ final class AppModel {
 
     /// Whether the dashboard shows the card for the Mac itself — its macOS version and
     /// uptime. It is a card like any other, so it can be taken off from the dashboard and
-    /// put back from the Mectrics item's row in Settings.
+    /// put back from the Dashboard's row in Settings.
     var showsDeviceCard: Bool {
         didSet {
             defaults.set(showsDeviceCard, forKey: Self.showsDeviceCardKey)
         }
     }
 
-    /// Whether the Mectrics item is in the menu bar: because a module is grouped into
+    /// Whether the Dashboard is in the menu bar: because a module is grouped into
     /// it, or because it was asked for on its own.
-    var showsMectricsItem: Bool {
-        Self.showsMectricsItem(
+    var showsDashboardItem: Bool {
+        Self.showsDashboardItem(
             grouped: groupedModules,
-            enabledForHealth: mectricsItemEnabled
+            enabledForHealth: dashboardItemEnabled
         )
     }
 
-    private static func showsMectricsItem(
+    private static func showsDashboardItem(
         grouped: Set<MetricID>,
         enabledForHealth: Bool
     ) -> Bool {
@@ -452,14 +452,14 @@ final class AppModel {
     private var menuBarItemKeys: [String] {
         MenuBarPlacement.itemKeys(
             orderedItems: orderedEnabledItems,
-            showsMectricsItem: showsMectricsItem
+            showsDashboardItem: showsDashboardItem
         )
     }
 
     /// The same list for a different set of components, so a `didSet` can ask whether the
     /// menu bar it is about to rebuild would actually look any different.
     ///
-    /// Editing components cannot move the Mectrics item, so its presence is passed in
+    /// Editing components cannot move the Dashboard, so its presence is passed in
     /// rather than recomputed: deriving it from the components alone would report a
     /// change that did not happen.
     private func menuBarItemKeys(
@@ -474,7 +474,7 @@ final class AppModel {
             }
         return MenuBarPlacement.itemKeys(
             orderedItems: items,
-            showsMectricsItem: showsMectricsItem
+            showsDashboardItem: showsDashboardItem
         )
     }
 
@@ -527,7 +527,7 @@ final class AppModel {
     private static let currentOnboardingVersion = 2
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
-    private static let mectricsItemEnabledKey = "mectricsItemEnabled"
+    private static let dashboardItemEnabledKey = "dashboardItemEnabled"
     /// Read only to migrate someone who had the Compact Health item switched on.
     private static let legacyCompactHealthEnabledKey = "compactHealthEnabled"
     private static let groupedModulesKey = "groupedModules"
@@ -560,10 +560,10 @@ final class AppModel {
         self.accentChoice = AccentChoice(rawValue: defaults.string(forKey: Self.accentKey) ?? "") ?? .pink
         // Icons default to on; only an explicit user choice turns them off.
         self.showMenuBarIcons = defaults.object(forKey: Self.menuBarIconsKey) as? Bool ?? true
-        // The Compact Health item became the Mectrics item, which does strictly more,
+        // The Compact Health item became the Dashboard, which does strictly more,
         // so someone who had it keeps an item in the same slot without being asked.
-        self.mectricsItemEnabled = defaults.object(
-            forKey: Self.mectricsItemEnabledKey
+        self.dashboardItemEnabled = defaults.object(
+            forKey: Self.dashboardItemEnabledKey
         ) as? Bool ?? defaults.bool(forKey: Self.legacyCompactHealthEnabledKey)
         self.adaptMonitoringToEnergyState =
             defaults.object(forKey: Self.adaptMonitoringKey) as? Bool ?? true

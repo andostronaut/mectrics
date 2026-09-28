@@ -33,9 +33,9 @@ struct MenuBarBuilderView: View {
             }
 
             Section {
-                // The Mectrics icon is one of the things in the menu bar, so it reads
+                // The Dashboard is one of the things in the menu bar, so it reads
                 // as a row in the same list rather than as a switch somewhere else.
-                MectricsItemRow(model: model)
+                DashboardItemRow(model: model)
                 ForEach(model.availableModules, id: \.self) { id in
                     moduleRow(id)
                 }
@@ -49,7 +49,7 @@ struct MenuBarBuilderView: View {
                 Text(
                     String(
                         localized: "builder.modules.placementFooter",
-                        defaultValue: "Each module takes its own menu bar item, or a card in the Mectrics icon's dashboard. Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
+                        defaultValue: "Each module takes its own menu bar item, or a card in the Dashboard. Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
                     )
                 )
             }
@@ -97,7 +97,7 @@ struct MenuBarBuilderView: View {
         .fixedSize()
     }
 
-    /// A preset describes the whole menu bar, so it empties the Mectrics icon as well as
+    /// A preset describes the whole menu bar, so it empties the Dashboard as well as
     /// setting the components. Writing the components alone would leave a module grouped
     /// from before, and the preset would claim it was in the menu bar while the icon
     /// still held it.
@@ -129,10 +129,10 @@ struct MenuBarBuilderView: View {
 
     private var previewStrip: some View {
         HStack(spacing: ExperienceSpacing.medium) {
-            // The menu bar's own order: the Mectrics item first, then every module
+            // The menu bar's own order: the Dashboard first, then every module
             // showing items of its own.
-            if model.showsMectricsItem {
-                MectricsLogoPreview(model: model)
+            if model.showsDashboardItem {
+                DashboardItemPreview(model: model)
                     .accessibilityElement()
                     .accessibilityLabel(
                         String(
@@ -149,7 +149,7 @@ struct MenuBarBuilderView: View {
                     component: entry.component
                 )
             }
-            if model.orderedEnabledItems.isEmpty && !model.showsMectricsItem {
+            if model.orderedEnabledItems.isEmpty && !model.showsDashboardItem {
                 Text("Nothing in the menu bar yet. Pick a look for a module below.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -222,7 +222,7 @@ struct MenuBarBuilderView: View {
     }
 }
 
-/// The Mectrics icon as a row in the modules list.
+/// The Dashboard as a row in the modules list.
 ///
 /// It is one of the things the menu bar holds, so it reads like the modules beside it:
 /// a name, the same placement pop-up, and its contents underneath. What a module shows
@@ -235,7 +235,7 @@ struct MenuBarBuilderView: View {
 /// in the menu bar. A control that cannot act is hidden rather than dimmed elsewhere in
 /// this pane, but here the pop-up still answers "where is this?", so it stays and says
 /// so (AGENTS.md §4).
-private struct MectricsItemRow: View {
+private struct DashboardItemRow: View {
     @Bindable var model: AppModel
 
     private var grouped: [MetricID] { model.orderedDashboardModules }
@@ -244,7 +244,7 @@ private struct MectricsItemRow: View {
     }
     /// The Mac's own card is a card like any other, so it is listed and added here too.
     private var systemInfoTitle: String {
-        String(localized: "builder.mectricsRow.systemInfo", defaultValue: "System info")
+        String(localized: "builder.dashboardRow.systemInfo", defaultValue: "System info")
     }
     private var isEmpty: Bool { grouped.isEmpty && !model.showsDeviceCard }
     private var hasAnythingToAdd: Bool { !addable.isEmpty || !model.showsDeviceCard }
@@ -258,8 +258,8 @@ private struct MectricsItemRow: View {
                         defaultValue: "Placement"
                     ),
                     selection: Binding(
-                        get: { model.showsMectricsItem ? MenuBarPlacement.ownItems : .off },
-                        set: { model.mectricsItemEnabled = $0 == .ownItems }
+                        get: { model.showsDashboardItem ? MenuBarPlacement.ownItems : .off },
+                        set: { model.dashboardItemEnabled = $0 == .ownItems }
                     )
                 ) {
                     Text(MenuBarPlacement.ownItems.localizedName)
@@ -273,11 +273,11 @@ private struct MectricsItemRow: View {
                 .disabled(!grouped.isEmpty)
             } label: {
                 HStack(spacing: ExperienceSpacing.small) {
-                    MectricsLogoPreview(model: model)
+                    DashboardItemPreview(model: model)
                     Text(
                         String(
-                            localized: "builder.mectricsRow.label",
-                            defaultValue: "Mectrics icon"
+                            localized: "builder.dashboardRow.label",
+                            defaultValue: "Dashboard"
                         )
                     )
                 }
@@ -293,7 +293,7 @@ private struct MectricsItemRow: View {
             if isEmpty {
                 Text(
                     String(
-                        localized: "builder.mectricsRow.empty",
+                        localized: "builder.dashboardRow.empty",
                         defaultValue: "Nothing grouped yet — it shows the health badge alone."
                     )
                 )
@@ -331,7 +331,7 @@ private struct MectricsItemRow: View {
                 } label: {
                     Label(
                         String(
-                            localized: "builder.mectricsRow.add",
+                            localized: "builder.dashboardRow.add",
                             defaultValue: "Add a reading"
                         ),
                         systemImage: "plus"
@@ -342,7 +342,7 @@ private struct MectricsItemRow: View {
                 .menuIndicator(.hidden)
                 .fixedSize()
                 .help(String(
-                    localized: "builder.mectricsRow.add",
+                    localized: "builder.dashboardRow.add",
                     defaultValue: "Add a reading"
                 ))
             }
@@ -350,7 +350,7 @@ private struct MectricsItemRow: View {
     }
 }
 
-/// One reading inside the Mectrics icon, with the control that takes it out.
+/// One reading inside the Dashboard, with the control that takes it out.
 private struct GroupedModuleChip: View {
     let title: String
     let symbol: String
@@ -372,8 +372,8 @@ private struct GroupedModuleChip: View {
             .buttonStyle(.plain)
             .accessibilityLabel(
                 String(
-                    localized: "builder.mectricsRow.remove",
-                    defaultValue: "Remove \(title) from the Mectrics icon"
+                    localized: "builder.dashboardRow.remove",
+                    defaultValue: "Remove \(title) from the Dashboard"
                 )
             )
         }
@@ -534,7 +534,7 @@ private struct ModuleHealthBadge: View {
 /// the chip honest — there is no second copy of the badge geometry to drift out of step.
 /// Its own body reads the health state, which changes on a severity transition and not
 /// on a sampling cycle, so this leaf is not a per-cycle cost.
-private struct MectricsLogoPreview: View {
+private struct DashboardItemPreview: View {
     let model: AppModel
     @Environment(\.colorScheme) private var colorScheme
 

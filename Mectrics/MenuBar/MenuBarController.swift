@@ -15,7 +15,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     private var items: [String: MetricStatusItem] = [:]
     /// The one Mectrics item: the dashboard's anchor and the health indicator. Nil
     /// when nothing is grouped into it and it was not asked for on its own.
-    private var logoItem: MectricsStatusItem?
+    private var logoItem: DashboardStatusItem?
     private let popover = NSPopover()
 
     /// What the shared popover is showing. All three share one `NSPopover`, so a
@@ -94,11 +94,11 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         logoItem?.remove()
         logoItem = nil
 
-        // The Mectrics item leads, then every module showing items of its own. There is
-        // no separate health item: the Mectrics icon carries the state and the dashboard
+        // The Dashboard leads, then every module showing items of its own. There is
+        // no separate health item: the Dashboard carries the state and the dashboard
         // leads with the condition, so a second icon would say it twice.
-        if model.showsMectricsItem {
-            let logo = MectricsStatusItem()
+        if model.showsDashboardItem {
+            let logo = DashboardStatusItem()
             logo.onClick = { [weak self] in
                 self?.toggleDashboardPopover()
             }
@@ -114,7 +114,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         refresh()
     }
 
-    /// Updates the live values of all items. The Mectrics item's only changing input is
+    /// Updates the live values of all items. The Dashboard's only changing input is
     /// its health badge, and only on a severity transition — an update repeating the
     /// state it already shows is dropped before it reaches AppKit.
     func refresh() {

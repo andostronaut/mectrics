@@ -152,284 +152,49 @@
         }
       }
     },
-    "builder.mectricsRow.add": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a reading"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Okuma ekle"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Добавить показатель"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Añadir una lectura"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter une mesure"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adicionar uma leitura"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "添加读数"
-          }
-        }
-      }
-    },
-    "builder.mectricsRow.empty": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing grouped yet — it shows the health badge alone."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Henüz bir şey toplanmadı — yalnızca sağlık işaretini gösterir."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пока ничего не сгруппировано — показывает только отметку состояния."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aún no hay nada agrupado: muestra solo el distintivo de estado."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rien de regroupé pour l’instant — elle n’affiche que le badge de santé."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nada agrupado ainda — exibe apenas o selo de saúde."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "尚未归入任何内容——仅显示健康标记。"
-          }
-        }
-      }
-    },
-    "builder.mectricsRow.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics icon"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics simgesi"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Значок Mectrics"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Icono de Mectrics"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Icône Mectrics"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ícone do Mectrics"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics 图标"
-          }
-        }
-      }
-    },
-    "builder.mectricsRow.remove": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove %@ from the Mectrics icon"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ ögesini Mectrics simgesinden çıkar"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Убрать %@ со значка Mectrics"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quitar %@ del icono de Mectrics"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retirer %@ de l’icône Mectrics"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remover %@ do ícone do Mectrics"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "从 Mectrics 图标中移除 %@"
-          }
-        }
-      }
-    },
-    "builder.mectricsRow.systemInfo": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "System info"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sistem bilgisi"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сведения о системе"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Info del sistema"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Infos système"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Info do sistema"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "系统信息"
-          }
-        }
-      }
-    },
     "builder.modules.placementFooter": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each module takes its own menu bar item, or a card in the Mectrics icon's dashboard. Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
+            "value": "Each module takes its own menu bar item, or a card in the Dashboard. Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Her modül ya kendi menü çubuğu ögesini ya da Mectrics simgesinin panelinde bir kart alır. Modüller yalnızca bu Mac gerekli donanımı bildirdiğinde görünür. Sıcaklıklar CPU, Bellek ve GPU içinde bulunur."
+            "value": "Her modül ya kendi menü çubuğu ögesini ya da panelde bir kart alır. Modüller yalnızca bu Mac gerekli donanımı bildirdiğinde görünür. Sıcaklıklar CPU, Bellek ve GPU içinde bulunur."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Каждый модуль получает либо собственный элемент строки меню, либо карточку на панели значка Mectrics. Модули появляются, только когда этот Mac сообщает о нужном оборудовании. Температуры доступны внутри CPU, памяти и GPU."
+            "value": "Каждый модуль получает либо собственный элемент строки меню, либо карточку на панели. Модули появляются, только когда этот Mac сообщает о нужном оборудовании. Температуры доступны внутри CPU, памяти и GPU."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cada módulo ocupa su propio elemento en la barra de menús o una tarjeta en el panel del icono de Mectrics. Los módulos aparecen solo cuando este Mac informa del hardware necesario. Las temperaturas están dentro de CPU, Memoria y GPU."
+            "value": "Cada módulo ocupa su propio elemento en la barra de menús o una tarjeta en el panel. Los módulos aparecen solo cuando este Mac informa del hardware necesario. Las temperaturas están dentro de CPU, Memoria y GPU."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chaque module prend son propre élément dans la barre des menus, ou une carte dans le tableau de bord de l’icône Mectrics. Les modules n’apparaissent que si ce Mac signale le matériel requis. Les températures se trouvent dans Processeur, Mémoire et GPU."
+            "value": "Chaque module prend son propre élément dans la barre des menus, ou une carte dans le tableau de bord. Les modules n’apparaissent que si ce Mac signale le matériel requis. Les températures se trouvent dans Processeur, Mémoire et GPU."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cada módulo ocupa um item próprio na barra de menus ou um cartão no painel do ícone do Mectrics. Os módulos aparecem apenas quando este Mac informa o hardware necessário. As temperaturas estão dentro de CPU, Memória e GPU."
+            "value": "Cada módulo ocupa um item próprio na barra de menus ou um cartão no painel. Os módulos aparecem apenas quando este Mac informa o hardware necessário. As temperaturas estão dentro de CPU, Memória e GPU."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每个模块可以占据自己的菜单栏项目，或成为 Mectrics 图标仪表板中的一张卡片。只有当这台 Mac 报告所需硬件时，模块才会出现。温度位于 CPU、内存和 GPU 内。"
+            "value": "每个模块可以占据自己的菜单栏项目，或成为仪表板中的一张卡片。只有当这台 Mac 报告所需硬件时，模块才会出现。温度位于 CPU、内存和 GPU 内。"
           }
         }
       }
@@ -628,43 +393,43 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics icon"
+            "value": "Dashboard"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics simgesi"
+            "value": "Panel"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Значок Mectrics"
+            "value": "Панель"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Icono de Mectrics"
+            "value": "Panel"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Icône Mectrics"
+            "value": "Tableau de bord"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ícone do Mectrics"
+            "value": "Painel"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics 图标"
+            "value": "仪表板"
           }
         }
       }
@@ -675,43 +440,43 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A card in the Mectrics icon's dashboard."
+            "value": "A card in the Dashboard, a click away."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics simgesinin panelinde bir kart."
+            "value": "Panelde bir kart, bir tık uzakta."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Карточка на панели значка Mectrics."
+            "value": "Карточка на панели, в одном клике."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una tarjeta en el panel del icono de Mectrics."
+            "value": "Una tarjeta en el panel, a un clic."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une carte dans le tableau de bord de l’icône Mectrics."
+            "value": "Une carte dans le tableau de bord, à un clic."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Um cartão no painel do ícone do Mectrics."
+            "value": "Um cartão no painel, a um clique."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics 图标仪表板中的一张卡片。"
+            "value": "仪表板中的一张卡片，一点即达。"
           }
         }
       }
@@ -8526,44 +8291,44 @@
       "localizations": {
         "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "Mectrics"
-          }
-        },
-        "es": {
-          "stringUnit": {
             "state": "translated",
-            "value": "Mectrics"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics"
+            "value": "Dashboard"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics"
+            "value": "Panel"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Панель"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tableau de bord"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Painel"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics"
+            "value": "仪表板"
           }
         }
       }
@@ -8573,44 +8338,44 @@
       "localizations": {
         "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "Show the Mectrics dashboard"
-          }
-        },
-        "es": {
-          "stringUnit": {
             "state": "translated",
-            "value": "Mostrar el panel de Mectrics"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afficher le tableau de bord Mectrics"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostrar o painel do Mectrics"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показать панель мониторинга Mectrics"
+            "value": "Show the Dashboard"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mectrics gösterge panelini göster"
+            "value": "Paneli göster"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать панель"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar el panel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le tableau de bord"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar o painel"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "显示 Mectrics 仪表盘"
+            "value": "显示仪表板"
           }
         }
       }
@@ -20532,6 +20297,241 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂不"
+          }
+        }
+      }
+    },
+    "builder.dashboardRow.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dashboard"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Панель"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tableau de bord"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Painel"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仪表板"
+          }
+        }
+      }
+    },
+    "builder.dashboardRow.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing here yet — it shows the health badge alone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz bir şey yok — yalnızca sağlık işaretini gösterir."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь пока пусто — показывает только отметку состояния."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay nada aquí: muestra solo el distintivo de estado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien ici pour l’instant — il n’affiche que le badge de santé."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada aqui ainda — exibe apenas o selo de saúde."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这里还没有内容——仅显示健康标记。"
+          }
+        }
+      }
+    },
+    "builder.dashboardRow.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a reading"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okuma ekle"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить показатель"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir una lectura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une mesure"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar uma leitura"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加读数"
+          }
+        }
+      }
+    },
+    "builder.dashboardRow.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@ from the Dashboard"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ögesini panelden çıkar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать %@ с панели"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar %@ del panel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@ du tableau de bord"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover %@ do painel"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从仪表板移除 %@"
+          }
+        }
+      }
+    },
+    "builder.dashboardRow.systemInfo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System info"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem bilgisi"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сведения о системе"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info del sistema"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Infos système"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info do sistema"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统信息"
           }
         }
       }

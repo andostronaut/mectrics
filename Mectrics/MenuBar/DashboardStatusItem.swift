@@ -13,13 +13,13 @@ import AppKit
 /// severity does — a transition measured in minutes, not in sampling cycles. Repeat
 /// updates with the same state are dropped before anything reaches AppKit.
 @MainActor
-final class MectricsStatusItem: NSObject {
+final class DashboardStatusItem: NSObject {
     /// Fixed, so the item never changes width — the same slot the Compact Health
     /// item reserves.
     static let fixedLength: CGFloat = 26
 
     let item = NSStatusBar.system.statusItem(
-        withLength: MectricsStatusItem.fixedLength
+        withLength: DashboardStatusItem.fixedLength
     )
     var onClick: (() -> Void)?
 
@@ -80,7 +80,7 @@ final class MectricsStatusItem: NSObject {
         button.toolTip = isNormal
             ? String(
                 localized: "dashboard.statusItem.help",
-                defaultValue: "Show the Mectrics dashboard"
+                defaultValue: "Show the Dashboard"
             )
             : state.localizedName
     }

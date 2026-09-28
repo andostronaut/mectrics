@@ -5,14 +5,14 @@ import MetricsKit
 ///
 /// This is a choice per module, not one mode for the whole menu bar. Someone who wants
 /// CPU in view every second and Disk and Battery only when asked can have exactly that:
-/// CPU takes its own items, the other two become cards in the Mectrics item's dashboard.
+/// CPU takes its own items, the other two become cards in the Dashboard's dashboard.
 /// A single global "style" could not express it.
 ///
 /// The raw values are persisted and must never change.
 enum MenuBarPlacement: String, CaseIterable, Identifiable {
     /// One status item per chosen component — a reading always in view.
     case ownItems
-    /// A card in the Mectrics item's dashboard, a click away.
+    /// A card in the Dashboard's dashboard, a click away.
     case grouped
     /// Not shown, and not sampled for the menu bar's sake.
     case off
@@ -31,7 +31,7 @@ enum MenuBarPlacement: String, CaseIterable, Identifiable {
             // obvious question — grouped into what? — unanswered on screen.
             return String(
                 localized: "placement.grouped",
-                defaultValue: "Mectrics icon"
+                defaultValue: "Dashboard"
             )
         case .off:
             return String(localized: "placement.off", defaultValue: "Off")
@@ -48,7 +48,7 @@ enum MenuBarPlacement: String, CaseIterable, Identifiable {
         case .grouped:
             return String(
                 localized: "placement.grouped.description",
-                defaultValue: "A card in the Mectrics icon's dashboard."
+                defaultValue: "A card in the Dashboard's dashboard."
             )
         case .off:
             return String(
@@ -60,7 +60,7 @@ enum MenuBarPlacement: String, CaseIterable, Identifiable {
 }
 
 extension MenuBarPlacement {
-    /// Modules a clean install groups into the Mectrics item. GPU and Fans are `.heavy`
+    /// Modules a clean install groups into the Dashboard. GPU and Fans are `.heavy`
     /// (SMC/IOKit) providers, so they are offered but never turned on for anyone.
     static let defaultGroupedModules: [MetricID] = []
 
@@ -96,18 +96,18 @@ extension MenuBarPlacement {
     }
 
     /// Identity of every status item the menu bar shows, in display order, so a rebuild
-    /// happens when the list changes and not when a value does. The Mectrics item is one
+    /// happens when the list changes and not when a value does. The Dashboard is one
     /// entry however many cards it holds — adding a card changes no status item.
     static func itemKeys(
         orderedItems: [(module: MetricID, component: MenuBarComponent)],
-        showsMectricsItem: Bool
+        showsDashboardItem: Bool
     ) -> [String] {
         var keys = orderedItems.map { "\($0.module.rawValue)|\($0.component.rawValue)" }
-        if showsMectricsItem { keys.append(mectricsItemKey) }
+        if showsDashboardItem { keys.append(dashboardItemKey) }
         return keys
     }
 
-    static let mectricsItemKey = "mectrics"
+    static let dashboardItemKey = "mectrics"
 
     /// The grouped modules as stored: the defaults when nothing was ever stored, and
     /// never a module this Mac cannot report. An empty stored list is a choice.

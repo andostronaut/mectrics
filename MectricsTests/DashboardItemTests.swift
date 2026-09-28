@@ -8,7 +8,7 @@ import XCTest
 ///
 /// Nothing here creates a status item or an `AppModel`: either would touch the real
 /// menu bar or the user's real preferences.
-final class MectricsItemTests: XCTestCase {
+final class DashboardItemTests: XCTestCase {
     private let laptop: [MetricID] = [.cpu, .memory, .battery, .network, .disk, .gpu, .fans]
     private let desktop: [MetricID] = [.cpu, .memory, .network, .disk, .gpu]
 
@@ -111,11 +111,11 @@ final class MectricsItemTests: XCTestCase {
             (.network, .netActivity)
         ]
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: false),
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: false),
             ["cpu|value", "cpu|temperature", "network|netActivity"]
         )
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: [], showsMectricsItem: false),
+            MenuBarPlacement.itemKeys(orderedItems: [], showsDashboardItem: false),
             []
         )
     }
@@ -125,8 +125,8 @@ final class MectricsItemTests: XCTestCase {
     func testTheMectricsItemIsOneEntryWhateverItHolds() {
         let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: true),
-            ["cpu|value", MenuBarPlacement.mectricsItemKey]
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true),
+            ["cpu|value", MenuBarPlacement.dashboardItemKey]
         )
     }
 
@@ -134,8 +134,8 @@ final class MectricsItemTests: XCTestCase {
     func testTheMectricsItemAppearingChangesTheItemList() {
         let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
         XCTAssertNotEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: false),
-            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: true)
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: false),
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true)
         )
     }
 
@@ -176,7 +176,7 @@ final class MectricsItemTests: XCTestCase {
         ]
         let before = MenuBarPlacement.itemKeys(
             orderedItems: orderedItems(components, grouped: [.disk]),
-            showsMectricsItem: true
+            showsDashboardItem: true
         )
         // Taking Disk off the dashboard clears its components.
         var after = components
@@ -185,7 +185,7 @@ final class MectricsItemTests: XCTestCase {
             before,
             MenuBarPlacement.itemKeys(
                 orderedItems: orderedItems(after, grouped: []),
-                showsMectricsItem: true
+                showsDashboardItem: true
             ),
             "Removing a card changed the menu bar's item list"
         )
@@ -260,7 +260,7 @@ final class MectricsItemTests: XCTestCase {
     /// bar and persist its autosave name.
     @MainActor
     func testLogoSlotFitsTheLogoAndCentersItOnWholePixels() {
-        let length = MectricsStatusItem.fixedLength
+        let length = DashboardStatusItem.fixedLength
         let logo = MectricsGlyph.menuBarImage.size
         XCTAssertEqual(length, length.rounded(), "The slot must be whole points")
         XCTAssertEqual(length.truncatingRemainder(dividingBy: 2), 0, "The slot must be even")

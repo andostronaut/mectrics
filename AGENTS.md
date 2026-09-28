@@ -77,12 +77,12 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
 - Components are picked by clicking a live preview chip, not from a select box — the
   user chooses what they can see.
 - **Placement is per module, not one style for the whole menu bar.** Each module takes
-  its own items (`enabledComponents`), or a card in the Mectrics item's dashboard
+  its own items (`enabledComponents`), or a card in the Dashboard
   (`groupedModules`), or neither — `MenuBarPlacement`. Someone who wants CPU in view every
   second and Disk only when asked can have exactly that, which a single global mode could
   not express. The two sets stay the source of truth rather than a third stored placement
   that could disagree with them, and the persisted raw values never change.
-- **The Mectrics icon is a row in the modules list, not a switch elsewhere.** It is one
+- **The Dashboard item is a row in the modules list, not a switch elsewhere.** It is one
   of the things the menu bar holds, so it reads like the modules beside it: a name, the
   same placement pop-up, and its contents underneath — the readings grouped into it,
   added and removed from that row. Placement is a pop-up and never a segmented control:
@@ -90,7 +90,7 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   ever the answer. The grouped placement is named for **where a module goes** ("Mectrics
   icon"), never for what happens to it ("Grouped"), which left the obvious question
   unanswered on screen.
-- **A preset describes the whole menu bar**, so applying one empties the Mectrics icon as
+- **A preset describes the whole menu bar**, so applying one empties the Dashboard item as
   well as setting components. Presets stay on one axis — how much detail you want — so
   none of them groups anything; a "one icon" preset would be a second axis, which is the
   mistake this set was rebuilt to undo.
@@ -101,7 +101,7 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   (`MenuBarPlacement.watchedModules`) — every module placed anywhere. Sampling, widgets,
   summaries, onboarding, and recovery actions go through them, never through
   `enabledComponents` directly.
-- **The Mectrics item is fixed-width, and it is also the health item.**
+- **The Dashboard item is fixed-width, and it is also the health item.**
   `MectricsStatusItem` has a fixed, even length, so its even-sided image sits on whole
   pixels at 1x. A badge **never changes that size**: a mark that grew when something went
   wrong would move every item after it. The accessibility label is assigned once; the
@@ -129,11 +129,11 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   state without emitting leaves the condition on the menu bar, in the dashboard's banner,
   and as an Attention Log event that never closes. The transition is `.recovered`: to every
   consumer it means this condition is no longer active, which is exactly what happened.
-- **One health indicator, and it is the Mectrics item.** The separate Compact Health item
+- **One health indicator, and it is the Dashboard item.** The separate Compact Health item
   is gone. It read the same `healthConditions` and showed the same worst condition as the
   dashboard's banner, so it was two icons answering one question — the duplication that
-  retired the floating panel. The state now rides on the Mectrics icon as a badge. The
-  switch that used to add that item now decides whether the Mectrics icon stays in the
+  retired the floating panel. The state now rides on the Dashboard item as a badge. The
+  switch that used to add that item now decides whether the Dashboard item stays in the
   menu bar with nothing grouped into it, and a Mac that had Compact Health on keeps an
   item in the same slot without being asked.
 - **Removing is on the surface; adding is in Settings.** The dashboard can take its own
@@ -249,7 +249,7 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   structural regions in the window server. Component availability therefore only grows
   within a session: a sensor that reads out of range for one cycle is a failed read, not
   hardware that vanished, and the item already renders a dash for a missing value. The
-  Mectrics item is **one entry in that list however many cards it holds**, so grouping or
+  Dashboard item is **one entry in that list however many cards it holds**, so grouping or
   ungrouping a module calls `onWatchedModulesChanged` — republish widgets, update Energy
   Guard — and not `onModulesChanged`. Only the first card and the last one change the
   list, because they create and remove the item itself.

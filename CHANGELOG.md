@@ -10,7 +10,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - **A compact menu bar: one icon instead of separate items.** Choose **Settings → Menu Bar →
-  Style → Compact** and the menu bar holds one Mectrics logo in place of an item per reading.
+  Style → Compact** and the menu bar holds one Dashboard icon in place of an item per reading.
   Clicking it opens a dashboard of cards — CPU, Memory, Battery, Network, and Disk unless
   you choose otherwise — each showing its value with a chart, a ring, or the figures behind
   it, and a last card with the macOS version and uptime. GPU and Fans can be added in the
@@ -20,26 +20,29 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   one click away than always in view. Your separate-items layout is kept exactly as it was
   and comes back when you switch back to **Separate**, and nothing changes on update:
   separate items stay the default.
+- **The grouped readings live behind one icon called the Dashboard.** It is named for what
+  it opens, not for the logo it wears, and the name is the same everywhere: the placement
+  you pick, the row in Settings, and the action on a card all say Dashboard.
 - **Where each reading goes is now a choice per module.** In **Settings → Menu Bar**, every
-  module takes either its own menu bar item or a card in the Mectrics icon's dashboard — so
+  module takes either its own menu bar item or a card in the Dashboard — so
   CPU can stay in view every second while Disk and Battery sit behind one icon, which a
   single Separate/Compact switch could not express. Move a module back and the items it was
   showing return exactly as they were. Nothing is grouped unless you ask, so your menu bar
   is unchanged on update.
-- **The Mectrics icon is also the health indicator, and the separate Compact Health item is
-  gone.** It watched the same conditions and showed the same worst one as the dashboard
+- **The Dashboard icon is also the health indicator, and the separate Compact Health item
+  is gone.** It watched the same conditions and showed the same worst one as the dashboard
   already did, so it was two icons answering one question. The icon now takes on a badge —
   the same symbol the Attention Log uses — when an alert becomes active, and the dashboard
   opens with what is wrong at the top. Nothing is lost: the switch that added that item now
-  keeps the Mectrics icon in the menu bar when nothing is grouped into it, and a Mac that
+  keeps the Dashboard item in the menu bar when nothing is grouped into it, and a Mac that
   had it on keeps an item in the same slot.
 - **Settings → Menu Bar** now reads as a list of what your menu bar holds, with the
-  Mectrics icon as a row of its own: the readings grouped into it sit under it, and you
+  Dashboard as a row of its own: the readings grouped into it sit under it, and you
   add and remove them from there. Each module's placement is a pop-up rather than three
   buttons repeated down the page, and the grouped choice is named for where the module
-  goes — **Mectrics icon** — instead of the unanswerable *Grouped*.
+  goes — **Dashboard** — instead of the unanswerable *Grouped*.
 - The Mac's own card — macOS version and uptime — can be taken off the dashboard like
-  any other, and put back from the Mectrics icon's row in **Settings → Menu Bar**.
+  any other, and put back from the Dashboard item's row in **Settings → Menu Bar**.
 - Cards can be taken off the dashboard from the dashboard: hover a card for its remove
   button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
   your Mac reports is listed along with what it costs to read.

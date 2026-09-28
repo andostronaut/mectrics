@@ -33,7 +33,7 @@ live in your menu bar — readable at a glance, and the bar never jumps around.<
 readable value — with a live sparkline where a trend actually tells you something — and
 stays out of the way otherwise. A click opens a detail popover with the numbers behind it.
 You choose that per module: CPU can have its own item, always in view, while Disk and
-Battery are grouped behind one Mectrics icon that opens them as a dashboard of cards. That
+Battery are grouped behind one Dashboard icon that opens them as a dashboard of cards. That
 icon is also the health indicator — it takes on a badge when something needs attention,
 and the dashboard opens with what is wrong.
 
@@ -49,7 +49,7 @@ Those numbers come from half-hour runs of the shipping build, not from one glanc
 Activity Monitor, and they are checked before a release rather than assumed. What you see
 will differ with your Mac, how many items you put in the menu bar, and whether you are on
 battery — more items means more work, because each one redraws every second. A grouped
-module costs nothing per second at all: the Mectrics icon is redrawn only when its health
+module costs nothing per second at all: the Dashboard item is redrawn only when its health
 badge changes, which is not something that happens on a timer.
 
 The project holds itself to deliberately tight internal budgets — 60 MB of memory and 3% of
@@ -109,7 +109,7 @@ throughput for Disk, and so on.
 
 ## Beyond the numbers
 
-- **Grouped readings** — put any module behind one Mectrics icon instead of giving it an
+- **Grouped readings** — put any module behind one Dashboard icon instead of giving it an
   item of its own. A click opens them as a dashboard of cards, plus your macOS version and
   uptime, and a click on a card opens its full detail. The icon is the health indicator
   too — it badges when something needs attention and surfaces what is off, including the
