@@ -8,163 +8,152 @@ import XCTest
 ///
 /// Nothing here creates a status item or an `AppModel`: either would touch the real
 /// menu bar or the user's real preferences.
-final class SingleIconMenuBarTests: XCTestCase {
+final class MectricsItemTests: XCTestCase {
     private let laptop: [MetricID] = [.cpu, .memory, .battery, .network, .disk, .gpu, .fans]
     private let desktop: [MetricID] = [.cpu, .memory, .network, .disk, .gpu]
 
-    // MARK: - MenuBarStyle
+    // MARK: - Placement
 
-    /// The raw values are what `"menuBarStyle"` holds, so renaming a case would reset
-    /// everyone's choice on update.
+    /// The raw values are persisted, so renaming a case would move someone's modules.
     func testRawValuesArePersistedAndThereforeNeverChange() {
-        XCTAssertEqual(MenuBarStyle.items.rawValue, "items")
-        XCTAssertEqual(MenuBarStyle.singleIcon.rawValue, "singleIcon")
-        XCTAssertEqual(MenuBarStyle(rawValue: "items"), .items)
-        XCTAssertEqual(MenuBarStyle(rawValue: "singleIcon"), .singleIcon)
-        // An absent or unknown value has no style; AppModel then falls back to items.
-        XCTAssertNil(MenuBarStyle(rawValue: ""))
-        XCTAssertNil(MenuBarStyle(rawValue: "SingleIcon"))
-        for style in MenuBarStyle.allCases {
-            XCTAssertEqual(style.id, style.rawValue)
+        XCTAssertEqual(MenuBarPlacement.ownItems.rawValue, "ownItems")
+        XCTAssertEqual(MenuBarPlacement.grouped.rawValue, "grouped")
+        XCTAssertEqual(MenuBarPlacement.off.rawValue, "off")
+        for placement in MenuBarPlacement.allCases {
+            XCTAssertEqual(MenuBarPlacement(rawValue: placement.rawValue), placement)
         }
     }
 
-    /// Separate items come first: it is the default and the Settings picker's order.
-    func testSeparateItemsLeadTheStylesBecauseTheyAreTheDefault() {
-        XCTAssertEqual(MenuBarStyle.allCases, [.items, .singleIcon])
+    func testEveryPlacementHasItsOwnNameAndDescription() {
+        let names = MenuBarPlacement.allCases.map(\.localizedName)
+        let descriptions = MenuBarPlacement.allCases.map(\.localizedDescription)
+        XCTAssertFalse(names.contains { $0.isEmpty })
+        XCTAssertFalse(descriptions.contains { $0.isEmpty })
+        XCTAssertEqual(Set(names).count, MenuBarPlacement.allCases.count)
+        XCTAssertEqual(Set(descriptions).count, MenuBarPlacement.allCases.count)
     }
 
-    func testEveryStyleHasItsOwnNameAndDescription() {
-        let names = MenuBarStyle.allCases.map(\.localizedName)
-        let descriptions = MenuBarStyle.allCases.map(\.localizedDescription)
-        XCTAssertFalse(names.contains(where: \.isEmpty))
-        XCTAssertFalse(descriptions.contains(where: \.isEmpty))
-        XCTAssertEqual(Set(names).count, MenuBarStyle.allCases.count)
-        XCTAssertEqual(Set(descriptions).count, MenuBarStyle.allCases.count)
+    /// Grouped wins over left-over components, because a grouped module keeps the
+    /// components it had so moving it back restores the items it was showing.
+    func testGroupedWinsOverLeftOverComponents() {
+        XCTAssertEqual(
+            MenuBarPlacement.placement(
+                of: .disk,
+                enabledComponents: [.disk: [.value, .ring]],
+                groupedModules: [.disk]
+            ),
+            .grouped
+        )
+        XCTAssertEqual(
+            MenuBarPlacement.placement(
+                of: .disk,
+                enabledComponents: [.disk: [.value]],
+                groupedModules: []
+            ),
+            .ownItems
+        )
+        for components: [MetricID: Set<MenuBarComponent>] in [[.disk: []], [:]] {
+            XCTAssertEqual(
+                MenuBarPlacement.placement(
+                    of: .disk,
+                    enabledComponents: components,
+                    groupedModules: []
+                ),
+                .off
+            )
+        }
     }
 
-    func testSeparateItemsWatchModulesWithAComponentAndIgnoreTheDashboard() {
-        let watched = MenuBarStyle.watchedModules(
-            style: .items,
+    /// The point of the whole model: one module in the menu bar and another in the
+    /// dashboard, both watched — which one global style could not express.
+    func testAModuleWithItemsAndAGroupedModuleAreBothWatched() {
+        let watched = MenuBarPlacement.watchedModules(
             available: desktop,
             enabledComponents: [
-                .cpu: [.value],
+                .cpu: [.value, .temperature],
                 .memory: [],
-                .network: [.netActivity, .netDown],
-                // Not on this Mac: a stored component never makes it watched.
-                .battery: [.batteryIcon]
+                .network: [.netActivity]
             ],
-            dashboardModules: [.disk, .gpu]
+            groupedModules: [.disk, .gpu]
         )
-        XCTAssertEqual(watched, [.cpu, .network])
+        XCTAssertEqual(watched, [.cpu, .network, .disk, .gpu])
     }
 
-    func testTheSingleIconWatchesTheDashboardAndIgnoresComponents() {
-        let watched = MenuBarStyle.watchedModules(
-            style: .singleIcon,
-            available: desktop,
-            enabledComponents: [.cpu: [.value], .memory: [.value]],
-            // Battery and Fans are not on this desktop.
-            dashboardModules: [.disk, .gpu, .battery, .fans]
-        )
-        XCTAssertEqual(watched, [.disk, .gpu])
-    }
-
-    /// An empty dashboard is a choice: the components left over from separate items
-    /// must not start being sampled behind it.
-    func testAnEmptyDashboardWatchesNothingWhateverTheComponentsSay() {
+    /// A module this Mac cannot report is never watched, however it was stored.
+    func testStoredPlacementsForAbsentHardwareAreIgnored() {
         XCTAssertEqual(
-            MenuBarStyle.watchedModules(
-                style: .singleIcon,
-                available: laptop,
-                enabledComponents: [.cpu: [.value], .battery: [.batteryIcon]],
-                dashboardModules: []
+            MenuBarPlacement.watchedModules(
+                available: desktop,
+                enabledComponents: [.battery: [.batteryIcon]],
+                groupedModules: [.fans]
             ),
             []
         )
+    }
+
+    func testNothingPlacedWatchesNothing() {
         XCTAssertEqual(
-            MenuBarStyle.watchedModules(
-                style: .items,
+            MenuBarPlacement.watchedModules(
                 available: laptop,
                 enabledComponents: [:],
-                dashboardModules: Set(laptop)
+                groupedModules: []
             ),
             []
         )
     }
 
-    func testSeparateItemKeysNameEachModuleAndComponentInDisplayOrder() {
+    // MARK: - When the menu bar is rebuilt
+
+    func testItemKeysNameEachModuleAndComponentInDisplayOrder() {
         let items: [(module: MetricID, component: MenuBarComponent)] = [
             (.cpu, .value),
             (.cpu, .temperature),
-            (.network, .netActivity),
-            (.battery, .batteryIcon)
+            (.network, .netActivity)
         ]
         XCTAssertEqual(
-            MenuBarStyle.itemKeys(style: .items, orderedItems: items),
-            ["cpu|value", "cpu|temperature", "network|netActivity", "battery|batteryIcon"]
+            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: false),
+            ["cpu|value", "cpu|temperature", "network|netActivity"]
         )
-        XCTAssertEqual(MenuBarStyle.itemKeys(style: .items, orderedItems: []), [])
+        XCTAssertEqual(
+            MenuBarPlacement.itemKeys(orderedItems: [], showsMectricsItem: false),
+            []
+        )
     }
 
-    /// The logo is not a metric item, so under the single icon a component appearing
-    /// (a temperature discovered mid-session) must never rebuild the menu bar.
-    func testTheSingleIconHasNoMetricItemsBecauseTheLogoIsNotOne() {
-        let before: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
-        let after = before + [(module: MetricID.cpu, component: MenuBarComponent.temperature)]
-        XCTAssertEqual(MenuBarStyle.itemKeys(style: .singleIcon, orderedItems: before), [])
+    /// The Mectrics item is one entry however many cards it holds, so adding or
+    /// removing a card never tears down and re-creates every status item.
+    func testTheMectricsItemIsOneEntryWhateverItHolds() {
+        let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
         XCTAssertEqual(
-            MenuBarStyle.itemKeys(style: .singleIcon, orderedItems: before),
-            MenuBarStyle.itemKeys(style: .singleIcon, orderedItems: after)
+            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: true),
+            ["cpu|value", MenuBarPlacement.mectricsItemKey]
         )
+    }
+
+    /// Gaining or losing the item itself is a genuine change in which items exist.
+    func testTheMectricsItemAppearingChangesTheItemList() {
+        let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
         XCTAssertNotEqual(
-            MenuBarStyle.itemKeys(style: .items, orderedItems: before),
-            MenuBarStyle.itemKeys(style: .items, orderedItems: after)
+            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: false),
+            MenuBarPlacement.itemKeys(orderedItems: items, showsMectricsItem: true)
         )
     }
 
-    /// GPU and Fans are `.heavy` SMC/IOKit providers, so the dashboard offers them but
-    /// never turns them on for someone who has not chosen.
-    func testDefaultDashboardModulesLeaveOutTheHeavyProviders() {
-        XCTAssertEqual(
-            MenuBarStyle.defaultDashboardModules,
-            [.cpu, .memory, .battery, .network, .disk]
-        )
-        XCTAssertEqual(
-            Set(MenuBarStyle.defaultDashboardModules).count,
-            MenuBarStyle.defaultDashboardModules.count,
-            "No module may appear twice"
-        )
-        for heavy in [MetricID.gpu, .fans, .sensors] {
-            XCTAssertFalse(MenuBarStyle.defaultDashboardModules.contains(heavy), "\(heavy)")
-        }
+    // MARK: - Grouped modules as stored
 
-        let defaultProviders: [any MetricProvider] = [
-            CPUProvider(), MemoryProvider(), BatteryProvider(), NetworkProvider(), DiskProvider()
-        ]
-        XCTAssertEqual(defaultProviders.map(\.id), MenuBarStyle.defaultDashboardModules)
-        for provider in defaultProviders {
-            XCTAssertNotEqual(provider.cost, .heavy, "\(provider.id) is sampled as heavy")
-        }
-        XCTAssertEqual(GPUProvider().cost, .heavy)
-    }
-
-    func testNothingStoredMeansTheDefaultsThisMacCanReport() {
+    /// Nothing is grouped unless it was asked for, so an update leaves every existing
+    /// menu bar exactly as it was.
+    func testNothingIsGroupedByDefault() {
+        XCTAssertTrue(MenuBarPlacement.defaultGroupedModules.isEmpty)
         XCTAssertEqual(
-            MenuBarStyle.dashboardModules(stored: nil, available: laptop),
-            [.cpu, .memory, .battery, .network, .disk]
+            MenuBarPlacement.groupedModules(stored: nil, available: laptop),
+            []
         )
-        // No battery on a desktop, and GPU is available but never a default.
-        XCTAssertEqual(
-            MenuBarStyle.dashboardModules(stored: nil, available: desktop),
-            [.cpu, .memory, .network, .disk]
-        )
-        XCTAssertEqual(MenuBarStyle.dashboardModules(stored: nil, available: []), [])
     }
 
     func testStoredModulesDropUnknownAndUnavailableValues() {
         XCTAssertEqual(
-            MenuBarStyle.dashboardModules(
+            MenuBarPlacement.groupedModules(
                 stored: ["gpu", "battery", "bogus", "CPU", "", "disk", "disk"],
                 available: desktop
             ),
@@ -172,38 +161,33 @@ final class SingleIconMenuBarTests: XCTestCase {
         )
     }
 
-    /// Turning every card off must survive a relaunch rather than bring the defaults
-    /// back.
-    func testAnEmptyStoredListStaysEmptyBecauseItIsAChoice() {
-        XCTAssertEqual(MenuBarStyle.dashboardModules(stored: [], available: laptop), [])
-    }
-
     /// AppModel stores the set as sorted raw values; reading that back through a real
     /// defaults domain has to give the same set.
-    func testDashboardModulesRoundTripThroughTheStoredFormat() throws {
-        let suiteName = "SingleIconMenuBarTests.\(UUID().uuidString)"
+    func testGroupedModulesRoundTripThroughTheStoredFormat() throws {
+        let suiteName = "MenuBarPlacementTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
         for chosen: Set<MetricID> in [[], [.gpu], [.cpu, .fans, .network], Set(laptop)] {
-            defaults.set(chosen.map(\.rawValue).sorted(), forKey: "dashboardModules")
+            defaults.set(chosen.map(\.rawValue).sorted(), forKey: "groupedModules")
             XCTAssertEqual(
-                MenuBarStyle.dashboardModules(
-                    stored: defaults.array(forKey: "dashboardModules") as? [String],
+                MenuBarPlacement.groupedModules(
+                    stored: defaults.array(forKey: "groupedModules") as? [String],
                     available: laptop
                 ),
                 chosen
             )
         }
-        defaults.removeObject(forKey: "dashboardModules")
+        defaults.removeObject(forKey: "groupedModules")
         XCTAssertEqual(
-            MenuBarStyle.dashboardModules(
-                stored: defaults.array(forKey: "dashboardModules") as? [String],
+            MenuBarPlacement.groupedModules(
+                stored: defaults.array(forKey: "groupedModules") as? [String],
                 available: laptop
             ),
-            Set(MenuBarStyle.defaultDashboardModules)
+            []
         )
     }
+
 
     // MARK: - Logo status item
 
@@ -364,7 +348,7 @@ final class SingleIconMenuBarTests: XCTestCase {
     @MainActor
     func testBadgingTheLogoNeverChangesItsSize() {
         let plain = MectricsGlyph.menuBarImage.size
-        for state in CompactHealthState.allCases where state != .normal {
+        for state in HealthState.allCases where state != .normal {
             let badged = Self.badged(state)
             XCTAssertEqual(badged.size, plain, "\(state.rawValue)")
             // Two colours, so it is deliberately not a template: AppKit must not
@@ -380,7 +364,7 @@ final class SingleIconMenuBarTests: XCTestCase {
         XCTAssertIdentical(
             MectricsGlyph.menuBarImage(
                 badge: nil,
-                tint: CompactHealthState.warning.tint,
+                tint: HealthState.warning.tint,
                 appearance: Self.appearance
             ),
             MectricsGlyph.menuBarImage
@@ -405,7 +389,7 @@ final class SingleIconMenuBarTests: XCTestCase {
     func testEveryHealthStateDrawsItsOwnMark() throws {
         var inkedPixels: [String: [Bool]] = [:]
         let plain = try coverage(of: MectricsGlyph.menuBarImage)
-        for state in CompactHealthState.allCases where state != .normal {
+        for state in HealthState.allCases where state != .normal {
             let mark = try coverage(of: Self.badged(state))
             XCTAssertNotEqual(mark, plain, "\(state.rawValue) is invisible")
             for (other, otherMark) in inkedPixels {
@@ -417,7 +401,7 @@ final class SingleIconMenuBarTests: XCTestCase {
             }
             inkedPixels[state.rawValue] = mark
         }
-        XCTAssertEqual(inkedPixels.count, CompactHealthState.allCases.count - 1)
+        XCTAssertEqual(inkedPixels.count, HealthState.allCases.count - 1)
     }
 
     /// The badge is punched out of the M rather than laid on top of it, so the two read
@@ -460,7 +444,7 @@ final class SingleIconMenuBarTests: XCTestCase {
     func testOnlyTheBadgeCarriesTheSeverityColour() throws {
         for name in [NSAppearance.Name.aqua, .darkAqua] {
             let appearance = try XCTUnwrap(NSAppearance(named: name))
-            let state = CompactHealthState.critical
+            let state = HealthState.critical
             let bitmap = try render(
                 MectricsGlyph.menuBarImage(
                     badge: state.symbolName,
@@ -513,7 +497,7 @@ final class SingleIconMenuBarTests: XCTestCase {
     /// by holding two different objects.
     @MainActor
     func testBothColoursAreResolvedForTheTargetAppearance() throws {
-        for state in [CompactHealthState.unavailable, .critical] {
+        for state in [HealthState.unavailable, .critical] {
             var drawn: [NSAppearance.Name: [NSColor]] = [:]
             for name in [NSAppearance.Name.aqua, .darkAqua] {
                 let bitmap = try render(
@@ -564,7 +548,7 @@ final class SingleIconMenuBarTests: XCTestCase {
         NSAppearance(named: .darkAqua) ?? NSAppearance.currentDrawing()
 
     @MainActor
-    private static func badged(_ state: CompactHealthState) -> NSImage {
+    private static func badged(_ state: HealthState) -> NSImage {
         MectricsGlyph.menuBarImage(
             badge: state.symbolName,
             tint: state.tint,

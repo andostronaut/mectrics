@@ -20,13 +20,21 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   one click away than always in view. Your separate-items layout is kept exactly as it was
   and comes back when you switch back to **Separate**, and nothing changes on update:
   separate items stay the default.
-- **The Compact icon is also the health indicator.** It takes on a badge — the same symbol
-  the Attention Log uses — when an alert becomes active, and the dashboard opens with what
-  is wrong at the top. There is no second item beside it to say the same thing, so Compact
-  really is one icon. The separate **Compact Health** item is unchanged for the Separate
-  style, and your choice about it is remembered while you are in Compact.
-- **Cards can be taken off the dashboard from the dashboard.** **Edit** above the grid, then
-  click a card to remove it. Adding stays in **Settings → Menu Bar**, where every module
+- **Where each reading goes is now a choice per module.** In **Settings → Menu Bar**, every
+  module takes either its own menu bar item or a card in the Mectrics icon's dashboard — so
+  CPU can stay in view every second while Disk and Battery sit behind one icon, which a
+  single Separate/Compact switch could not express. Move a module back and the items it was
+  showing return exactly as they were. Nothing is grouped unless you ask, so your menu bar
+  is unchanged on update.
+- **The Mectrics icon is also the health indicator, and the separate Compact Health item is
+  gone.** It watched the same conditions and showed the same worst one as the dashboard
+  already did, so it was two icons answering one question. The icon now takes on a badge —
+  the same symbol the Attention Log uses — when an alert becomes active, and the dashboard
+  opens with what is wrong at the top. Nothing is lost: the switch that added that item now
+  keeps the Mectrics icon in the menu bar when nothing is grouped into it, and a Mac that
+  had it on keeps an item in the same slot.
+- Cards can be taken off the dashboard from the dashboard: hover a card for its remove
+  button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
   your Mac reports is listed along with what it costs to read.
 - Moving between the grid and a module's detail now slides, so the dashboard reads as one
   place with two depths instead of two panels swapped under the pointer. It follows Reduce

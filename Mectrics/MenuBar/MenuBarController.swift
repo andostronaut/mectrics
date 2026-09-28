@@ -13,8 +13,8 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     private let model: AppModel
     /// One status item per enabled (module, component) pair, keyed "module|component".
     private var items: [String: MetricStatusItem] = [:]
-    private var compactHealthItem: CompactHealthStatusItem?
-    /// The single-icon style's logo item; nil with separate items.
+    /// The one Mectrics item: the dashboard's anchor and the health indicator. Nil
+    /// when nothing is grouped into it and it was not asked for on its own.
     private var logoItem: MectricsStatusItem?
     private let popover = NSPopover()
 
@@ -22,7 +22,6 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     /// click on another item replaces the content rather than stacking a second one.
     private enum PopoverKind: Equatable {
         case module(MetricID)
-        case health
         case dashboard
     }
 
@@ -69,7 +68,6 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
 
     @objc private func systemColorsDidChange() {
         for statusItem in items.values { statusItem.invalidateCachedRender() }
-        compactHealthItem?.invalidateCachedRender()
         // The logo's badge tint is a dynamic system colour too, and it keeps its
         // identity when the user picks a new accent.
         logoItem?.invalidateCachedRender()
@@ -93,47 +91,35 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         }
         for (_, item) in items { item.remove() }
         items.removeAll()
-        compactHealthItem?.remove()
-        compactHealthItem = nil
         logoItem?.remove()
         logoItem = nil
 
-        switch model.menuBarStyle {
-        case .singleIcon:
-            // No Compact Health item here: the logo carries the health state and the
-            // dashboard leads with the condition, so a second icon would say it twice.
+        // The Mectrics item leads, then every module showing items of its own. There is
+        // no separate health item: the Mectrics icon carries the state and the dashboard
+        // leads with the condition, so a second icon would say it twice.
+        if model.showsMectricsItem {
             let logo = MectricsStatusItem()
             logo.onClick = { [weak self] in
                 self?.toggleDashboardPopover()
             }
             logoItem = logo
-        case .items:
-            if model.compactHealthEnabled {
-                let healthItem = CompactHealthStatusItem()
-                healthItem.onClick = { [weak self] in
-                    self?.toggleHealthPopover()
-                }
-                compactHealthItem = healthItem
+        }
+        for (id, component) in model.orderedEnabledItems {
+            let statusItem = MetricStatusItem(id: id, component: component)
+            statusItem.onClick = { [weak self] moduleID in
+                self?.togglePopover(for: moduleID)
             }
-            for (id, component) in model.orderedEnabledItems {
-                let statusItem = MetricStatusItem(id: id, component: component)
-                statusItem.onClick = { [weak self] moduleID in
-                    self?.togglePopover(for: moduleID)
-                }
-                items["\(id.rawValue)|\(component.rawValue)"] = statusItem
-            }
+            items["\(id.rawValue)|\(component.rawValue)"] = statusItem
         }
         refresh()
     }
 
-    /// Updates the live values of all items. Under the single icon the only thing that
-    /// can change is the logo's health badge, and only on a severity transition — both
-    /// health items drop an update that repeats the state they already show.
+    /// Updates the live values of all items. The Mectrics item's only changing input is
+    /// its health badge, and only on a severity transition — an update repeating the
+    /// state it already shows is dropped before it reaches AppKit.
     func refresh() {
         let accent = model.accentNSColor
-        let health = model.compactHealthState
-        compactHealthItem?.update(health)
-        logoItem?.update(health)
+        logoItem?.update(model.healthState)
         // History is shared by every item of the same module, and only charted
         // components need it at all.
         var histories: [MetricID: [Double]] = [:]
@@ -198,23 +184,6 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
             from: button
         )
         PerformanceSignposts.endModulePopover(signpostID)
-    }
-
-    private func toggleHealthPopover() {
-        guard let button = compactHealthItem?.item.button else { return }
-        if popover.isShown && popoverKind == .health {
-            closePopover()
-            return
-        }
-
-        let signpostID = PerformanceSignposts.beginHealthPopover()
-        show(
-            CompactHealthPopoverView(model: model),
-            as: .health,
-            visibleModules: [],
-            from: button
-        )
-        PerformanceSignposts.endHealthPopover(signpostID)
     }
 
     private func toggleDashboardPopover() {

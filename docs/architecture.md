@@ -27,8 +27,8 @@ flowchart LR
     subgraph app["Mectrics.app — LSUIElement agent, no Dock icon"]
         AM["<b>AppModel</b><br/><i>@Observable</i>"]
         MB["<b>MenuBarController</b><br/>one NSStatusItem per component,<br/>or one logo item"]
-        PO["<b>Popovers</b><br/>details · dashboard · Compact Health · Settings"]
-        AL["<b>Alert delivery</b><br/>notifications · Compact Health · Attention Log"]
+        PO["<b>Popovers</b><br/>details · dashboard · Settings"]
+        AL["<b>Alert delivery</b><br/>notifications · health badge · Attention Log"]
         AM --> MB
         AM --> PO
         AM --> AL
@@ -139,28 +139,32 @@ sampling, so Mectrics eases off on exactly the states it would report.
 
 ## Menu bar rendering
 
-The menu bar has two styles (`MenuBarStyle`, whose persisted raw values never change),
-chosen under Settings → Menu Bar → Style:
+Where a module appears is a choice **per module**, not one mode for the whole menu bar
+(`MenuBarPlacement`, whose persisted raw values never change), made under Settings → Menu
+Bar:
 
-- **Separate items** (`MenuBarStyle.items`, shown as "Separate") — one status item per
-  chosen component. This is the default for new installs and upgrades alike, so nobody's
-  menu bar changes on update.
-- **Single icon** (`MenuBarStyle.singleIcon`, shown as "Compact") — one Mectrics logo item
-  that opens [the dashboard](#the-dashboard).
+- **Menu bar** (`.ownItems`) — one status item per chosen component, always in view.
+- **Grouped** (`.grouped`) — a card in the Mectrics item's [dashboard](#the-dashboard),
+  a click away.
+- **Off** — not shown, and not sampled for the menu bar's sake.
 
-Each style keeps its own choices: separate items read `enabledComponents`, the single icon
-reads `dashboardModules`, and neither ever writes the other's. Switching back to separate
-items therefore restores the exact layout that was there before, however long the single
-icon was in use.
+A single global style could not express what people actually want: CPU in view every
+second, Disk and Battery gathered behind one icon. Placement is exclusive, so "where do I
+see Disk?" has one answer, and the two sets that decide it — `enabledComponents` and
+`groupedModules` — stay the source of truth rather than a third stored value that could
+disagree with them. Grouping a module leaves its components alone, so moving it back
+restores the items it was showing instead of resetting it to a default. Nothing is grouped
+unless it was asked for, so an update leaves every existing menu bar exactly as it was.
 
-Each style also has exactly one health indicator. With separate items it is the optional
-Compact Health item; under the single icon the logo carries the state itself and no Compact
-Health item is created, because the dashboard already leads with the condition and a second
-icon beside it would put the same thing in the menu bar twice. `compactHealthEnabled` is
-kept rather than cleared while the single icon is in use, so switching back restores the
-menu bar the user had.
+There is exactly one health indicator, and it is the Mectrics item. The separate Compact
+Health item is gone: it read the same `healthConditions` and showed the same worst
+condition as the dashboard's banner, so it was two icons answering one question — the
+duplication that retired the floating panel. The switch that used to add that item now
+decides whether the Mectrics icon stays in the menu bar with nothing grouped into it, and
+a Mac that had Compact Health switched on keeps an item in the same slot without being
+asked.
 
-### Separate items
+### Modules taking their own items
 
 - One `NSStatusItem` per enabled **component**, not per module — Battery can contribute its
   icon and its health as two independent items.
@@ -185,13 +189,13 @@ menu bar the user had.
 `MectricsStatusItem` has nothing to redraw. Its image is a template drawn in code from the
 app icon's geometry (`MectricsGlyph`), so it is sharp at every backing scale, and AppKit
 tints a template for light, dark, and tinted menu bars on its own. The item's length is
-fixed (the same 26 pt slot the Compact Health item reserves) and even, and the 20 × 14 pt
+fixed at 26 pt and even, and the 20 × 14 pt
 image has whole, even sides, so at 1x the logo sits on whole pixels instead of being
 resampled into a blur.
 
 This item is also the style's health indicator. When a condition routed to health becomes
-active, the logo takes on a badge — the same symbol the Attention Log and Compact Health
-use — punched out of the M so the two read as two marks, with the severity tint only
+active, the logo takes on a badge — the same symbol the Attention Log
+uses — punched out of the M so the two read as two marks, with the severity tint only
 reinforcing a signal the shape already carries. The badged mark is **the same size** as the
 plain one: the item reserves a fixed width, and a logo that grew when something went wrong
 would move every item after it. The accessibility label is assigned once; the image,
@@ -212,22 +216,21 @@ changing theme redraws it on the next cycle. Every colour is resolved inside
 `secondaryLabelColor`, and resolving that against the wrong appearance put a light-grey
 badge on a light menu bar.
 
-The status item list under the single icon is the logo, and nothing else, so very little
-can change it. `MenuBarStyle.itemKeys` is empty for this style, which means a
-component becoming available underneath it never triggers a rebuild, and turning a
-dashboard module on or off goes through `AppModel.onWatchedModulesChanged` — republish the
-widgets, update Energy Guard, adjust what an open dashboard reports as visible — rather than
-`onModulesChanged`, which would tear down and re-create every status item for a change
-none of them shows. Switching styles is a genuine change in which items exist, and does
-rebuild.
+The Mectrics item is **one entry in the item list however many cards it holds**
+(`MenuBarPlacement.itemKeys`), so grouping or ungrouping a module goes through
+`AppModel.onWatchedModulesChanged` — republish the widgets, update Energy Guard, adjust
+what an open dashboard reports as visible — rather than `onModulesChanged`, which would
+tear down and re-create every status item for a change none of them shows. Only the first
+card and the last one reach `onModulesChanged`, because those create and remove the item
+itself.
 
 ## The dashboard
 
-The single icon opens `DashboardPopoverView` in the same shared `NSPopover` the module and
-Compact Health popovers use, so a click on another item replaces its content rather than
+The Mectrics item opens `DashboardPopoverView` in the same shared `NSPopover` the module
+popovers use, so a click on another item replaces its content rather than
 stacking a second popover, and it is dismissed the same way. It is a popover, not a panel:
 it is on screen from a click until the next click elsewhere, and is not the always-visible
-second surface the floating panel was (see [Compact Health](#compact-health)).
+second surface the floating panel was (see [Health](#health)).
 
 - Cards follow the menu bar's module order, then a Device card that no provider backs:
   the macOS version, and the uptime from `kern.boottime`, so sleep counts as it does for
@@ -302,24 +305,26 @@ before that it was one hardcoded list, so every upgrade was greeted with news fr
 release. A version with no entry presents nothing rather than something stale, and a test
 fails if the current version has no notes.
 
-## Compact Health
+## Health
 
 The always-on-top floating panel that once existed was removed: it duplicated the menu bar
 without answering a question the menu bar could not, and it dragged along per-display
 placement, a global hotkey, and two layout modes.
 
-The optional **Compact Health** item replaced it — a single stable-width status item that
-stays quiet and turns into a warning only when an alert routed to it activates. Real-time
+A single stable-width status item replaced it, quiet until an alert routed to it
+activates — today that is the Mectrics item's health badge. Real-time
 viewing therefore lives entirely in the menu bar and its popovers, and no second
-always-visible surface should be reintroduced. The single icon's dashboard is one of those
-popovers: it gathers every chosen reading in one place, but only between a click and the
-next click elsewhere, and the worst condition routed to health leads it as a banner.
+always-visible surface should be reintroduced. The Mectrics item's dashboard is one of
+those popovers: it gathers every grouped reading in one place, but only between a click
+and the next click elsewhere, and the worst condition routed to health leads it as a
+banner.
 
-That banner is why the single icon has no Compact Health item of its own. The two would
-read the same `compactHealthConditions` and show the same worst condition, one in a banner
-and one in an icon beside it — the duplication this section exists to record. Under the
-single icon the state rides on the logo as a badge instead, so the style is one icon in
-fact and not only in name. Separate items keep the Compact Health item unchanged.
+That banner is why the Compact Health item no longer exists. The two read the same
+`healthConditions` and showed the same worst condition, one in a banner and one in an icon
+beside it — the duplication this section exists to record. The state rides on the Mectrics
+icon as a badge instead, so one icon means one icon. Nothing was lost with the item: its
+switch became the one that keeps the Mectrics icon in the menu bar when nothing is grouped
+into it.
 
 The bundled `mectrics` CLI is a read-only automation interface for unattended machines,
 not another dashboard. The app owns configuration. The CLI reads its enabled rules and can:
@@ -391,16 +396,16 @@ the widget is positioned as "at a glance" while the menu bar carries the real-ti
   minutes and each costs an IOKit round trip.
 - What is on screen decides which providers run at all, not only how often. The app
   samples its *watched* modules (`AppModel.enabledModules`, resolved by
-  `MenuBarStyle.watchedModules`) plus whatever enabled alert rules need. With separate
-  items the watched modules are those with an item in the menu bar; under the single icon
-  they are the dashboard's. Those are sampled even while the popover is closed: the cards
+  `MenuBarPlacement.watchedModules`) plus whatever enabled alert rules need — every module
+  placed anywhere, whether it shows items of its own or a card. Those are sampled even
+  while the popover is closed: the cards
   open on current values with a history already there to draw, and the widgets and the
   diagnostics summary consume the same set.
 - The SMC is sampled only where a temperature is actually shown — a `.temperature` menu
-  bar component or the menu bar builder's temperature chips (separate items only; the
-  single icon shows neither), an open popover, dashboard, or detail window for
-  CPU/Memory/GPU, or a rule that watches the CPU temperature directly. Under the single
-  icon, the dashboard therefore has the SMC read only while it is open.
+  bar component or the menu bar builder's temperature chips (shown only for a module
+  taking items of its own), an open popover, dashboard, or detail window for
+  CPU/Memory/GPU, or a rule that watches the CPU temperature directly. A grouped module
+  therefore has the SMC read only while the dashboard is open.
 - The hot path is allocation-free: the ring buffer is pre-allocated.
 - Providers copy the single IORegistry property they need rather than a whole property
   dictionary, and anything that reaches a system daemon (reclaimable disk space) runs on
@@ -414,7 +419,7 @@ the widget is positioned as "at a glance" while the menu bar carries the real-ti
   of that figure. The 60 MB budget
   describes the menu bar's steady state, which is what the app spends its life in.
 - Local points-of-interest signposts cover provider discovery, menu bar readiness, engine
-  start, the first live sample, and popover presentation (module, Compact Health, and
+  start, the first live sample, and popover presentation (module and
   dashboard). They are visible to
   Instruments but are neither persisted nor transmitted.
 - `scripts/performance/measure.sh` launches an isolated Release app or attaches to an
@@ -438,9 +443,9 @@ Three things dominate, and none of them is arithmetic on a sample:
    bitmap. An item whose render inputs are unchanged costs nothing, which is why
    `MetricStatusItem` compares them first — a menu bar of items that never change measures
    at 0% CPU. The price is per *changed* item per cycle, so the honest way to reduce it is
-   to change fewer things, not to sample less often. The single icon's logo is assigned
-   once and never changes, so under that style only a Compact Health item, if enabled, is
-   left to pay it, and only when its state changes.
+   to change fewer things, not to sample less often. The Mectrics item pays it only when
+   its health badge changes, which is a severity transition and not a cycle, so a menu bar
+   of grouped modules costs nothing per cycle at all.
 2. **Rebuilding the menu bar.** `MenuBarController.rebuild()` destroys and re-creates every
    `NSStatusItem`, and each one is a window the server has to register. This belongs to a
    change in *which* items exist, never to a change in their values, so component

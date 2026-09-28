@@ -25,20 +25,6 @@ struct MenuBarBuilderView: View {
     var body: some View {
         Form {
             Section {
-                Picker(
-                    String(localized: "builder.style.label", defaultValue: "Style"),
-                    selection: $model.menuBarStyle
-                ) {
-                    ForEach(MenuBarStyle.allCases) { style in
-                        Text(style.localizedName).tag(style)
-                    }
-                }
-                .pickerStyle(.segmented)
-            } footer: {
-                Text(model.menuBarStyle.localizedDescription)
-            }
-
-            Section {
                 previewStrip
             } header: {
                 Text("Preview")
@@ -46,54 +32,50 @@ struct MenuBarBuilderView: View {
                 Text("Hold Command and drag an item in the menu bar to reorder it.")
             }
 
-            switch model.menuBarStyle {
-            case .items:
-                Section {
-                    ForEach(model.availableModules, id: \.self) { id in
-                        moduleRow(id)
-                    }
-                } header: {
-                    HStack {
-                        Text("Modules")
-                        Spacer()
-                        presetsMenu
-                    }
-                } footer: {
-                    Text(
-                        String(
-                            localized: "builder.modules.footer",
-                            defaultValue: "Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
-                        )
-                    )
+            Section {
+                ForEach(model.availableModules, id: \.self) { id in
+                    moduleRow(id)
                 }
-            case .singleIcon:
-                Section {
-                    ForEach(model.availableModules, id: \.self) { id in
-                        DashboardModuleRow(model: model, id: id)
-                    }
-                } header: {
-                    Text(
-                        String(
-                            localized: "builder.dashboard.header",
-                            defaultValue: "Dashboard"
-                        )
-                    )
-                } footer: {
-                    Text(
-                        String(
-                            localized: "builder.dashboard.footer",
-                            defaultValue: "Every module turned on here gets a card in the dashboard. GPU and Fans cost more energy to read, so they are read less often."
-                        )
-                    )
+            } header: {
+                HStack {
+                    Text("Modules")
+                    Spacer()
+                    presetsMenu
                 }
+            } footer: {
+                Text(
+                    String(
+                        localized: "builder.modules.placementFooter",
+                        defaultValue: "Each module takes its own menu bar item, or a card in the Mectrics icon's dashboard. Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
+                    )
+                )
             }
 
             Section {
-                // The single icon draws no module icons, so the switch would do
-                // nothing there.
-                if model.menuBarStyle == .items {
-                    Toggle("Show module icons", isOn: $model.showMenuBarIcons)
-                }
+                Toggle(
+                    String(
+                        localized: "builder.mectricsItem.label",
+                        defaultValue: "Always show the Mectrics icon"
+                    ),
+                    isOn: $model.mectricsItemEnabled
+                )
+                .disabled(!model.groupedModules.isEmpty)
+            } footer: {
+                Text(
+                    model.groupedModules.isEmpty
+                        ? String(
+                            localized: "builder.mectricsItem.footer",
+                            defaultValue: "The icon takes on a badge when an alert becomes active, and opens a dashboard of whatever you group into it. Grouping a module shows it whether this is on or not."
+                        )
+                        : String(
+                            localized: "builder.mectricsItem.footer.grouped",
+                            defaultValue: "The icon is in the menu bar because modules are grouped into it. It also carries the health badge."
+                        )
+                )
+            }
+
+            Section {
+                Toggle("Show module icons", isOn: $model.showMenuBarIcons)
                 Picker("Chart color", selection: $model.accentChoice) {
                     ForEach(AccentChoice.allCases) { choice in
                         Text(choice.localizedName).tag(choice)
@@ -103,44 +85,6 @@ struct MenuBarBuilderView: View {
                 Text("Appearance")
             }
 
-            // The single icon has no separate health item: its logo carries the state
-            // and the dashboard leads with the condition, so the switch would offer to
-            // say the same thing twice.
-            switch model.menuBarStyle {
-            case .items:
-                Section {
-                    Toggle(
-                        "Show Compact Health item",
-                        isOn: $model.compactHealthEnabled
-                    )
-                } footer: {
-                    Text("One extra menu bar item that stays quiet until an alert sent to it becomes active.")
-                }
-            case .singleIcon:
-                Section {
-                    LabeledContent(
-                        String(
-                            localized: "builder.health.label",
-                            defaultValue: "Health"
-                        )
-                    ) {
-                        Text(
-                            String(
-                                localized: "builder.health.onTheIcon",
-                                defaultValue: "On the Mectrics icon"
-                            )
-                        )
-                        .foregroundStyle(.secondary)
-                    }
-                } footer: {
-                    Text(
-                        String(
-                            localized: "builder.health.singleIcon.footer",
-                            defaultValue: "The icon takes on a badge when an alert sent to it becomes active, and the dashboard opens with what is wrong. No second item is needed."
-                        )
-                    )
-                }
-            }
         }
         .formStyle(.grouped)
         // Preview tiles are only honest if every module is being sampled, including
@@ -195,28 +139,9 @@ struct MenuBarBuilderView: View {
 
     private var previewStrip: some View {
         HStack(spacing: ExperienceSpacing.medium) {
-            // Only the separate-items style puts a health item of its own in the bar.
-            if model.compactHealthEnabled && model.menuBarStyle == .items {
-                CompactHealthPreview(model: model)
-            }
-            switch model.menuBarStyle {
-            case .items:
-                ForEach(model.orderedEnabledItems.indices, id: \.self) { index in
-                    let entry = model.orderedEnabledItems[index]
-                    MenuBarPreviewItem(
-                        model: model,
-                        id: entry.module,
-                        component: entry.component
-                    )
-                }
-                if model.orderedEnabledItems.isEmpty && !model.compactHealthEnabled {
-                    Text("Nothing in the menu bar yet. Pick a look for a module below.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            case .singleIcon:
-                // The real mark the menu bar draws, badge and all, rather than a
-                // look-alike: a chip is only honest if it is the thing it previews.
+            // The menu bar's own order: the Mectrics item first, then every module
+            // showing items of its own.
+            if model.showsMectricsItem {
                 MectricsLogoPreview(model: model)
                     .accessibilityElement()
                     .accessibilityLabel(
@@ -225,6 +150,19 @@ struct MenuBarBuilderView: View {
                             defaultValue: "Mectrics"
                         )
                     )
+            }
+            ForEach(model.orderedEnabledItems.indices, id: \.self) { index in
+                let entry = model.orderedEnabledItems[index]
+                MenuBarPreviewItem(
+                    model: model,
+                    id: entry.module,
+                    component: entry.component
+                )
+            }
+            if model.orderedEnabledItems.isEmpty && !model.showsMectricsItem {
+                Text("Nothing in the menu bar yet. Pick a look for a module below.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
         }
@@ -242,56 +180,50 @@ struct MenuBarBuilderView: View {
 
     // MARK: - Module rows
 
+    /// One module: where it goes, and — when it takes items of its own — which of them.
+    ///
+    /// The chips stay hidden while the module is grouped or off rather than being dimmed:
+    /// a look it cannot show right now is not a choice to be made (AGENTS.md §4).
     private func moduleRow(_ id: MetricID) -> some View {
-        LabeledContent {
-            HStack(spacing: ExperienceSpacing.small) {
-                Spacer(minLength: 0)
-                ForEach(model.availableComponents(for: id)) { component in
-                    MenuBarComponentChip(
-                        model: model,
-                        id: id,
-                        component: component
+        VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
+            LabeledContent {
+                Picker(
+                    id.localizedName,
+                    selection: Binding(
+                        get: { model.placement(of: id) },
+                        set: { model.setPlacement($0, for: id) }
                     )
+                ) {
+                    ForEach(MenuBarPlacement.allCases) { placement in
+                        Text(placement.localizedName).tag(placement)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            } label: {
+                HStack(spacing: ExperienceSpacing.small) {
+                    Label(
+                        id.localizedName,
+                        systemImage: MetricSymbol.name(for: id)
+                    )
+                    ModuleHealthBadge(model: model, id: id)
                 }
             }
-        } label: {
-            HStack(spacing: ExperienceSpacing.small) {
-                Label(
-                    id.localizedName,
-                    systemImage: MetricSymbol.name(for: id)
-                )
-                ModuleHealthBadge(model: model, id: id)
+            if model.placement(of: id) == .ownItems {
+                HStack(spacing: ExperienceSpacing.small) {
+                    ForEach(model.availableComponents(for: id)) { component in
+                        MenuBarComponentChip(
+                            model: model,
+                            id: id,
+                            component: component
+                        )
+                    }
+                    Spacer(minLength: 0)
+                }
             }
         }
         .accessibilityElement(children: .contain)
-    }
-}
-
-/// One dashboard card switch. Its own body reads the membership, so turning one card
-/// on or off re-evaluates this row alone.
-private struct DashboardModuleRow: View {
-    let model: AppModel
-    let id: MetricID
-
-    var body: some View {
-        Toggle(
-            isOn: Binding(
-                get: { model.isDashboardModuleEnabled(id) },
-                set: { enabled in
-                    if enabled != model.isDashboardModuleEnabled(id) {
-                        model.toggleDashboardModule(id)
-                    }
-                }
-            )
-        ) {
-            HStack(spacing: ExperienceSpacing.small) {
-                Label(
-                    id.localizedName,
-                    systemImage: MetricSymbol.name(for: id)
-                )
-                ModuleHealthBadge(model: model, id: id)
-            }
-        }
     }
 }
 
@@ -435,17 +367,6 @@ private struct ModuleHealthBadge: View {
     }
 }
 
-private struct CompactHealthPreview: View {
-    let model: AppModel
-
-    var body: some View {
-        let state = model.compactHealthState
-        Image(systemName: state.symbolName)
-            .accessibilityLabel("Compact Health")
-            .accessibilityValue(state.localizedName)
-    }
-}
-
 /// The single icon as the menu bar actually draws it: the same template image, badged
 /// with the same health state, tinted the same way.
 ///
@@ -458,7 +379,7 @@ private struct MectricsLogoPreview: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        let state = model.compactHealthState
+        let state = model.healthState
         let isNormal = state == .normal
         // The mark is drawn for an AppKit appearance, and this pane's is the one the
         // chip is being shown in.

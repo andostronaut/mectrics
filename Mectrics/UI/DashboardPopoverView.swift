@@ -15,8 +15,6 @@ struct DashboardPopoverView: View {
     @State private var selectedModule: MetricID? = nil
     /// Facts no sample carries, read once when the popover appears.
     @State private var systemInfo = DashboardSystemInfo()
-    /// True while the grid offers to take its cards off the dashboard.
-    @State private var isEditingCards = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Outer width, padding included. Kept close to a native menu bar popover: the
@@ -83,44 +81,10 @@ struct DashboardPopoverView: View {
     private var overview: some View {
         VStack(alignment: .leading, spacing: Self.padding) {
             DashboardHealthBanner(model: model) { select($0) }
-            if !model.orderedDashboardModules.isEmpty {
-                editBar
-            }
             cardGrid
             actionFooter
         }
         .padding(Self.padding)
-    }
-
-    /// One quiet control above the grid. It says "Edit" rather than carrying a row of
-    /// remove buttons all the time, because reading the dashboard is what it is for and
-    /// changing it is the rarer errand.
-    private var editBar: some View {
-        HStack(spacing: 0) {
-            Spacer(minLength: 0)
-            Button {
-                toggleEditing()
-            } label: {
-                Text(
-                    isEditingCards
-                        ? String(localized: "dashboard.edit.done", defaultValue: "Done")
-                        : String(localized: "dashboard.edit", defaultValue: "Edit")
-                )
-                .font(.caption.weight(.medium))
-            }
-            .buttonStyle(.borderless)
-            .help(
-                isEditingCards
-                    ? String(
-                        localized: "dashboard.edit.done.help",
-                        defaultValue: "Finish choosing cards"
-                    )
-                    : String(
-                        localized: "dashboard.edit.help",
-                        defaultValue: "Take cards off the dashboard. Add them back in Settings."
-                    )
-            )
-        }
     }
 
     private var cardGrid: some View {
@@ -150,7 +114,6 @@ struct DashboardPopoverView: View {
                 model: model,
                 id: id,
                 systemInfo: systemInfo,
-                isEditing: isEditingCards,
                 onRemove: { removeCard(id) }
             ) { select($0) }
         case .device:
@@ -213,30 +176,10 @@ struct DashboardPopoverView: View {
         guard let animation = ExperienceMotion.stateChange(
             reduceMotion: reduceMotion
         ) else {
-            applyRemoval(id)
+            model.setPlacement(.off, for: id)
             return
         }
-        withAnimation(animation) { applyRemoval(id) }
-    }
-
-    private func applyRemoval(_ id: MetricID) {
-        model.toggleDashboardModule(id)
-        // Nothing left to edit once the last card is gone, and the empty hint that
-        // replaces the grid leads to Settings on its own.
-        if model.orderedDashboardModules.isEmpty {
-            isEditingCards = false
-        }
-    }
-
-    /// Turns the grid's remove controls on and off.
-    private func toggleEditing() {
-        guard let animation = ExperienceMotion.stateChange(
-            reduceMotion: reduceMotion
-        ) else {
-            isEditingCards.toggle()
-            return
-        }
-        withAnimation(animation) { isEditingCards.toggle() }
+        withAnimation(animation) { model.setPlacement(.off, for: id) }
     }
 }
 
@@ -355,19 +298,17 @@ private struct DashboardModuleCard: View {
     let model: AppModel
     let id: MetricID
     let systemInfo: DashboardSystemInfo
-    /// While editing, the card offers to leave the dashboard instead of opening.
-    let isEditing: Bool
     let onRemove: () -> Void
     let onSelect: (MetricID) -> Void
+    @State private var isHovered = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let sample = model.latest[id]
         let state = model.metricState(for: id, isEnabled: true)
         let facts = sample.map(cardFacts(for:))
         Button {
-            // One card, one meaning at a time: while editing, a click takes it off
-            // rather than drilling into a card the user is about to remove.
-            if isEditing { onRemove() } else { onSelect(id) }
+            onSelect(id)
         } label: {
             DashboardCardLayout(
                 symbol: MetricSymbol.name(for: id),
@@ -387,34 +328,64 @@ private struct DashboardModuleCard: View {
             }
         }
         .buttonStyle(DashboardCardButtonStyle())
-        .overlay(alignment: .topTrailing) {
-            if isEditing { removeBadge }
+        .overlay(alignment: .topTrailing) { removeButton }
+        .onHover { hovering in
+            guard let animation = ExperienceMotion.stateChange(
+                reduceMotion: reduceMotion
+            ) else {
+                isHovered = hovering
+                return
+            }
+            withAnimation(animation) { isHovered = hovering }
+        }
+        // Right-click reaches the same action without depending on hover, which a
+        // keyboard or a trackpad in flight never produces.
+        .contextMenu {
+            Button(role: .destructive, action: onRemove) {
+                Label(removeTitle, systemImage: "minus.circle")
+            }
         }
         .accessibilityLabel(id.localizedName)
         .accessibilityValue(accessibilityValue(sample: sample, state: state, facts: facts))
-        .accessibilityHint(
-            isEditing
-                ? String(
-                    localized: "dashboard.card.remove.hint",
-                    defaultValue: "Takes this card off the dashboard"
-                )
-                : String(
-                    localized: "dashboard.card.hint",
-                    defaultValue: "Shows details"
-                )
-        )
+        .accessibilityHint(String(
+            localized: "dashboard.card.hint",
+            defaultValue: "Shows details"
+        ))
     }
 
-    /// The editing affordance. It is drawn, not tappable: the whole card is the target,
-    /// so there is no small control to hit and no second thing to describe to
-    /// VoiceOver — the card's own hint already says what a click will do.
-    private var removeBadge: some View {
-        Image(systemName: "minus.circle.fill")
-            .font(.callout)
-            .symbolRenderingMode(.palette)
-            .foregroundStyle(.white, .red)
-            .padding(ExperienceSpacing.tiny)
-            .accessibilityHidden(true)
+    /// A real button, not a drawn badge, with a hit target big enough to aim at.
+    ///
+    /// It appears on hover so the grid stays a grid of readings, and it is a control in
+    /// its own right rather than a decoration over one: an overlay drawn on top of the
+    /// card's own button swallows the clicks aimed at it, which is exactly the shape
+    /// that made the first attempt at this almost unclickable.
+    private var removeButton: some View {
+        Button(action: onRemove) {
+            Image(systemName: "minus.circle.fill")
+                .font(.callout)
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(
+                    Color.white,
+                    Color(nsColor: .systemRed)
+                )
+                // A 22-point target inside the card's corner, so the click lands
+                // wherever in it the pointer happens to be.
+                .frame(width: 22, height: 22)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(removeTitle)
+        .accessibilityLabel(removeTitle)
+        .opacity(isHovered ? 1 : 0)
+        // Hidden means unreachable, so it leaves the layout entirely when not shown.
+        .allowsHitTesting(isHovered)
+    }
+
+    private var removeTitle: String {
+        String(
+            localized: "dashboard.card.remove",
+            defaultValue: "Remove from Dashboard"
+        )
     }
 
     private func cardFacts(for sample: MetricSample) -> DashboardCardFacts {
@@ -832,7 +803,7 @@ private struct DashboardHealthBanner: View {
     @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        let conditions = model.compactHealthConditions
+        let conditions = model.healthConditions
         if let worst = conditions.first {
             let tint = worst.severity.dashboardTint
             let shape = RoundedRectangle(

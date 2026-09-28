@@ -70,57 +70,63 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   `0%` / `0`. Do not offer a component whose data this Mac cannot report.
 - Components are picked by clicking a live preview chip, not from a select box — the
   user chooses what they can see.
-- **Two styles, each with its own choices.** `MenuBarStyle.items` (one item per component,
-  the default for new installs and upgrades) and `.singleIcon` (one logo item that opens
-  the dashboard popover). The single icon keeps its cards in `dashboardModules` and
-  **never edits `enabledComponents`**, so switching back restores the exact layout. The
-  persisted raw values never change.
-- `enabledModules` and `setEnabled(_:for:)` are style-aware: they mean the *watched* set
-  (`MenuBarStyle.watchedModules`) — modules with an item, or with a dashboard card under the
-  single icon. Sampling, widgets, summaries, onboarding, and recovery actions go through
-  them, never through `enabledComponents` directly.
-- **The logo item is fixed-width, and it is also the health item.** `MectricsStatusItem`
-  has a fixed, even length, so its even-sided template image sits on whole pixels at 1x.
-  A badge **never changes that size**: a mark that grew when something went wrong would
-  move every item after it. The accessibility label is assigned once; the image, tint,
-  value, and tooltip change only on a severity transition, and an update repeating the
-  state already shown is dropped before it reaches AppKit. The mark stays a template, so
-  it follows light, dark, and tinted menu bars by itself.
+- **Placement is per module, not one style for the whole menu bar.** Each module takes
+  its own items (`enabledComponents`), or a card in the Mectrics item's dashboard
+  (`groupedModules`), or neither — `MenuBarPlacement`. Someone who wants CPU in view every
+  second and Disk only when asked can have exactly that, which a single global mode could
+  not express. The two sets stay the source of truth rather than a third stored placement
+  that could disagree with them, and the persisted raw values never change.
+- **Placement is exclusive, and moving a module keeps its components.** A module is in one
+  place, so "where do I see Disk?" has one answer. Grouping it leaves `enabledComponents`
+  alone, so moving it back restores the items it was showing instead of resetting it.
+- `enabledModules` and `setEnabled(_:for:)` mean the *watched* set
+  (`MenuBarPlacement.watchedModules`) — every module placed anywhere. Sampling, widgets,
+  summaries, onboarding, and recovery actions go through them, never through
+  `enabledComponents` directly.
+- **The Mectrics item is fixed-width, and it is also the health item.**
+  `MectricsStatusItem` has a fixed, even length, so its even-sided image sits on whole
+  pixels at 1x. A badge **never changes that size**: a mark that grew when something went
+  wrong would move every item after it. The accessibility label is assigned once; the
+  image, value, and tooltip change only on a severity transition or a theme change, and an
+  update repeating what is already shown is dropped before it reaches AppKit.
 - **Health is a shape, not a colour, and only the badge is tinted.** The badge is the same
-  symbol the Attention Log and Compact Health use, punched out of the M so the two read as
-  two marks; the tint only reinforces it. Two rules follow, both learned the hard way.
-  **Never paint the whole mark** the severity colour: a template M is drawn near-white on
-  a dark menu bar, so an orange one reads as a logo going out at the moment it has
-  something to say. The M keeps the menu bar's label colour. And a badged mark is drawn
-  for **one appearance**, so the appearance belongs in its cache key and in the item's
-  render inputs, and *every* colour it uses — the tint included, because
-  `secondaryLabelColor` is one — is resolved inside
-  `appearance.performAsCurrentDrawingAppearance`.
+  symbol the Attention Log uses, punched out of the M so the two read as two marks. Two
+  rules follow, both learned the hard way. **Never paint the whole mark** the severity
+  colour: a template M is drawn near-white on a dark menu bar, so an orange one reads as a
+  logo going out at the moment it has something to say. And a badged mark is drawn for
+  **one appearance**, so the appearance belongs in its cache key and in the item's render
+  inputs, and *every* colour it uses — the tint included, because `secondaryLabelColor` is
+  one — is resolved inside `appearance.performAsCurrentDrawingAppearance`.
 
 ## 4. Surfaces and Settings
 
 - **The menu bar is the only live surface.** The always-on-top floating panel and its
-  global hotkey were removed; the supported overviews live in the menu bar — the optional
-  **Compact Health** item, and the single icon's dashboard. The dashboard is a transient
-  popover in the shared `NSPopover`, on screen only from a click until the next click
-  elsewhere. Do not reintroduce a second always-visible rendering surface.
+  global hotkey were removed; the supported overview lives in the menu bar — the Mectrics
+  item's dashboard. It is a transient popover in the shared `NSPopover`, on screen only
+  from a click until the next click elsewhere. Do not reintroduce a second always-visible
+  rendering surface.
 - **A condition that stops being watched must be announced, not just forgotten.** A rule
   switched off, or a signal whose reading goes away, ends its condition — and every surface
   showing it learns that only from an `onConditionUpdate`. A monitor that resets its own
   state without emitting leaves the condition on the menu bar, in the dashboard's banner,
   and as an Attention Log event that never closes. The transition is `.recovered`: to every
   consumer it means this condition is no longer active, which is exactly what happened.
-- **One health indicator per style, never two.** With separate items it is the optional
-  **Compact Health** item. Under the single icon the logo carries the state itself and
-  there is no Compact Health item at all: the dashboard already leads with the condition,
-  so a second icon beside it would put the same thing in the menu bar twice — the
-  duplication that retired the floating panel. `compactHealthEnabled` is kept rather than
-  cleared when the style changes, so switching back restores the menu bar the user had.
+- **One health indicator, and it is the Mectrics item.** The separate Compact Health item
+  is gone. It read the same `healthConditions` and showed the same worst condition as the
+  dashboard's banner, so it was two icons answering one question — the duplication that
+  retired the floating panel. The state now rides on the Mectrics icon as a badge. The
+  switch that used to add that item now decides whether the Mectrics icon stays in the
+  menu bar with nothing grouped into it, and a Mac that had Compact Health on keeps an
+  item in the same slot without being asked.
 - **Removing is on the surface; adding is in Settings.** The dashboard can take its own
   cards off, because that is the common errand and the card is right there. It never
   offers the modules it is *not* showing — a popover that did would become the pane it
   links to, and the pane is where a module's cost is stated. This is the one deliberate
   exception to "Settings holds configuration": it edits a set the surface already shows.
+  The control is a **real button revealed on hover, plus a context menu**, never a drawn
+  badge over the card's own button: an overlay swallows the clicks aimed at it, which is
+  what made the first attempt almost unclickable. And there is no edit *mode* — a mode to
+  enter before a one-click errand is worse than the errand.
 - The bundled CLI is a headless **automation interface**, not a second live dashboard. It
   reuses the app's saved rules, offers event streaming and one-shot checks, and keeps
   standard output pipe-safe. `check` and alert streaming sample only the metrics they need;
@@ -221,10 +227,11 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   tears down and re-creates every `NSStatusItem`, which means new windows and new
   structural regions in the window server. Component availability therefore only grows
   within a session: a sensor that reads out of range for one cycle is a failed read, not
-  hardware that vanished, and the item already renders a dash for a missing value. Under
-  the single icon no component change touches the list (`MenuBarStyle.itemKeys` is
-  empty), and a dashboard module turned on or off calls `onWatchedModulesChanged`, which
-  republishes widgets and updates Energy Guard — never `onModulesChanged`.
+  hardware that vanished, and the item already renders a dash for a missing value. The
+  Mectrics item is **one entry in that list however many cards it holds**, so grouping or
+  ungrouping a module calls `onWatchedModulesChanged` — republish widgets, update Energy
+  Guard — and not `onModulesChanged`. Only the first card and the last one change the
+  list, because they create and remove the item itself.
 - **Every visibility report is balanced and batched.** A popover reports its modules
   visible as one set and hidden as the same set (`onDetailVisibilityChanged`,
   `AppModel.setVisibleDetailModules`), so opening the dashboard is one forced refresh, not
@@ -264,8 +271,7 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
 4. Add menu-bar text in `MenuBarText` (+ a stable template in `MetricStatusItem`).
 5. Add popover rows in `DetailPopoverView` (localized labels), the primary value in
    `DashboardFormat.primaryValue(for:sample:)` (shared by the detail and the dashboard),
-   and a dashboard card in `DashboardPopoverView`. A `.heavy` provider stays out of
-   `MenuBarStyle.defaultDashboardModules`.
+   and a dashboard card in `DashboardPopoverView`.
 6. Add a sanity test in `MetricsKitTests`.
 
 ## 7. Build / test / run

@@ -41,61 +41,47 @@ final class AppModel {
         didSet {
             persistEnabledComponents()
             resetFailuresForNewlyWatchedModules(
-                previouslyWatched: MenuBarStyle.watchedModules(
-                    style: menuBarStyle,
+                previouslyWatched: MenuBarPlacement.watchedModules(
                     available: availableModules,
                     enabledComponents: oldValue,
-                    dashboardModules: dashboardModules
+                    groupedModules: groupedModules
                 )
             )
             refreshActiveMetrics()
-            // Under the single icon a component edit changes no status item.
-            if menuBarStyle == .items && enabledComponents != oldValue {
-                onModulesChanged?()
-            }
+            if enabledComponents != oldValue { onModulesChanged?() }
         }
     }
 
-    /// Separate items per component, or one logo item that opens the dashboard.
-    var menuBarStyle: MenuBarStyle {
-        didSet {
-            defaults.set(menuBarStyle.rawValue, forKey: Self.menuBarStyleKey)
-            guard menuBarStyle != oldValue else { return }
-            resetFailuresForNewlyWatchedModules(
-                previouslyWatched: MenuBarStyle.watchedModules(
-                    style: oldValue,
-                    available: availableModules,
-                    enabledComponents: enabledComponents,
-                    dashboardModules: dashboardModules
-                )
-            )
-            refreshActiveMetrics()
-            // The status item list changes, so this is a genuine rebuild.
-            onModulesChanged?()
-        }
-    }
-
-    /// Modules with a card in the dashboard popover (single-icon style). Kept apart
-    /// from `enabledComponents` so neither style's choices overwrite the other's.
-    var dashboardModules: Set<MetricID> {
+    /// Modules shown as a card in the Mectrics item's dashboard rather than as items of
+    /// their own. Kept apart from `enabledComponents` so a module moving between the two
+    /// never destroys the components it had.
+    var groupedModules: Set<MetricID> {
         didSet {
             defaults.set(
-                dashboardModules.map(\.rawValue).sorted(),
-                forKey: Self.dashboardModulesKey
+                groupedModules.map(\.rawValue).sorted(),
+                forKey: Self.groupedModulesKey
             )
-            guard dashboardModules != oldValue else { return }
+            guard groupedModules != oldValue else { return }
+            let hadItem = Self.showsMectricsItem(
+                grouped: oldValue,
+                enabledForHealth: mectricsItemEnabled
+            )
             resetFailuresForNewlyWatchedModules(
-                previouslyWatched: MenuBarStyle.watchedModules(
-                    style: menuBarStyle,
+                previouslyWatched: MenuBarPlacement.watchedModules(
                     available: availableModules,
                     enabledComponents: enabledComponents,
-                    dashboardModules: oldValue
+                    groupedModules: oldValue
                 )
             )
             refreshActiveMetrics()
-            // The watched set changed but no status item did, so the menu bar is left
-            // alone — it is rebuilt only when its list of items changes.
-            if menuBarStyle == .singleIcon { onWatchedModulesChanged?() }
+            // Adding the first card creates the Mectrics item, and taking the last one
+            // away can remove it — those are the only card changes the menu bar has to
+            // be rebuilt for. Otherwise the watched set changed and no status item did.
+            if hadItem == showsMectricsItem {
+                onWatchedModulesChanged?()
+            } else {
+                onModulesChanged?()
+            }
         }
     }
 
@@ -103,11 +89,10 @@ final class AppModel {
     /// a card in the dashboard under the single icon. Sampling, widgets, summaries, and
     /// the popovers all scope to this.
     var enabledModules: Set<MetricID> {
-        MenuBarStyle.watchedModules(
-            style: menuBarStyle,
+        MenuBarPlacement.watchedModules(
             available: availableModules,
             enabledComponents: enabledComponents,
-            dashboardModules: dashboardModules
+            groupedModules: groupedModules
         )
     }
 
@@ -124,11 +109,15 @@ final class AppModel {
     /// Menu bar items in display order: module order, then the component order
     /// defined by `MenuBarComponent.available(for:)`.
     var orderedEnabledItems: [(module: MetricID, component: MenuBarComponent)] {
-        availableModules.flatMap { id in
-            availableComponents(for: id)
-                .filter { enabledComponents[id]?.contains($0) ?? false }
-                .map { (id, $0) }
-        }
+        availableModules
+            // A grouped module keeps its components for when it comes back, but it is
+            // showing a card right now, not items.
+            .filter { !groupedModules.contains($0) }
+            .flatMap { id in
+                availableComponents(for: id)
+                    .filter { enabledComponents[id]?.contains($0) ?? false }
+                    .map { (id, $0) }
+            }
     }
 
     /// Called when the menu bar's list of status items changes, so it can be rebuilt
@@ -191,22 +180,39 @@ final class AppModel {
 
     /// Optional one-item health summary. Existing metric items and their layout are
     /// preserved when this is toggled.
-    /// Whether a separate Compact Health item stands in the menu bar.
+    /// Keep the Mectrics item in the menu bar even with no module grouped into it, for
+    /// its health badge alone. Grouping a module shows the item whatever this says.
     ///
-    /// Only the separate-items style has one. Under the single icon the logo carries the
-    /// health state itself, so this choice adds no item there — but it is kept rather
-    /// than cleared, so switching back restores the menu bar the user last had.
-    var compactHealthEnabled: Bool {
+    /// This is what the Compact Health switch became. That item watched the same
+    /// conditions and showed the same worst one as the dashboard's banner, so it was two
+    /// icons answering one question; the answer now rides on the Mectrics icon, and this
+    /// switch decides whether that icon is there when nothing else calls for it.
+    var mectricsItemEnabled: Bool {
         didSet {
             defaults.set(
-                compactHealthEnabled,
-                forKey: Self.compactHealthEnabledKey
+                mectricsItemEnabled,
+                forKey: Self.mectricsItemEnabledKey
             )
-            guard compactHealthEnabled != oldValue else { return }
-            // Under the single icon no status item depends on this, and the menu bar is
-            // rebuilt only when its list of items changes.
-            if menuBarStyle == .items { onModulesChanged?() }
+            guard mectricsItemEnabled != oldValue else { return }
+            // Only matters when no card is already keeping the item on screen.
+            if groupedModules.isEmpty { onModulesChanged?() }
         }
+    }
+
+    /// Whether the Mectrics item is in the menu bar: because a module is grouped into
+    /// it, or because it was asked for on its own.
+    var showsMectricsItem: Bool {
+        Self.showsMectricsItem(
+            grouped: groupedModules,
+            enabledForHealth: mectricsItemEnabled
+        )
+    }
+
+    private static func showsMectricsItem(
+        grouped: Set<MetricID>,
+        enabledForHealth: Bool
+    ) -> Bool {
+        enabledForHealth || !grouped.isEmpty
     }
 
     /// Whether Mectrics looks for a new version on its own.
@@ -314,21 +320,40 @@ final class AppModel {
         enabledComponents[id] = set
     }
 
-    func isDashboardModuleEnabled(_ id: MetricID) -> Bool {
-        dashboardModules.contains(id)
+    func placement(of id: MetricID) -> MenuBarPlacement {
+        MenuBarPlacement.placement(
+            of: id,
+            enabledComponents: enabledComponents,
+            groupedModules: groupedModules
+        )
     }
 
-    func toggleDashboardModule(_ id: MetricID) {
-        if dashboardModules.contains(id) {
-            dashboardModules.remove(id)
-        } else if availableModules.contains(id) {
-            dashboardModules.insert(id)
+    /// Moves a module between its own items, the dashboard, and nowhere.
+    ///
+    /// Placement is exclusive so "where do I see Disk?" has one answer. Moving a module
+    /// to the dashboard keeps the components it had, so moving it back restores the
+    /// items it was showing rather than resetting it to a default.
+    func setPlacement(_ placement: MenuBarPlacement, for id: MetricID) {
+        guard availableModules.contains(id), placement != self.placement(of: id) else {
+            return
+        }
+        switch placement {
+        case .grouped:
+            groupedModules.insert(id)
+        case .ownItems:
+            groupedModules.remove(id)
+            if (enabledComponents[id] ?? []).isEmpty {
+                enabledComponents[id] = [.default(for: id)]
+            }
+        case .off:
+            groupedModules.remove(id)
+            enabledComponents[id] = []
         }
     }
 
     /// The dashboard's modules in card order (the menu bar's module order).
     var orderedDashboardModules: [MetricID] {
-        availableModules.filter { dashboardModules.contains($0) }
+        availableModules.filter { groupedModules.contains($0) }
     }
 
     /// Component choices worth offering for a module. Battery health and cycle count
@@ -410,7 +435,10 @@ final class AppModel {
 
     /// Identity of every metric status item the menu bar shows, in display order.
     private var menuBarItemKeys: [String] {
-        MenuBarStyle.itemKeys(style: menuBarStyle, orderedItems: orderedEnabledItems)
+        MenuBarPlacement.itemKeys(
+            orderedItems: orderedEnabledItems,
+            showsMectricsItem: showsMectricsItem
+        )
     }
 
     /// Temperature belonging to a hardware-domain module, if the SMC exposes a
@@ -462,9 +490,10 @@ final class AppModel {
     private static let currentOnboardingVersion = 2
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
-    private static let compactHealthEnabledKey = "compactHealthEnabled"
-    private static let menuBarStyleKey = "menuBarStyle"
-    private static let dashboardModulesKey = "dashboardModules"
+    private static let mectricsItemEnabledKey = "mectricsItemEnabled"
+    /// Read only to migrate someone who had the Compact Health item switched on.
+    private static let legacyCompactHealthEnabledKey = "compactHealthEnabled"
+    private static let groupedModulesKey = "groupedModules"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
     private static let answeredUpdateChecksKey = "hasAnsweredAutomaticUpdateChecks"
     private static let alertsKey = AlertConfigurationStorage.thresholdRulesKey
@@ -493,9 +522,11 @@ final class AppModel {
         self.accentChoice = AccentChoice(rawValue: defaults.string(forKey: Self.accentKey) ?? "") ?? .pink
         // Icons default to on; only an explicit user choice turns them off.
         self.showMenuBarIcons = defaults.object(forKey: Self.menuBarIconsKey) as? Bool ?? true
-        self.compactHealthEnabled = defaults.bool(
-            forKey: Self.compactHealthEnabledKey
-        )
+        // The Compact Health item became the Mectrics item, which does strictly more,
+        // so someone who had it keeps an item in the same slot without being asked.
+        self.mectricsItemEnabled = defaults.object(
+            forKey: Self.mectricsItemEnabledKey
+        ) as? Bool ?? defaults.bool(forKey: Self.legacyCompactHealthEnabledKey)
         self.adaptMonitoringToEnergyState =
             defaults.object(forKey: Self.adaptMonitoringKey) as? Bool ?? true
         self.automaticUpdateChecks = defaults.bool(
@@ -508,13 +539,10 @@ final class AppModel {
         self.systemAlertRules = Self.loadSystemAlertRules(from: defaults)
         self.enabledComponents = Self.loadEnabledComponents(
             from: defaults, available: available.filter { $0 != .sensors })
-        // Separate items stay the default for new installs and upgrades alike, so
-        // nobody's menu bar changes on update.
-        self.menuBarStyle = MenuBarStyle(
-            rawValue: defaults.string(forKey: Self.menuBarStyleKey) ?? ""
-        ) ?? .items
-        self.dashboardModules = MenuBarStyle.dashboardModules(
-            stored: defaults.array(forKey: Self.dashboardModulesKey) as? [String],
+        // Nothing is grouped unless it was asked for, so an existing menu bar is
+        // exactly as it was: every module keeps the items it had.
+        self.groupedModules = MenuBarPlacement.groupedModules(
+            stored: defaults.array(forKey: Self.groupedModulesKey) as? [String],
             available: available.filter { $0 != .sensors }
         )
         refreshComponentOptions()
@@ -533,20 +561,10 @@ final class AppModel {
     /// removes all of its components; under the single icon it adds the module to the
     /// dashboard or takes it out.
     func setEnabled(_ enabled: Bool, for id: MetricID) {
-        switch menuBarStyle {
-        case .singleIcon:
-            if enabled != dashboardModules.contains(id) {
-                toggleDashboardModule(id)
-            }
-        case .items:
-            if enabled {
-                if (enabledComponents[id] ?? []).isEmpty {
-                    enabledComponents[id] = [.default(for: id)]
-                }
-            } else {
-                enabledComponents[id] = []
-            }
-        }
+        guard enabled != (placement(of: id) != .off) else { return }
+        // Turning a module back on restores where it was, which for a grouped module is
+        // its card; otherwise it takes its own item.
+        setPlacement(enabled ? .ownItems : .off, for: id)
     }
 
     /// Normalized history for sparklines.
@@ -629,13 +647,15 @@ final class AppModel {
         // module needs no temperature of its own either: the CPU temperature rule asks
         // for `.sensors` directly, and thermal pressure comes from ProcessInfo, not the
         // SMC.
-        let showsTemperature = menuBarStyle == .items
-            && [MetricID.cpu, .memory, .gpu].contains { id in
-                enabledComponents[id]?.contains(.temperature) ?? false
-            }
+        let showsTemperature = [MetricID.cpu, .memory, .gpu].contains { id in
+            // A grouped module's components are not on screen; its card is, and a card
+            // asks for its temperature by being visible, not by existing.
+            placement(of: id) == .ownItems
+                && (enabledComponents[id]?.contains(.temperature) ?? false)
+        }
         if showsTemperature
             || !visibleDetailModules.isDisjoint(with: [.cpu, .memory, .gpu])
-            || (builderPreviewActive && menuBarStyle == .items) {
+            || builderPreviewActive {
             active.insert(.sensors)
         }
         for (id, rule) in alertRules where rule.enabled {
@@ -760,7 +780,7 @@ final class AppModel {
         SystemConditionSource.readings(latest: latest)
     }
 
-    var compactHealthConditions: [ActiveAlertCondition] {
+    var healthConditions: [ActiveAlertCondition] {
         activeAlertConditions.values
             .filter { $0.destinations.contains(.compactHealth) }
             .sorted {
@@ -771,7 +791,7 @@ final class AppModel {
             }
     }
 
-    var compactHealthMetricIDs: Set<MetricID> {
+    var healthMetricIDs: Set<MetricID> {
         var ids = Set(alertRules.compactMap { id, rule in
             rule.enabled && rule.destinations.contains(.compactHealth)
                 ? id
@@ -784,10 +804,10 @@ final class AppModel {
         return ids
     }
 
-    var compactHealthState: CompactHealthState {
-        CompactHealthState.resolve(
-            conditions: compactHealthConditions,
-            configuredMetricStates: compactHealthMetricIDs.map {
+    var healthState: HealthState {
+        HealthState.resolve(
+            conditions: healthConditions,
+            configuredMetricStates: healthMetricIDs.map {
                 metricState(for: $0, isEnabled: true)
             }
         )

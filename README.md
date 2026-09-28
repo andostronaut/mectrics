@@ -32,11 +32,10 @@ live in your menu bar — readable at a glance, and the bar never jumps around.<
 **mectrics** is a native macOS menu bar system monitor. Each module you enable draws a
 readable value — with a live sparkline where a trend actually tells you something — and
 stays out of the way otherwise. A click opens a detail popover with the numbers behind it.
-An optional **Compact Health** item collapses the whole machine into a single indicator
-that speaks up only when something needs attention. If you would rather keep the menu bar
-quiet, the **Compact** style puts a single icon in place of every item: one Mectrics logo
-that opens your readings as a dashboard of cards, and that takes on a badge itself when
-something needs attention.
+You choose that per module: CPU can have its own item, always in view, while Disk and
+Battery are grouped behind one Mectrics icon that opens them as a dashboard of cards. That
+icon is also the health indicator — it takes on a badge when something needs attention,
+and the dashboard opens with what is wrong.
 
 It is built around three commitments:
 
@@ -49,9 +48,9 @@ It is built around three commitments:
 Those numbers come from half-hour runs of the shipping build, not from one glance at
 Activity Monitor, and they are checked before a release rather than assumed. What you see
 will differ with your Mac, how many items you put in the menu bar, and whether you are on
-battery — more items means more work, because each one redraws every second. The single
-icon is redrawn only when its health badge changes, which is not something that happens on
-a timer.
+battery — more items means more work, because each one redraws every second. A grouped
+module costs nothing per second at all: the Mectrics icon is redrawn only when its health
+badge changes, which is not something that happens on a timer.
 
 The project holds itself to deliberately tight internal budgets — 60 MB of memory and 3% of
 a core — and publishes where it stands against them rather than only the flattering half.
@@ -110,14 +109,13 @@ throughput for Disk, and so on.
 
 ## Beyond the numbers
 
-- **Compact Health** — one status item that summarizes the whole machine and surfaces only
-  what is off, including the two conditions macOS reports itself.
-- **Compact menu bar** — one Mectrics logo in the menu bar instead of an item per reading. A
-  click opens a dashboard of cards — CPU, Memory, Battery, Network, and Disk unless you
-  choose others, plus your macOS version and uptime — and a click on a card opens its full
-  detail. The logo is the health indicator too, so one icon really means one icon. Take a
-  card off from the dashboard itself; add one back in Settings. Switch back and your
-  separate items return exactly as you left them.
+- **Grouped readings** — put any module behind one Mectrics icon instead of giving it an
+  item of its own. A click opens them as a dashboard of cards, plus your macOS version and
+  uptime, and a click on a card opens its full detail. The icon is the health indicator
+  too — it badges when something needs attention and surfaces what is off, including the
+  two conditions macOS reports itself. Take a card off from the dashboard itself; add one
+  back in Settings. Move a module back to the menu bar and its items return exactly as you
+  left them.
 - **Alert rules** — sustained notifications with a live preview and test delivery, so you
   know what a rule will look like before it fires at 3am. Rules watch either a number you
   pick or a state macOS reports: your Mac slowing its CPU and GPU down to cool off, and
@@ -126,8 +124,8 @@ throughput for Disk, and so on.
 - **Attention Log** — a local, exportable record of what tripped and when.
 - **Energy Guard** — sampling that steps down under Low Power Mode and thermal pressure.
 - **Menu bar builder** — a visual layout editor with presets, where you toggle components
-  by clicking their live preview instead of guessing from a list, or pick the dashboard's
-  cards when you use the Compact style.
+  by clicking their live preview instead of guessing from a list, and choose whether each
+  module takes the menu bar or the dashboard.
 - **Widgets** — small / medium / large WidgetKit overviews for Notification Center.
 - **Diagnostics** — a local-only system summary you can copy or export as plain text.
 - **Headless CLI** — a read-only automation interface for alert events and one-shot health
@@ -135,8 +133,8 @@ throughput for Disk, and so on.
 - **Three-step onboarding**, accent themes, and launch at login.
 
 <div align="center">
-  <img src="docs/assets/compact-health.png" alt="The Compact Health popover reading All systems normal, with CPU, Memory, Network and Disk summarized in one list" width="620">
-  <p><sub><b>Compact Health</b> — the whole machine in one item, quiet until it is not</sub></p>
+  <img src="docs/assets/compact-health.png" alt="The health popover reading All systems normal, with CPU, Memory, Network and Disk summarized in one list" width="620">
+  <p><sub><b>Health</b> — the whole machine in one item, quiet until it is not</sub></p>
 </div>
 
 <table>

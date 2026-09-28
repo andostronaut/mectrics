@@ -29,7 +29,7 @@ final class MectricsStatusItem: NSObject {
     private var lastRender: RenderInputs?
 
     private struct RenderInputs: Equatable {
-        let state: CompactHealthState
+        let state: HealthState
         let appearanceName: NSAppearance.Name
     }
 
@@ -60,7 +60,7 @@ final class MectricsStatusItem: NSObject {
     /// with any colour vision. Only the badge takes the severity colour — the M keeps the
     /// menu bar's own label colour, because a solid mark painted orange on a dark menu
     /// bar reads as dimmer than the white one it replaced, not as louder.
-    func update(_ state: CompactHealthState) {
+    func update(_ state: HealthState) {
         guard let button = item.button else { return }
         let appearance = button.effectiveAppearance
         let inputs = RenderInputs(state: state, appearanceName: appearance.name)

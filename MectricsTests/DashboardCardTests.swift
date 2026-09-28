@@ -34,7 +34,7 @@ final class DashboardCardTests: XCTestCase {
             [[.module(.cpu), .module(.memory)], [.device]]
         )
         XCTAssertEqual(
-            DashboardLayout.rows(for: MenuBarStyle.defaultDashboardModules),
+            DashboardLayout.rows(for: [.cpu, .memory, .battery, .network, .disk]),
             [
                 [.module(.cpu), .module(.memory)],
                 [.module(.battery), .module(.network)],

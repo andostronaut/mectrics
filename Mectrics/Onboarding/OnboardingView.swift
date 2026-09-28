@@ -292,33 +292,17 @@ struct OnboardingView: View {
         model.availableModules.filter { !Self.recommendedIDs.contains($0) }
     }
 
-    /// The module switches edit whatever the menu bar style shows: menu bar items, or
-    /// the dashboard's cards under the single icon (onboarding can be reopened later).
+    /// Onboarding turns modules on and off; where each one goes is chosen later, in
+    /// the Menu Bar pane, and a module turned on here takes its own item.
     private var modulesSectionTitle: String {
-        switch model.menuBarStyle {
-        case .items:
-            return String(localized: "Menu bar modules")
-        case .singleIcon:
-            return String(
-                localized: "onboarding.modules.dashboard",
-                defaultValue: "Dashboard modules"
-            )
-        }
+        String(localized: "Menu bar modules")
     }
 
     private var recommendedHint: String {
-        switch model.menuBarStyle {
-        case .items:
-            return String(
-                localized: "onboarding.recommended.hint",
-                defaultValue: "Recommended menu bar module"
-            )
-        case .singleIcon:
-            return String(
-                localized: "onboarding.recommended.dashboardHint",
-                defaultValue: "Recommended dashboard module"
-            )
-        }
+        String(
+            localized: "onboarding.recommended.hint",
+            defaultValue: "Recommended menu bar module"
+        )
     }
 
     private func previewValue(for id: MetricID) -> String {
