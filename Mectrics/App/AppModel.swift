@@ -48,7 +48,13 @@ final class AppModel {
                 )
             )
             refreshActiveMetrics()
-            if enabledComponents != oldValue { onModulesChanged?() }
+            // Only when the menu bar's list of items actually changes. A grouped module
+            // shows a card and no items, so editing its components — which taking it off
+            // the dashboard does — changes nothing in the menu bar, and rebuilding for it
+            // tore down every status item and closed the open dashboard with them.
+            if menuBarItemKeys(for: oldValue) != menuBarItemKeys {
+                onModulesChanged?()
+            }
         }
     }
 
@@ -196,6 +202,15 @@ final class AppModel {
             guard mectricsItemEnabled != oldValue else { return }
             // Only matters when no card is already keeping the item on screen.
             if groupedModules.isEmpty { onModulesChanged?() }
+        }
+    }
+
+    /// Whether the dashboard shows the card for the Mac itself — its macOS version and
+    /// uptime. It is a card like any other, so it can be taken off from the dashboard and
+    /// put back from the Mectrics item's row in Settings.
+    var showsDeviceCard: Bool {
+        didSet {
+            defaults.set(showsDeviceCard, forKey: Self.showsDeviceCardKey)
         }
     }
 
@@ -441,6 +456,28 @@ final class AppModel {
         )
     }
 
+    /// The same list for a different set of components, so a `didSet` can ask whether the
+    /// menu bar it is about to rebuild would actually look any different.
+    ///
+    /// Editing components cannot move the Mectrics item, so its presence is passed in
+    /// rather than recomputed: deriving it from the components alone would report a
+    /// change that did not happen.
+    private func menuBarItemKeys(
+        for components: [MetricID: Set<MenuBarComponent>]
+    ) -> [String] {
+        let items = availableModules
+            .filter { !groupedModules.contains($0) }
+            .flatMap { id in
+                availableComponents(for: id)
+                    .filter { components[id]?.contains($0) ?? false }
+                    .map { (module: id, component: $0) }
+            }
+        return MenuBarPlacement.itemKeys(
+            orderedItems: items,
+            showsMectricsItem: showsMectricsItem
+        )
+    }
+
     /// Temperature belonging to a hardware-domain module, if the SMC exposes a
     /// recognized sensor for that domain on this Mac.
     func temperature(for id: MetricID) -> Double? {
@@ -494,6 +531,7 @@ final class AppModel {
     /// Read only to migrate someone who had the Compact Health item switched on.
     private static let legacyCompactHealthEnabledKey = "compactHealthEnabled"
     private static let groupedModulesKey = "groupedModules"
+    private static let showsDeviceCardKey = "showsDeviceCard"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
     private static let answeredUpdateChecksKey = "hasAnsweredAutomaticUpdateChecks"
     private static let alertsKey = AlertConfigurationStorage.thresholdRulesKey
@@ -541,6 +579,10 @@ final class AppModel {
             from: defaults, available: available.filter { $0 != .sensors })
         // Nothing is grouped unless it was asked for, so an existing menu bar is
         // exactly as it was: every module keeps the items it had.
+        // On unless it was turned off, so the dashboard has something to say about the
+        // Mac even before a module is grouped into it.
+        self.showsDeviceCard =
+            defaults.object(forKey: Self.showsDeviceCardKey) as? Bool ?? true
         self.groupedModules = MenuBarPlacement.groupedModules(
             stored: defaults.array(forKey: Self.groupedModulesKey) as? [String],
             available: available.filter { $0 != .sensors }

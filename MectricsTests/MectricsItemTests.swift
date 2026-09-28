@@ -139,6 +139,71 @@ final class MectricsItemTests: XCTestCase {
         )
     }
 
+    // MARK: - The dashboard's own cards
+
+    /// The Mac's card is a card like any other and can be taken off.
+    func testTheDeviceCardCanBeTakenOff() {
+        XCTAssertEqual(
+            DashboardLayout.cards(for: [.cpu], includesDevice: true),
+            [.module(.cpu), .device]
+        )
+        XCTAssertEqual(
+            DashboardLayout.cards(for: [.cpu], includesDevice: false),
+            [.module(.cpu)]
+        )
+    }
+
+    /// With nothing left at all the grid says why it is empty rather than going blank.
+    func testAnEmptyDashboardStillExplainsItself() {
+        XCTAssertEqual(
+            DashboardLayout.cards(for: [], includesDevice: true),
+            [.device, .emptyHint]
+        )
+        XCTAssertEqual(
+            DashboardLayout.cards(for: [], includesDevice: false),
+            [.emptyHint]
+        )
+    }
+
+    /// Taking a card off edits the module's components, and the menu bar must not be
+    /// rebuilt for it: a grouped module contributes no items, so the list is unchanged —
+    /// and a rebuild tears down every status item, taking the open dashboard with it.
+    func testRemovingACardLeavesTheItemListAlone() {
+        let components: [MetricID: Set<MenuBarComponent>] = [
+            .cpu: [.value],
+            // Grouped, and still holding the components it had before it was grouped.
+            .disk: [.value, .ring]
+        ]
+        let before = MenuBarPlacement.itemKeys(
+            orderedItems: orderedItems(components, grouped: [.disk]),
+            showsMectricsItem: true
+        )
+        // Taking Disk off the dashboard clears its components.
+        var after = components
+        after[.disk] = []
+        XCTAssertEqual(
+            before,
+            MenuBarPlacement.itemKeys(
+                orderedItems: orderedItems(after, grouped: []),
+                showsMectricsItem: true
+            ),
+            "Removing a card changed the menu bar's item list"
+        )
+    }
+
+    private func orderedItems(
+        _ components: [MetricID: Set<MenuBarComponent>],
+        grouped: Set<MetricID>
+    ) -> [(module: MetricID, component: MenuBarComponent)] {
+        desktop
+            .filter { !grouped.contains($0) }
+            .flatMap { id in
+                MenuBarComponent.available(for: id)
+                    .filter { components[id]?.contains($0) ?? false }
+                    .map { (module: id, component: $0) }
+            }
+    }
+
     // MARK: - Grouped modules as stored
 
     /// Nothing is grouped unless it was asked for, so an update leaves every existing

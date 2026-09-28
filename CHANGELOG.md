@@ -38,6 +38,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   add and remove them from there. Each module's placement is a pop-up rather than three
   buttons repeated down the page, and the grouped choice is named for where the module
   goes — **Mectrics icon** — instead of the unanswerable *Grouped*.
+- The Mac's own card — macOS version and uptime — can be taken off the dashboard like
+  any other, and put back from the Mectrics icon's row in **Settings → Menu Bar**.
 - Cards can be taken off the dashboard from the dashboard: hover a card for its remove
   button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
   your Mac reports is listed along with what it costs to read.
@@ -50,6 +52,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Taking a card off the dashboard no longer closes the dashboard. Removing it cleared the
+  module's menu bar components, and that asked for the whole menu bar to be rebuilt — which
+  destroys every status item, and the open popover with them. A grouped module has no menu
+  bar items to change, so there was nothing to rebuild.
+- A hovered card no longer draws its remove button on top of the chevron that says a click
+  opens details. The chevron sits at the bottom of the card now, so both can be aimed at.
 - Switching an alert rule off while it was alerting now clears it everywhere. The monitors
   reset themselves but told nobody, and a surface only learns a condition is over from
   being told — so the condition stayed on the menu bar and at the top of the dashboard, and

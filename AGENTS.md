@@ -141,6 +141,9 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   offers the modules it is *not* showing — a popover that did would become the pane it
   links to, and the pane is where a module's cost is stated. This is the one deliberate
   exception to "Settings holds configuration": it edits a set the surface already shows.
+  The Mac's own card is a card like any other here: it can be taken off and put back the
+  same way. One corner, one affordance — the remove control owns the top-trailing corner,
+  so a hovered card shows its "opens details" chevron at the bottom instead.
   The control is a **real button revealed on hover, plus a context menu**, never a drawn
   badge over the card's own button: an overlay swallows the clicks aimed at it, which is
   what made the first attempt almost unclickable. And there is no edit *mode* — a mode to
@@ -259,6 +262,10 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
 - **A closed popover releases its content.** Its window is only ordered out, so a view
   tree kept in it would go on observing the model and running `.task` loops off screen.
   Every opening installs fresh content.
+- **Rebuild on the item list, never on the settings behind it.** `onModulesChanged` is for
+  a change in *which* status items exist. Editing a grouped module's components changes
+  none, so comparing the raw preferences instead of the resolved item list rebuilt the menu
+  bar — and destroyed the open dashboard — every time a card was taken off.
 - **Follow the sampling cycle only if the value can change that often.** Reading `latest`
   ties a view to every cycle, which is right for a reading and wrong for anything coarser:
   the dashboard's uptime reads in minutes, so it is driven by a one-minute `TimelineView`

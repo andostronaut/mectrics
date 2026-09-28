@@ -93,7 +93,10 @@ struct DashboardPopoverView: View {
             verticalSpacing: Self.cardSpacing
         ) {
             ForEach(
-                DashboardLayout.rows(for: model.orderedDashboardModules),
+                DashboardLayout.rows(
+                    for: model.orderedDashboardModules,
+                    includesDevice: model.showsDeviceCard
+                ),
                 id: \.self
             ) { row in
                 // A row with one card leaves the second cell empty.
@@ -117,7 +120,9 @@ struct DashboardPopoverView: View {
                 onRemove: { removeCard(id) }
             ) { select($0) }
         case .device:
-            DashboardDeviceCard(model: model)
+            DashboardDeviceCard(model: model) {
+                removeDeviceCard()
+            }
         case .emptyHint:
             // The dashboard's modules are chosen in the Menu Bar pane, whichever pane
             // Settings last showed.
@@ -172,6 +177,16 @@ struct DashboardPopoverView: View {
     /// Settings, where every module this Mac reports is listed with what it costs. That
     /// asymmetry is deliberate: a popover that also had to offer the modules it is not
     /// showing would become the settings pane it links to.
+    private func removeDeviceCard() {
+        guard let animation = ExperienceMotion.stateChange(
+            reduceMotion: reduceMotion
+        ) else {
+            model.showsDeviceCard = false
+            return
+        }
+        withAnimation(animation) { model.showsDeviceCard = false }
+    }
+
     private func removeCard(_ id: MetricID) {
         guard let animation = ExperienceMotion.stateChange(
             reduceMotion: reduceMotion
@@ -197,14 +212,21 @@ enum DashboardCard: Hashable {
 
 enum DashboardLayout {
     /// The cards in grid order: the chosen modules, then the device.
-    static func cards(for modules: [MetricID]) -> [DashboardCard] {
-        guard !modules.isEmpty else { return [.device, .emptyHint] }
-        return modules.map(DashboardCard.module) + [.device]
+    static func cards(
+        for modules: [MetricID],
+        includesDevice: Bool = true
+    ) -> [DashboardCard] {
+        let device: [DashboardCard] = includesDevice ? [.device] : []
+        guard !modules.isEmpty else { return device + [.emptyHint] }
+        return modules.map(DashboardCard.module) + device
     }
 
     /// The cards in rows of two; an odd count leaves the last row one card short.
-    static func rows(for modules: [MetricID]) -> [[DashboardCard]] {
-        let cards = cards(for: modules)
+    static func rows(
+        for modules: [MetricID],
+        includesDevice: Bool = true
+    ) -> [[DashboardCard]] {
+        let cards = cards(for: modules, includesDevice: includesDevice)
         return stride(from: 0, to: cards.count, by: 2).map {
             Array(cards[$0..<min($0 + 2, cards.count)])
         }
@@ -300,8 +322,6 @@ private struct DashboardModuleCard: View {
     let systemInfo: DashboardSystemInfo
     let onRemove: () -> Void
     let onSelect: (MetricID) -> Void
-    @State private var isHovered = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let sample = model.latest[id]
@@ -328,64 +348,19 @@ private struct DashboardModuleCard: View {
             }
         }
         .buttonStyle(DashboardCardButtonStyle())
-        .overlay(alignment: .topTrailing) { removeButton }
-        .onHover { hovering in
-            guard let animation = ExperienceMotion.stateChange(
-                reduceMotion: reduceMotion
-            ) else {
-                isHovered = hovering
-                return
-            }
-            withAnimation(animation) { isHovered = hovering }
-        }
-        // Right-click reaches the same action without depending on hover, which a
-        // keyboard or a trackpad in flight never produces.
-        .contextMenu {
-            Button(role: .destructive, action: onRemove) {
-                Label(removeTitle, systemImage: "minus.circle")
-            }
-        }
+        .dashboardRemovable(
+            String(
+                localized: "dashboard.card.remove",
+                defaultValue: "Remove from Dashboard"
+            ),
+            onRemove: onRemove
+        )
         .accessibilityLabel(id.localizedName)
         .accessibilityValue(accessibilityValue(sample: sample, state: state, facts: facts))
         .accessibilityHint(String(
             localized: "dashboard.card.hint",
             defaultValue: "Shows details"
         ))
-    }
-
-    /// A real button, not a drawn badge, with a hit target big enough to aim at.
-    ///
-    /// It appears on hover so the grid stays a grid of readings, and it is a control in
-    /// its own right rather than a decoration over one: an overlay drawn on top of the
-    /// card's own button swallows the clicks aimed at it, which is exactly the shape
-    /// that made the first attempt at this almost unclickable.
-    private var removeButton: some View {
-        Button(action: onRemove) {
-            Image(systemName: "minus.circle.fill")
-                .font(.callout)
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(
-                    Color.white,
-                    Color(nsColor: .systemRed)
-                )
-                // A 22-point target inside the card's corner, so the click lands
-                // wherever in it the pointer happens to be.
-                .frame(width: 22, height: 22)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help(removeTitle)
-        .accessibilityLabel(removeTitle)
-        .opacity(isHovered ? 1 : 0)
-        // Hidden means unreachable, so it leaves the layout entirely when not shown.
-        .allowsHitTesting(isHovered)
-    }
-
-    private var removeTitle: String {
-        String(
-            localized: "dashboard.card.remove",
-            defaultValue: "Remove from Dashboard"
-        )
     }
 
     private func cardFacts(for sample: MetricSample) -> DashboardCardFacts {
@@ -708,6 +683,7 @@ private struct DashboardNetworkContent: View {
 /// The Mac itself. Not a button: there is no module detail behind it.
 private struct DashboardDeviceCard: View {
     let model: AppModel
+    let onRemove: () -> Void
 
     private static let version = DashboardFormat.systemVersion(
         ProcessInfo.processInfo.operatingSystemVersion
@@ -743,6 +719,13 @@ private struct DashboardDeviceCard: View {
             }
         }
         .background { DashboardCardBackground() }
+        .dashboardRemovable(
+            String(
+                localized: "dashboard.device.remove",
+                defaultValue: "Remove System Info from Dashboard"
+            ),
+            onRemove: onRemove
+        )
         .accessibilityElement(children: .combine)
     }
 
@@ -899,13 +882,72 @@ private struct DashboardCardLayout<Content: View>: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
-                // Room for the chevron a hovered card shows.
-                .padding(.trailing, ExperienceSpacing.medium)
+                // Room for the remove control a hovered card shows beside it.
+                .padding(.trailing, ExperienceSpacing.large)
             content
         }
         .padding(DashboardPopoverView.padding)
         .frame(width: DashboardPopoverView.cardWidth, alignment: .leading)
         .frame(maxHeight: .infinity, alignment: .top)
+    }
+}
+
+/// The control that takes a card off the dashboard.
+///
+/// Shared by every card so the two can never drift apart, and it is a **real button**,
+/// not a badge drawn over the card: an overlay on top of a card's own button swallows
+/// the clicks aimed at it, which is what made the first attempt nearly unusable. It sits
+/// in the top-trailing corner, which is why a hovered card shows its "opens details"
+/// chevron at the bottom instead — two affordances in one corner is one the pointer
+/// cannot reach. The context menu reaches the same action without hovering at all.
+private struct DashboardRemovable: ViewModifier {
+    let title: String
+    let onRemove: () -> Void
+    @State private var isHovered = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .topTrailing) {
+                Button(action: onRemove) {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.callout)
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color.white, Color(nsColor: .systemRed))
+                        // A 22-point target, so the click lands wherever in the corner
+                        // the pointer happens to be.
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(title)
+                .accessibilityLabel(title)
+                .opacity(isHovered ? 1 : 0)
+                .allowsHitTesting(isHovered)
+            }
+            .onHover { hovering in
+                guard let animation = ExperienceMotion.stateChange(
+                    reduceMotion: reduceMotion
+                ) else {
+                    isHovered = hovering
+                    return
+                }
+                withAnimation(animation) { isHovered = hovering }
+            }
+            .contextMenu {
+                Button(role: .destructive, action: onRemove) {
+                    Label(title, systemImage: "minus.circle")
+                }
+            }
+    }
+}
+
+private extension View {
+    func dashboardRemovable(
+        _ title: String,
+        onRemove: @escaping () -> Void
+    ) -> some View {
+        modifier(DashboardRemovable(title: title, onRemove: onRemove))
     }
 }
 
@@ -946,12 +988,14 @@ private struct DashboardCardButton: View {
             .background {
                 DashboardCardBackground(fillOpacity: fillOpacity)
             }
-            .overlay(alignment: .topTrailing) {
+            // Bottom-trailing, because the card's remove control owns the top-trailing
+            // corner: two affordances in one spot is one the pointer cannot reach.
+            .overlay(alignment: .bottomTrailing) {
                 if isHovered {
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.tertiary)
-                        .padding(.top, DashboardPopoverView.padding + ExperienceSpacing.tiny)
+                        .padding(.bottom, DashboardPopoverView.padding)
                         .padding(.trailing, DashboardPopoverView.padding)
                         .accessibilityHidden(true)
                 }

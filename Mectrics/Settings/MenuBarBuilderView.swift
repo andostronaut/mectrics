@@ -242,6 +242,12 @@ private struct MectricsItemRow: View {
     private var addable: [MetricID] {
         model.availableModules.filter { model.placement(of: $0) != .grouped }
     }
+    /// The Mac's own card is a card like any other, so it is listed and added here too.
+    private var systemInfoTitle: String {
+        String(localized: "builder.mectricsRow.systemInfo", defaultValue: "System info")
+    }
+    private var isEmpty: Bool { grouped.isEmpty && !model.showsDeviceCard }
+    private var hasAnythingToAdd: Bool { !addable.isEmpty || !model.showsDeviceCard }
 
     var body: some View {
         VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
@@ -284,7 +290,7 @@ private struct MectricsItemRow: View {
     @ViewBuilder
     private var contents: some View {
         HStack(spacing: ExperienceSpacing.small) {
-            if grouped.isEmpty {
+            if isEmpty {
                 Text(
                     String(
                         localized: "builder.mectricsRow.empty",
@@ -295,18 +301,32 @@ private struct MectricsItemRow: View {
                 .foregroundStyle(.secondary)
             } else {
                 ForEach(grouped, id: \.self) { id in
-                    GroupedModuleChip(id: id) {
+                    GroupedModuleChip(
+                        title: id.localizedName,
+                        symbol: MetricSymbol.name(for: id)
+                    ) {
                         model.setPlacement(.off, for: id)
+                    }
+                }
+                if model.showsDeviceCard {
+                    GroupedModuleChip(
+                        title: systemInfoTitle,
+                        symbol: "desktopcomputer"
+                    ) {
+                        model.showsDeviceCard = false
                     }
                 }
             }
             Spacer(minLength: 0)
-            if !addable.isEmpty {
+            if hasAnythingToAdd {
                 Menu {
                     ForEach(addable, id: \.self) { id in
                         Button(id.localizedName) {
                             model.setPlacement(.grouped, for: id)
                         }
+                    }
+                    if !model.showsDeviceCard {
+                        Button(systemInfoTitle) { model.showsDeviceCard = true }
                     }
                 } label: {
                     Label(
@@ -332,12 +352,13 @@ private struct MectricsItemRow: View {
 
 /// One reading inside the Mectrics icon, with the control that takes it out.
 private struct GroupedModuleChip: View {
-    let id: MetricID
+    let title: String
+    let symbol: String
     let onRemove: () -> Void
 
     var body: some View {
         HStack(spacing: ExperienceSpacing.xSmall) {
-            Label(id.localizedName, systemImage: MetricSymbol.name(for: id))
+            Label(title, systemImage: symbol)
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
             Button(action: onRemove) {
@@ -352,7 +373,7 @@ private struct GroupedModuleChip: View {
             .accessibilityLabel(
                 String(
                     localized: "builder.mectricsRow.remove",
-                    defaultValue: "Remove \(id.localizedName) from the Mectrics icon"
+                    defaultValue: "Remove \(title) from the Mectrics icon"
                 )
             )
         }
