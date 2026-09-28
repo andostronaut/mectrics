@@ -78,14 +78,16 @@ struct MenuBarBuilderView: View {
         HStack(spacing: ExperienceSpacing.medium) {
             // The menu bar's own order: the Dashboard first, then every module
             // showing items of its own.
-            DashboardItemPreview(model: model)
-                .accessibilityElement()
-                .accessibilityLabel(
-                    String(
-                        localized: "dashboard.statusItem.accessibilityLabel",
-                        defaultValue: "Dashboard"
+            if model.showsDashboardItem {
+                DashboardItemPreview(model: model)
+                    .accessibilityElement()
+                    .accessibilityLabel(
+                        String(
+                            localized: "dashboard.statusItem.accessibilityLabel",
+                            defaultValue: "Dashboard"
+                        )
                     )
-                )
+            }
             ForEach(model.orderedEnabledItems.indices, id: \.self) { index in
                 let entry = model.orderedEnabledItems[index]
                 MenuBarPreviewItem(
@@ -93,6 +95,18 @@ struct MenuBarBuilderView: View {
                     id: entry.module,
                     component: entry.component
                 )
+            }
+            // An empty menu bar is allowed, and recoverable — but only if you know how,
+            // so this says it rather than leaving a blank strip.
+            if !model.showsDashboardItem && model.orderedEnabledItems.isEmpty {
+                Text(
+                    String(
+                        localized: "builder.preview.empty",
+                        defaultValue: "Nothing in the menu bar. Open Mectrics again from Spotlight to come back here."
+                    )
+                )
+                .font(.callout)
+                .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
         }
@@ -188,11 +202,36 @@ private struct DashboardItemRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
             LabeledContent {
-                // No control: this one cannot move. A pop-up that only ever reads
-                // "Menu bar" would be a dimmed thing to click past, so its place is
-                // stated as text instead (AGENTS.md §4).
-                Text(MenuBarPlacement.ownItems.localizedName)
-                    .foregroundStyle(.secondary)
+                // With cards inside there is nothing to decide — they would have
+                // nowhere to be shown — so the place is stated as text and the pop-up
+                // appears once it is empty (AGENTS.md §4: disclose, never dim).
+                if grouped.isEmpty {
+                    Picker(
+                        String(
+                            localized: "builder.placement.label",
+                            defaultValue: "Placement"
+                        ),
+                        selection: Binding(
+                            get: {
+                                model.dashboardItemEnabled
+                                    ? MenuBarPlacement.ownItems
+                                    : .off
+                            },
+                            set: { model.dashboardItemEnabled = $0 == .ownItems }
+                        )
+                    ) {
+                        Text(MenuBarPlacement.ownItems.localizedName)
+                            .tag(MenuBarPlacement.ownItems)
+                        Text(MenuBarPlacement.off.localizedName)
+                            .tag(MenuBarPlacement.off)
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .fixedSize()
+                } else {
+                    Text(MenuBarPlacement.ownItems.localizedName)
+                        .foregroundStyle(.secondary)
+                }
             } label: {
                 HStack(spacing: ExperienceSpacing.small) {
                     DashboardItemPreview(model: model)

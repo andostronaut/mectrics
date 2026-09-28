@@ -108,16 +108,17 @@ final class DashboardItemTests: XCTestCase {
             (.network, .netActivity)
         ]
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items),
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true),
             [
                 MenuBarPlacement.dashboardItemKey,
                 "cpu|value", "cpu|temperature", "network|netActivity"
             ]
         )
-        // The Dashboard is permanent, so the list is never empty.
+        // Emptying the menu bar completely is allowed: it is recoverable by launching
+        // Mectrics again, so the icon is not locked in place.
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: []),
-            [MenuBarPlacement.dashboardItemKey]
+            MenuBarPlacement.itemKeys(orderedItems: [], showsDashboardItem: false),
+            []
         )
     }
 
@@ -126,17 +127,18 @@ final class DashboardItemTests: XCTestCase {
     func testTheDashboardLeadsAndIsOneEntryWhateverItHolds() {
         let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items),
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true),
             [MenuBarPlacement.dashboardItemKey, "cpu|value"]
         )
     }
 
-    /// It cannot be switched off, so the menu bar can never be emptied completely — an
-    /// app with no items left has no way back into its own settings.
-    func testTheMenuBarAlwaysHasTheDashboard() {
-        XCTAssertTrue(
-            MenuBarPlacement.itemKeys(orderedItems: [])
-                .contains(MenuBarPlacement.dashboardItemKey)
+    /// Gaining or losing it is a genuine change in which items exist, so it is the one
+    /// card change that has to rebuild the menu bar.
+    func testTheDashboardAppearingChangesTheItemList() {
+        let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
+        XCTAssertNotEqual(
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: false),
+            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true)
         )
     }
 
@@ -204,6 +206,7 @@ final class DashboardItemTests: XCTestCase {
         ]
         let before = MenuBarPlacement.itemKeys(
             orderedItems: orderedItems(components, grouped: [.disk]),
+            showsDashboardItem: true
         )
         // Taking Disk off the dashboard clears its components.
         var after = components
@@ -212,6 +215,8 @@ final class DashboardItemTests: XCTestCase {
             before,
             MenuBarPlacement.itemKeys(
                 orderedItems: orderedItems(after, grouped: []),
+                // Kept while empty, so taking the last card off leaves the item there.
+                showsDashboardItem: true
             ),
             "Removing a card changed the menu bar's item list"
         )

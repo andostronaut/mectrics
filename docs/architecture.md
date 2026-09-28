@@ -156,13 +156,16 @@ restores the items it was showing instead of resetting it to a default. An upgra
 nothing: a stored `enabledComponents` is read as it always was, and `groupedModules`
 starts empty for anyone who already had a menu bar.
 
-**The Dashboard is always there and cannot be switched off.** The reason is that this app
-has nowhere else to be: no Dock icon, no main window, so a menu bar that could be emptied
-would leave an `LSUIElement` agent invisible and reachable only by launching it again. Its
-health badge is sometimes given as a second reason and should not be: every alert rule
-ships disabled, so on a clean install that badge never fires until someone configures a
-rule. The cost is real — someone who wants CPU alone in their menu bar carries an icon
-they never open — so if this is revisited, revisit it on invisibility, not on health. So `MenuBarPlacement.itemKeys`
+**The Dashboard can be switched off, once it is empty.** With cards inside it there is
+nothing to decide, because they would have nowhere to be shown, so its row in Settings
+states its place as text and offers the pop-up when the last card leaves. It was briefly
+locked in place on the grounds that an `LSUIElement` agent with an empty menu bar is
+invisible — true, but not decisive: launching Mectrics again opens Settings, so the state
+is recoverable, and locking the icon spends the scarce surface on someone who only wants
+CPU there. What the lock was really protecting against is not knowing that, so the
+Settings preview strip says it when the menu bar is empty. The health badge is not a
+reason to keep it either: every alert rule ships disabled, so on a clean install it never
+fires until someone configures one. So `MenuBarPlacement.itemKeys`
 always leads with it, its row in Settings carries no placement control — its place is
 stated as text — and grouping a module can never create or remove a status item.
 

@@ -80,14 +80,14 @@ extension MenuBarPlacement {
     /// Identity of every status item the menu bar shows, in display order, so a rebuild
     /// happens when the list changes and not when a value does.
     ///
-    /// The Dashboard always leads it. It is the app's one permanent item — its health
-    /// badge is the only thing that speaks up unasked, and an app whose whole menu bar
-    /// can be switched off has no way back — so it is one entry here however many cards
-    /// it holds, and grouping a module changes no status item at all.
+    /// The Dashboard leads it when it is there, and it is **one entry however many cards
+    /// it holds** — so grouping a module changes no status item unless it is the first
+    /// card, which brings the item back, or the last, which can take it away.
     static func itemKeys(
-        orderedItems: [(module: MetricID, component: MenuBarComponent)]
+        orderedItems: [(module: MetricID, component: MenuBarComponent)],
+        showsDashboardItem: Bool
     ) -> [String] {
-        [dashboardItemKey]
+        (showsDashboardItem ? [dashboardItemKey] : [])
             + orderedItems.map { "\($0.module.rawValue)|\($0.component.rawValue)" }
     }
 

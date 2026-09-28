@@ -82,14 +82,16 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   second and Disk only when asked can have exactly that, which a single global mode could
   not express. The two sets stay the source of truth rather than a third stored placement
   that could disagree with them, and the persisted raw values never change.
-- **The Dashboard is always in the menu bar and cannot be switched off**, because the app
-  has nowhere else to be: no Dock icon, no window, so an empty menu bar is an invisible
-  app. Not because of the health badge — every alert rule ships disabled, so on a clean
-  install it never fires until a rule is configured. The cost is real: someone who wants
-  CPU alone carries an icon they never open. `MenuBarPlacement.itemKeys` always leads with
-  it, its row in Settings carries no placement control, and grouping a module can never
-  create or remove a status item — only `onWatchedModulesChanged`, never
-  `onModulesChanged`.
+- **The Dashboard can be switched off, but only once it is empty.** With cards inside
+  there is nothing to decide — they would have nowhere to be shown — so its row states its
+  place as text and the pop-up appears when the last card leaves. Empty it first, then
+  turn it off. It is not locked in place: emptying the menu bar completely is recoverable,
+  because launching Mectrics again opens Settings
+  (`applicationShouldHandleReopen`), and locking the icon would spend the scarce surface
+  on someone who only wants CPU there. The preview strip says how to come back, because a
+  blank menu bar that is recoverable only if you know how is not recoverable. Do not
+  justify this item with the health badge: every alert rule ships disabled, so on a clean
+  install it never fires until a rule is configured.
 - **The Dashboard is a row in the modules list, not a switch elsewhere.** It is one
   of the things the menu bar holds, so it reads like the modules beside it: a name, its
   place, and its contents underneath — the readings grouped into it, added and removed

@@ -25,9 +25,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   you decide what deserves more. Give any module an item of its own whenever you want, in
   **Settings → Menu Bar**. An update changes nothing: the menu bar you already have is the
   menu bar you keep.
-- **The Dashboard icon is always there and cannot be switched off.** Its health badge is
-  the only thing in Mectrics that speaks up without being asked, and an app with no menu
-  bar items left would have no way back into its own settings.
+- **The Dashboard icon can be switched off once nothing is grouped into it.** With cards
+  inside there is nothing to decide, so its row shows where it is; empty it and the choice
+  appears. You can end up with an empty menu bar, and that is fine — opening Mectrics
+  again from Spotlight brings Settings back, and the pane says so.
 - A module's last look can no longer be switched off from the chips. Clearing it used to
   drop the module out of the menu bar, so the row collapsed while you were still editing
   it. The pop-up beside the chips is what takes a module out.

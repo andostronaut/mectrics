@@ -68,6 +68,10 @@ final class AppModel {
                 forKey: Self.groupedModulesKey
             )
             guard groupedModules != oldValue else { return }
+            let hadItem = Self.showsDashboardItem(
+                grouped: oldValue,
+                keptWhenEmpty: dashboardItemEnabled
+            )
             resetFailuresForNewlyWatchedModules(
                 previouslyWatched: MenuBarPlacement.watchedModules(
                     available: availableModules,
@@ -76,10 +80,14 @@ final class AppModel {
                 )
             )
             refreshActiveMetrics()
-            // The Dashboard is always in the menu bar, so a card can never create or
-            // remove a status item: the watched set changed and the item list did not,
-            // which is the lighter of the two notifications.
-            onWatchedModulesChanged?()
+            // The first card can bring the item back and the last can take it away, if
+            // it is not being kept while empty. Otherwise the watched set changed and no
+            // status item did, which is the lighter of the two notifications.
+            if hadItem == showsDashboardItem {
+                onWatchedModulesChanged?()
+            } else {
+                onModulesChanged?()
+            }
         }
     }
 
@@ -178,6 +186,38 @@ final class AppModel {
 
     /// Optional one-item health summary. Existing metric items and their layout are
     /// preserved when this is toggled.
+    /// Keep the Dashboard in the menu bar when nothing is grouped into it.
+    ///
+    /// It is not a permanent item. Emptying the menu bar entirely is recoverable —
+    /// launching Mectrics again opens Settings (`applicationShouldHandleReopen`) — so
+    /// locking the icon in place would spend the scarce surface on someone who only
+    /// wants CPU there. With cards inside it there is nothing to decide: they would have
+    /// nowhere to be shown, so it stays.
+    var dashboardItemEnabled: Bool {
+        didSet {
+            defaults.set(dashboardItemEnabled, forKey: Self.dashboardItemEnabledKey)
+            guard dashboardItemEnabled != oldValue else { return }
+            // Only ever changes the menu bar when no card is holding the item there.
+            if groupedModules.isEmpty { onModulesChanged?() }
+        }
+    }
+
+    /// Whether the Dashboard is in the menu bar: because something is grouped into it,
+    /// or because it was asked to stay while empty.
+    var showsDashboardItem: Bool {
+        Self.showsDashboardItem(
+            grouped: groupedModules,
+            keptWhenEmpty: dashboardItemEnabled
+        )
+    }
+
+    private static func showsDashboardItem(
+        grouped: Set<MetricID>,
+        keptWhenEmpty: Bool
+    ) -> Bool {
+        keptWhenEmpty || !grouped.isEmpty
+    }
+
     /// Whether the dashboard shows the card for the Mac itself — its macOS version and
     /// uptime. It is a card like any other, so it can be taken off from the dashboard and
     /// put back from the Dashboard's row in Settings.
@@ -425,7 +465,10 @@ final class AppModel {
 
     /// Identity of every metric status item the menu bar shows, in display order.
     private var menuBarItemKeys: [String] {
-        MenuBarPlacement.itemKeys(orderedItems: orderedEnabledItems)
+        MenuBarPlacement.itemKeys(
+            orderedItems: orderedEnabledItems,
+            showsDashboardItem: showsDashboardItem
+        )
     }
 
     /// The same list for a different set of components, so a `didSet` can ask whether the
@@ -444,7 +487,12 @@ final class AppModel {
                     .filter { components[id]?.contains($0) ?? false }
                     .map { (module: id, component: $0) }
             }
-        return MenuBarPlacement.itemKeys(orderedItems: items)
+        // Editing components cannot move the Dashboard, so its presence is passed
+        // through rather than recomputed from the components alone.
+        return MenuBarPlacement.itemKeys(
+            orderedItems: items,
+            showsDashboardItem: showsDashboardItem
+        )
     }
 
     /// Temperature belonging to a hardware-domain module, if the SMC exposes a
@@ -496,6 +544,7 @@ final class AppModel {
     private static let currentOnboardingVersion = 2
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
+    private static let dashboardItemEnabledKey = "dashboardItemEnabled"
     private static let groupedModulesKey = "groupedModules"
     private static let showsDeviceCardKey = "showsDeviceCard"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
@@ -540,6 +589,10 @@ final class AppModel {
             from: defaults, available: available.filter { $0 != .sensors })
         // Nothing is grouped unless it was asked for, so an existing menu bar is
         // exactly as it was: every module keeps the items it had.
+        // Kept while empty unless it was turned off, so a menu bar never goes silently
+        // blank behind someone who cleared the Dashboard out.
+        self.dashboardItemEnabled =
+            defaults.object(forKey: Self.dashboardItemEnabledKey) as? Bool ?? true
         // On unless it was turned off, so the dashboard has something to say about the
         // Mac even before a module is grouped into it.
         self.showsDeviceCard =

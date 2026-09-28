@@ -142,6 +142,53 @@
         }
       }
     },
+    "builder.preview.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing in the menu bar. Open Mectrics again from Spotlight to come back here."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü çubuğunda hiçbir şey yok. Buraya dönmek için Mectrics’i Spotlight’tan tekrar aç."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В строке меню ничего нет. Чтобы вернуться сюда, снова откройте Mectrics через Spotlight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay nada en la barra de menús. Vuelve aquí abriendo Mectrics otra vez desde Spotlight."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien dans la barre des menus. Rouvrez Mectrics depuis Spotlight pour revenir ici."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não há nada na barra de menus. Abra o Mectrics novamente pelo Spotlight para voltar aqui."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏中没有任何内容。通过聚焦搜索再次打开 Mectrics 即可回到这里。"
+          }
+        }
+      }
+    },
     "dashboard.card.remove": {
       "extractionState": "manual",
       "localizations": {
