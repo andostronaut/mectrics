@@ -23,7 +23,12 @@ struct DashboardPopoverView: View {
     /// cards are glanceable summaries, and the full reading is one click away.
     static let width: CGFloat = 320
     /// Around the grid, and inside every card.
-    static let padding: CGFloat = 10
+    ///
+    /// The design system's own step, which is also what the detail branch of this same
+    /// popover pads itself by — at 10 the grid and the detail disagreed by two points
+    /// across one click, and the cards sat closer to the edge than anything else the app
+    /// puts in a popover.
+    static let padding: CGFloat = ExperienceSpacing.medium
     static let cardSpacing: CGFloat = 8
     /// One of the two columns: the width inside the padding, less the gap, halved.
     static let cardWidth = (width - 2 * padding - cardSpacing) / 2

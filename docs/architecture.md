@@ -194,10 +194,23 @@ active, the logo takes on a badge — the same symbol the Attention Log and Comp
 use — punched out of the M so the two read as two marks, with the severity tint only
 reinforcing a signal the shape already carries. The badged mark is **the same size** as the
 plain one: the item reserves a fixed width, and a logo that grew when something went wrong
-would move every item after it. The accessibility label is assigned once; the image, tint,
+would move every item after it. The accessibility label is assigned once; the image,
 accessibility value, and tooltip change only on a severity transition, and an update that
 repeats the state already shown is dropped before it reaches AppKit. Per-cycle work for
 this item is therefore still none — the badge is not on a timer.
+
+Only the badge takes the severity colour. Painting the whole mark was tried first and is
+worse than doing nothing: a template M is drawn near-white on a dark menu bar, so an orange
+one is *dimmer* than the mark it replaced, and the logo appears to go out exactly when it
+has something to report. A thin symbol gains from colour; a solid letter loses. So the M is
+drawn in the label colour of the menu bar's own appearance and the badge carries the tint
+beside it — which makes the badged mark a two-colour image and therefore not a template.
+That has a cost the plain logo does not pay: it is drawn for one appearance, so the
+appearance is part of its cache key and of `MectricsStatusItem`'s render inputs, and a Mac
+changing theme redraws it on the next cycle. Every colour is resolved inside
+`performAsCurrentDrawingAppearance`, the tint included — `.unavailable` tints with
+`secondaryLabelColor`, and resolving that against the wrong appearance put a light-grey
+badge on a light menu bar.
 
 The status item list under the single icon is the logo, and nothing else, so very little
 can change it. `MenuBarStyle.itemKeys` is empty for this style, which means a

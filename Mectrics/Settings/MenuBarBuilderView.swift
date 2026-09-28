@@ -455,17 +455,27 @@ private struct CompactHealthPreview: View {
 /// on a sampling cycle, so this leaf is not a per-cycle cost.
 private struct MectricsLogoPreview: View {
     let model: AppModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let state = model.compactHealthState
         let isNormal = state == .normal
+        // The mark is drawn for an AppKit appearance, and this pane's is the one the
+        // chip is being shown in.
+        let appearance = NSAppearance(
+            named: colorScheme == .dark ? .darkAqua : .aqua
+        ) ?? NSAppearance.currentDrawing()
         Image(
             nsImage: MectricsGlyph.menuBarImage(
-                badge: isNormal ? nil : state.symbolName
+                badge: isNormal ? nil : state.symbolName,
+                tint: state.tint,
+                appearance: appearance
             )
         )
-        .renderingMode(.template)
-        .foregroundStyle(isNormal ? Color.primary : Color(nsColor: state.tint))
+        // The badged mark carries its own two colours; only the plain template one is
+        // ours to colour.
+        .renderingMode(isNormal ? .template : .original)
+        .foregroundStyle(Color.primary)
         .accessibilityValue(state.localizedName)
     }
 }

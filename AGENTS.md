@@ -86,10 +86,16 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   value, and tooltip change only on a severity transition, and an update repeating the
   state already shown is dropped before it reaches AppKit. The mark stays a template, so
   it follows light, dark, and tinted menu bars by itself.
-- **Health is a shape, not a colour.** The badge is the same symbol the Attention Log and
-  Compact Health use, punched out of the M so the two read as two marks; the tint only
-  reinforces it. A state that could only be seen as a colour is not readable in a tinted
-  menu bar or with any colour vision.
+- **Health is a shape, not a colour, and only the badge is tinted.** The badge is the same
+  symbol the Attention Log and Compact Health use, punched out of the M so the two read as
+  two marks; the tint only reinforces it. Two rules follow, both learned the hard way.
+  **Never paint the whole mark** the severity colour: a template M is drawn near-white on
+  a dark menu bar, so an orange one reads as a logo going out at the moment it has
+  something to say. The M keeps the menu bar's label colour. And a badged mark is drawn
+  for **one appearance**, so the appearance belongs in its cache key and in the item's
+  render inputs, and *every* colour it uses — the tint included, because
+  `secondaryLabelColor` is one — is resolved inside
+  `appearance.performAsCurrentDrawingAppearance`.
 
 ## 4. Surfaces and Settings
 

@@ -365,9 +365,11 @@ final class SingleIconMenuBarTests: XCTestCase {
     func testBadgingTheLogoNeverChangesItsSize() {
         let plain = MectricsGlyph.menuBarImage.size
         for state in CompactHealthState.allCases where state != .normal {
-            let badged = MectricsGlyph.menuBarImage(badge: state.symbolName)
+            let badged = Self.badged(state)
             XCTAssertEqual(badged.size, plain, "\(state.rawValue)")
-            XCTAssertTrue(badged.isTemplate, "\(state.rawValue)")
+            // Two colours, so it is deliberately not a template: AppKit must not
+            // recolour the badge and the M as one silhouette.
+            XCTAssertFalse(badged.isTemplate, "\(state.rawValue)")
         }
     }
 
@@ -376,7 +378,11 @@ final class SingleIconMenuBarTests: XCTestCase {
     @MainActor
     func testNoBadgeIsThePlainSharedLogo() {
         XCTAssertIdentical(
-            MectricsGlyph.menuBarImage(badge: nil),
+            MectricsGlyph.menuBarImage(
+                badge: nil,
+                tint: CompactHealthState.warning.tint,
+                appearance: Self.appearance
+            ),
             MectricsGlyph.menuBarImage
         )
     }
@@ -386,10 +392,9 @@ final class SingleIconMenuBarTests: XCTestCase {
     /// again on every read would undo that.
     @MainActor
     func testBadgedLogosAreBuiltOncePerState() {
-        let symbol = CompactHealthState.critical.symbolName
         XCTAssertIdentical(
-            MectricsGlyph.menuBarImage(badge: symbol),
-            MectricsGlyph.menuBarImage(badge: symbol)
+            Self.badged(.critical),
+            Self.badged(.critical)
         )
     }
 
@@ -401,9 +406,7 @@ final class SingleIconMenuBarTests: XCTestCase {
         var inkedPixels: [String: [Bool]] = [:]
         let plain = try coverage(of: MectricsGlyph.menuBarImage)
         for state in CompactHealthState.allCases where state != .normal {
-            let mark = try coverage(
-                of: MectricsGlyph.menuBarImage(badge: state.symbolName)
-            )
+            let mark = try coverage(of: Self.badged(state))
             XCTAssertNotEqual(mark, plain, "\(state.rawValue) is invisible")
             for (other, otherMark) in inkedPixels {
                 XCTAssertNotEqual(
@@ -422,10 +425,7 @@ final class SingleIconMenuBarTests: XCTestCase {
     /// than a plain one does at the gap, while still inking the corner itself.
     @MainActor
     func testTheBadgeIsSetApartFromTheM() throws {
-        let badged = try render(
-            MectricsGlyph.menuBarImage(badge: CompactHealthState.warning.symbolName),
-            scale: 2
-        )
+        let badged = try render(Self.badged(.warning), scale: 2)
         let plain = try render(MectricsGlyph.menuBarImage, scale: 2)
         let width = badged.pixelsWide, height = badged.pixelsHigh
 
@@ -449,6 +449,99 @@ final class SingleIconMenuBarTests: XCTestCase {
         )
     }
 
+    /// The severity colour belongs to the badge, never to the M.
+    ///
+    /// Painting the whole mark made the logo *harder* to see exactly when it had
+    /// something to say: a template M is drawn near-white on a dark menu bar, and a
+    /// solid letter in orange reads as dimmer than the white one it replaced. The M
+    /// therefore stays achromatic — the menu bar's own label colour — and only the badge
+    /// is tinted. Saturation is the property that says so, in either theme.
+    @MainActor
+    func testOnlyTheBadgeCarriesTheSeverityColour() throws {
+        for name in [NSAppearance.Name.aqua, .darkAqua] {
+            let appearance = try XCTUnwrap(NSAppearance(named: name))
+            let state = CompactHealthState.critical
+            let bitmap = try render(
+                MectricsGlyph.menuBarImage(
+                    badge: state.symbolName,
+                    tint: state.tint,
+                    appearance: appearance
+                ),
+                scale: 2
+            )
+            let width = bitmap.pixelsWide, height = bitmap.pixelsHigh
+
+            // The M, sampled in the leading half and clear of the badge's quadrant.
+            let markPixels = (0..<width / 2).flatMap { x in
+                (0..<height / 2).compactMap { y -> NSColor? in
+                    // `labelColor` is not fully opaque (0.85), so a threshold above
+                    // that would find no M at all.
+                    guard alpha(bitmap, x, y) > 0.5 else { return nil }
+                    return bitmap.colorAt(x: x, y: y)
+                }
+            }
+            XCTAssertFalse(markPixels.isEmpty, "\(name.rawValue): the M drew nothing")
+            for colour in markPixels {
+                XCTAssertLessThan(
+                    colour.saturationComponent,
+                    0.2,
+                    "\(name.rawValue): the M was painted the severity colour"
+                )
+            }
+
+            // The badge, in the trailing-bottom quadrant, is where the colour lives.
+            let badgePixels = (width / 2..<width).flatMap { x in
+                (height / 2..<height).compactMap { y -> NSColor? in
+                    guard alpha(bitmap, x, y) > 0.5 else { return nil }
+                    return bitmap.colorAt(x: x, y: y)
+                }
+            }
+            XCTAssertTrue(
+                badgePixels.contains { $0.saturationComponent > 0.4 },
+                "\(name.rawValue): the badge carried no colour"
+            )
+        }
+    }
+
+    /// The mark is drawn for one appearance, so a Mac changing theme has to get a new
+    /// one — otherwise a dark-mode M stays white on a light menu bar.
+    ///
+    /// `.unavailable` is the state that proves it: its tint is `secondaryLabelColor`, a
+    /// dynamic colour. Resolving it against whatever appearance happened to be current
+    /// rather than the target one drew a light-grey badge onto a light menu bar, where
+    /// it all but disappeared. Both themes are checked by what they actually draw, not
+    /// by holding two different objects.
+    @MainActor
+    func testBothColoursAreResolvedForTheTargetAppearance() throws {
+        for state in [CompactHealthState.unavailable, .critical] {
+            var drawn: [NSAppearance.Name: [NSColor]] = [:]
+            for name in [NSAppearance.Name.aqua, .darkAqua] {
+                let bitmap = try render(
+                    MectricsGlyph.menuBarImage(
+                        badge: state.symbolName,
+                        tint: state.tint,
+                        appearance: try XCTUnwrap(NSAppearance(named: name))
+                    ),
+                    scale: 2
+                )
+                drawn[name] = (0..<bitmap.pixelsWide).flatMap { x in
+                    (0..<bitmap.pixelsHigh).compactMap { y in
+                        alpha(bitmap, x, y) > 0.5 ? bitmap.colorAt(x: x, y: y) : nil
+                    }
+                }
+            }
+            let light = try XCTUnwrap(drawn[.aqua])
+            let dark = try XCTUnwrap(drawn[.darkAqua])
+            // The M alone guarantees this: near-black in one theme, near-white in the
+            // other. A mark drawn for the wrong appearance would match.
+            XCTAssertNotEqual(
+                light.map(\.brightnessComponent),
+                dark.map(\.brightnessComponent),
+                "\(state.rawValue) drew the same mark for both themes"
+            )
+        }
+    }
+
     // MARK: - Uptime
 
     /// Uptime counts from boot, sleep included, so it can never be less than the time
@@ -465,6 +558,19 @@ final class SingleIconMenuBarTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// The appearance the badged marks are drawn for in these tests.
+    private static let appearance =
+        NSAppearance(named: .darkAqua) ?? NSAppearance.currentDrawing()
+
+    @MainActor
+    private static func badged(_ state: CompactHealthState) -> NSImage {
+        MectricsGlyph.menuBarImage(
+            badge: state.symbolName,
+            tint: state.tint,
+            appearance: appearance
+        )
+    }
 
     private func render(_ image: NSImage, scale: CGFloat) throws -> NSBitmapImageRep {
         let bitmap = try XCTUnwrap(NSBitmapImageRep(

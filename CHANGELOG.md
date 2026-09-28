@@ -31,6 +31,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Moving between the grid and a module's detail now slides, so the dashboard reads as one
   place with two depths instead of two panels swapped under the pointer. It follows Reduce
   Motion, where the change is immediate rather than merely quicker.
+- The dashboard's cards sit a little further from the popover's edge, matching the spacing
+  the rest of the app uses — and the spacing its own detail view already used, two points
+  apart across a single click.
 
 ### Fixed
 

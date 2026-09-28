@@ -34,28 +34,13 @@ enum MectricsGlyph {
     /// logo resampled, and softened, to fit. It is rounded down so the M spans it edge to
     /// edge and both stems' outer edges fall on pixel boundaries even at 1x.
     /// The tip is not set apart here; at menu bar size a seam reads as a broken stem.
-    static func templateImage(height: CGFloat, badge symbolName: String? = nil) -> NSImage {
+    static func templateImage(height: CGFloat) -> NSImage {
         let size = NSSize(width: (height * aspectRatio).rounded(.down), height: height)
         let image = NSImage(size: size, flipped: true) { bounds in
             guard let context = NSGraphicsContext.current?.cgContext else { return false }
-            guard let symbolName else {
-                context.addPath(path(in: bounds))
-                context.setFillColor(NSColor.black.cgColor)
-                context.fillPath()
-                return true
-            }
-            let badge = badgeRect(in: bounds)
-            // The M first, with a round gap punched around the badge. Even-odd against
-            // the full bounds turns the disc into a hole rather than a second shape.
-            context.saveGState()
-            context.addRect(bounds)
-            context.addEllipse(in: badge.insetBy(dx: -badgeGap, dy: -badgeGap))
-            context.clip(using: .evenOdd)
             context.addPath(path(in: bounds))
             context.setFillColor(NSColor.black.cgColor)
             context.fillPath()
-            context.restoreGState()
-            drawBadge(symbolName, in: badge, context: context)
             return true
         }
         image.isTemplate = true
@@ -72,22 +57,93 @@ enum MectricsGlyph {
     /// The badge is how the single icon reports health without a second item beside it.
     /// It is **the same size as the plain logo**, because the item reserves a fixed width
     /// and a mark that grew when something went wrong would move every item after it.
-    /// Built once per symbol: this changes on a severity transition, which is rare, and
-    /// never on a sampling cycle.
+    ///
+    /// **Only the badge is tinted.** Tinting the whole M instead costs more than it buys:
+    /// a template M is drawn near-white on a dark menu bar, and painting all of it the
+    /// severity colour turns a bright mark into a dim one — the logo looks like it went
+    /// out exactly when it has something to say. A thin symbol gains from colour; a solid
+    /// letter loses. So the M is drawn in the label colour of the menu bar's own
+    /// appearance, and the badge carries the tint beside it.
+    ///
+    /// Built once per symbol, tint, and appearance: all three change on a severity
+    /// transition or a theme switch, never on a sampling cycle.
     @MainActor
-    static func menuBarImage(badge symbolName: String?) -> NSImage {
+    static func menuBarImage(
+        badge symbolName: String?,
+        tint: NSColor,
+        appearance: NSAppearance
+    ) -> NSImage {
         guard let symbolName else { return menuBarImage }
-        if let cached = badgedMenuBarImages[symbolName] { return cached }
-        let image = templateImage(height: menuBarHeight, badge: symbolName)
-        badgedMenuBarImages[symbolName] = image
+        let key = BadgeKey(
+            symbolName: symbolName,
+            tint: tint,
+            appearanceName: appearance.name
+        )
+        if let cached = badgedMenuBarImages[key] { return cached }
+        let image = badgedImage(
+            height: menuBarHeight,
+            badge: symbolName,
+            tint: tint,
+            appearance: appearance
+        )
+        badgedMenuBarImages[key] = image
         return image
     }
 
     /// Height of the menu bar logo, badged or not.
     static let menuBarHeight: CGFloat = 14
 
+    private struct BadgeKey: Hashable {
+        let symbolName: String
+        let tint: NSColor
+        let appearanceName: NSAppearance.Name
+    }
+
     @MainActor
-    private static var badgedMenuBarImages: [String: NSImage] = [:]
+    private static var badgedMenuBarImages: [BadgeKey: NSImage] = [:]
+
+    /// The badged mark, in two colours and therefore not a template.
+    ///
+    /// The colours are resolved against `appearance` up front rather than inside the
+    /// drawing handler, because AppKit may call that handler later, for another scale,
+    /// with a different appearance current.
+    private static func badgedImage(
+        height: CGFloat,
+        badge symbolName: String,
+        tint: NSColor,
+        appearance: NSAppearance
+    ) -> NSImage {
+        // Both colours are resolved inside the appearance, not only the mark's: a tint
+        // can be a dynamic colour too — `secondaryLabelColor` is one — and resolving it
+        // against whatever appearance happened to be current gives a badge drawn for
+        // the wrong theme.
+        var markColor = NSColor.labelColor
+        var resolvedTint = tint
+        appearance.performAsCurrentDrawingAppearance {
+            markColor = NSColor.labelColor.usingColorSpace(.sRGB) ?? .labelColor
+            resolvedTint = tint.usingColorSpace(.sRGB) ?? tint
+        }
+        let size = NSSize(width: (height * aspectRatio).rounded(.down), height: height)
+        let image = NSImage(size: size, flipped: true) { bounds in
+            guard let context = NSGraphicsContext.current?.cgContext else { return false }
+            let badge = badgeRect(in: bounds)
+            // The M first, with a round gap punched around the badge. Even-odd against
+            // the full bounds turns the disc into a hole rather than a second shape.
+            context.saveGState()
+            context.addRect(bounds)
+            context.addEllipse(in: badge.insetBy(dx: -badgeGap, dy: -badgeGap))
+            context.clip(using: .evenOdd)
+            context.addPath(path(in: bounds))
+            context.setFillColor(markColor.cgColor)
+            context.fillPath()
+            context.restoreGState()
+            drawBadge(symbolName, in: badge, tint: resolvedTint, context: context)
+            return true
+        }
+        // Two colours, so AppKit must not recolour it as a single silhouette.
+        image.isTemplate = false
+        return image
+    }
 
     /// The badge's square, at the trailing-bottom corner: the foot of the right stem,
     /// which carries the least of what makes the M recognizable.
@@ -102,20 +158,25 @@ enum MectricsGlyph {
     }
 
     /// Badge side as a fraction of the logo's height. Large enough for a triangle and
-    /// an octagon to read apart at menu bar size, small enough to leave the M standing.
-    private static let badgeScale: CGFloat = 0.62
+    /// an octagon to read apart at menu bar size, small enough to leave the M standing:
+    /// the mark is wide and its right stem is half of what makes it an M, so a badge
+    /// that covers the stem turns the logo into something else.
+    private static let badgeScale: CGFloat = 0.45
 
     /// Clearance punched out of the M around the badge, so the two read as two marks
     /// rather than one blob. In points at the logo's natural size.
-    private static let badgeGap: CGFloat = 1.2
+    private static let badgeGap: CGFloat = 0.9
 
-    /// Draws `symbolName` into `rect` as opaque black, for a template image's alpha.
+    /// Draws `symbolName` into `rect` in `tint`.
     ///
     /// The enclosing handler's context has y pointing down (`flipped: true`), and
     /// drawing a bitmap there would mirror it, so the flip is undone around this draw.
+    /// The symbol supplies the shape as a mask; the colour is ours, so the badge does
+    /// not depend on how the symbol happens to be rendered.
     private static func drawBadge(
         _ symbolName: String,
         in rect: CGRect,
+        tint: NSColor,
         context: CGContext
     ) {
         let configuration = NSImage.SymbolConfiguration(
@@ -135,9 +196,9 @@ enum MectricsGlyph {
         context.saveGState()
         context.translateBy(x: 0, y: rect.minY + rect.maxY)
         context.scaleBy(x: 1, y: -1)
-        // A symbol is a black glyph on transparent, so its own alpha is the coverage a
-        // template image needs — no mask or fill colour of our own.
-        context.draw(cgImage, in: rect)
+        context.clip(to: rect, mask: cgImage)
+        context.setFillColor(tint.cgColor)
+        context.fill(rect)
         context.restoreGState()
     }
 }

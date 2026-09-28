@@ -23,8 +23,15 @@ final class MectricsStatusItem: NSObject {
     )
     var onClick: (() -> Void)?
 
-    /// The state the current mark was drawn for, so repeat updates are no-ops.
-    private var lastState: CompactHealthState?
+    /// Everything the current mark was drawn from, so repeat updates are no-ops. The
+    /// appearance is in here because a badged mark is drawn in the menu bar's own label
+    /// colour and has to be redrawn when the Mac changes theme.
+    private var lastRender: RenderInputs?
+
+    private struct RenderInputs: Equatable {
+        let state: CompactHealthState
+        let appearanceName: NSAppearance.Name
+    }
 
     override init() {
         super.init()
@@ -46,20 +53,28 @@ final class MectricsStatusItem: NSObject {
         update(.normal)
     }
 
-    /// Shows `state` on the logo: unbadged and untinted while everything is normal, and
+    /// Shows `state` on the logo: the plain template mark while everything is normal, and
     /// badged with the same symbol the Attention Log and Compact Health use otherwise.
     ///
     /// Shape carries the state and colour only reinforces it, so the item stays readable
-    /// with any colour vision and in a tinted menu bar.
+    /// with any colour vision. Only the badge takes the severity colour — the M keeps the
+    /// menu bar's own label colour, because a solid mark painted orange on a dark menu
+    /// bar reads as dimmer than the white one it replaced, not as louder.
     func update(_ state: CompactHealthState) {
         guard let button = item.button else { return }
-        guard state != lastState else { return }
-        lastState = state
+        let appearance = button.effectiveAppearance
+        let inputs = RenderInputs(state: state, appearanceName: appearance.name)
+        guard inputs != lastRender else { return }
+        lastRender = inputs
         let isNormal = state == .normal
         button.image = MectricsGlyph.menuBarImage(
-            badge: isNormal ? nil : state.symbolName
+            badge: isNormal ? nil : state.symbolName,
+            tint: state.tint,
+            appearance: appearance
         )
-        button.contentTintColor = isNormal ? nil : state.tint
+        // The normal mark is a template AppKit tints for every menu bar; the badged one
+        // carries its own two colours and must not be recoloured as one silhouette.
+        button.contentTintColor = nil
         button.setAccessibilityValue(state.localizedName)
         // Hovering says what is wrong, or what a click does when nothing is.
         button.toolTip = isNormal
@@ -70,9 +85,9 @@ final class MectricsStatusItem: NSObject {
             : state.localizedName
     }
 
-    /// Forces the next update to redraw even if the state is unchanged.
+    /// Forces the next update to redraw even if the inputs compare equal.
     func invalidateCachedRender() {
-        lastState = nil
+        lastRender = nil
     }
 
     func remove() {
