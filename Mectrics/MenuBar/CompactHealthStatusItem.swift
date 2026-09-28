@@ -390,7 +390,8 @@ extension AttentionSeverity {
     }
 }
 
-private extension ActiveAlertCondition {
+extension ActiveAlertCondition {
+    /// One line on what is wrong, shared by the Compact Health and dashboard popovers.
     var summary: String {
         switch conditionKey {
         case SystemAlertSignal.thermalPressure.conditionKey:

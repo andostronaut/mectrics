@@ -208,7 +208,9 @@ The full recipe is in [`AGENTS.md` §6](AGENTS.md#6-adding-a-metric-provider). I
    hides itself automatically.
 3. Register it in `MetricsKit.coreProviders()`.
 4. Add menu bar text in `MenuBarText` plus a stable width template in `MetricStatusItem`.
-5. Add popover rows and a primary value in `DetailPopoverView`, with localized labels.
+5. Add popover rows in `DetailPopoverView`, with localized labels, the primary value in
+   `DashboardFormat` (the detail and the dashboard share it), and a dashboard card in
+   `DashboardPopoverView`.
 6. Add a sanity test in `MetricsKitTests`.
 
 Providers are sampled on one serial queue and declare a `cost` (`light` / `medium` /

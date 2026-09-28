@@ -90,7 +90,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var powerSourceRunLoopSource: CFRunLoopSource?
     private var pendingRoutes: [ApplicationRoute] = []
     private var isReadyForRoutes = false
-    private var visibleDetailMetricIDs: Set<MetricID> = []
+    /// Modules on screen in the menu bar popover (the dashboard shows several) and in
+    /// the detail window, kept apart because both can show the same module at once: a
+    /// module stays visible until every surface showing it has let it go.
+    private var popoverVisibleMetricIDs: Set<MetricID> = []
+    private var windowVisibleMetricIDs: Set<MetricID> = []
+    private var visibleDetailMetricIDs: Set<MetricID> {
+        popoverVisibleMetricIDs.union(windowVisibleMetricIDs)
+    }
     private var hasRecordedFirstSample = false
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -116,14 +123,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBar.rebuild()
         PerformanceSignposts.menuBarReady()
         energyGuard = EnergyGuardController(model: model)
-        menuBar.onDetailVisibilityChanged = { [weak self] id, visible in
-            self?.setDetail(id, visible: visible)
+        menuBar.onDetailVisibilityChanged = { [weak self] ids, visible in
+            self?.setDetail(ids, visible: visible, inWindow: false)
         }
 
         // Rebuild the menu bar when the module selection changes.
         model.onModulesChanged = { [weak self] in
             self?.menuBar.rebuild()
             guard let self else { return }
+            self.widgetSnapshots.publish(from: self.model, force: true)
+            self.refreshEnergyGuardVisibility()
+        }
+
+        // A dashboard module turned on or off changes what is sampled and published,
+        // but not a single status item, so the menu bar is left standing.
+        model.onWatchedModulesChanged = { [weak self] in
+            guard let self else { return }
+            self.menuBar.dashboardModulesChanged()
             self.widgetSnapshots.publish(from: self.model, force: true)
             self.refreshEnergyGuardVisibility()
         }
@@ -139,7 +155,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             model: model,
             dock: dock,
             onVisibilityChanged: { [weak self] id, visible in
-                self?.setDetail(id, visible: visible)
+                self?.setDetail([id], visible: visible, inWindow: true)
             }
         )
         attentionLog = AttentionLogWindowController(
@@ -151,6 +167,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         whatsNewWindow = WhatsNewWindowController(dock: dock)
         model.onOpenSettings = { [weak self] in
             self?.settings.show()
+        }
+        model.onOpenMenuBarSettings = { [weak self] in
+            self?.settings.show(pane: .menuBar)
         }
         model.onOpenOnboarding = { [weak self] in
             self?.showOnboarding()
@@ -226,6 +245,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Energy-friendly: sample more slowly on battery.
         let onBattery = Self.isOnBattery()
+        model.isOnBattery = onBattery
         model.engine.start(onBattery: onBattery)
         PerformanceSignposts.engineStarted()
         DiagnosticLogStore.shared.record(.samplingStarted)
@@ -522,6 +542,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let appDelegate = Unmanaged<AppDelegate>.fromOpaque(context).takeUnretainedValue()
             DispatchQueue.main.async {
                 let onBattery = AppDelegate.isOnBattery()
+                // The notification also fires for every change in charge, so the
+                // model is written only when the source itself changed.
+                if appDelegate.model.isOnBattery != onBattery {
+                    appDelegate.model.isOnBattery = onBattery
+                }
                 appDelegate.model.engine.updatePowerState(
                     onBattery: onBattery
                 )
@@ -542,15 +567,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         SystemPowerSource.isOnBattery
     }
 
-    private func setDetail(_ id: MetricID, visible: Bool) {
-        if visible {
-            visibleDetailMetricIDs.insert(id)
-        } else {
-            visibleDetailMetricIDs.remove(id)
+    /// Takes a whole surface's modules at once — the dashboard reports all of its
+    /// cards together — so opening it updates sampling and Energy Guard once.
+    private func setDetail(_ ids: Set<MetricID>, visible: Bool, inWindow: Bool) {
+        switch (inWindow, visible) {
+        case (true, true): windowVisibleMetricIDs.formUnion(ids)
+        case (true, false): windowVisibleMetricIDs.subtract(ids)
+        case (false, true): popoverVisibleMetricIDs.formUnion(ids)
+        case (false, false): popoverVisibleMetricIDs.subtract(ids)
         }
         // A popover or detail window is where a temperature is read, so it decides
         // whether the SMC is sampled at all as well as how often.
-        model.setDetailVisible(id, visible)
+        model.setVisibleDetailModules(visibleDetailMetricIDs)
         refreshEnergyGuardVisibility()
     }
 

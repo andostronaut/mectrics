@@ -26,8 +26,8 @@ flowchart LR
 
     subgraph app["Mectrics.app — LSUIElement agent, no Dock icon"]
         AM["<b>AppModel</b><br/><i>@Observable</i>"]
-        MB["<b>MenuBarController</b><br/>one NSStatusItem per component"]
-        PO["<b>Popovers</b><br/>details · Compact Health · Settings"]
+        MB["<b>MenuBarController</b><br/>one NSStatusItem per component,<br/>or one logo item"]
+        PO["<b>Popovers</b><br/>details · dashboard · Compact Health · Settings"]
         AL["<b>Alert delivery</b><br/>notifications · Compact Health · Attention Log"]
         AM --> MB
         AM --> PO
@@ -139,6 +139,23 @@ sampling, so Mectrics eases off on exactly the states it would report.
 
 ## Menu bar rendering
 
+The menu bar has two styles (`MenuBarStyle`, whose persisted raw values never change),
+chosen under Settings → Menu Bar → Style:
+
+- **Separate items** (`MenuBarStyle.items`, shown as "Separate") — one status item per
+  chosen component. This is the default for new installs and upgrades alike, so nobody's
+  menu bar changes on update.
+- **Single icon** (`MenuBarStyle.singleIcon`, shown as "Compact") — one Mectrics logo item
+  that opens [the dashboard](#the-dashboard).
+
+Each style keeps its own choices: separate items read `enabledComponents`, the single icon
+reads `dashboardModules`, and neither ever writes the other's. Switching back to separate
+items therefore restores the exact layout that was there before, however long the single
+icon was in use. The optional Compact Health item is independent of the style and appears
+in either.
+
+### Separate items
+
 - One `NSStatusItem` per enabled **component**, not per module — Battery can contribute its
   icon and its health as two independent items.
 - CPU, Memory, and GPU can each contribute an independent temperature item when the Mac
@@ -156,6 +173,66 @@ sampling, so Mectrics eases off on exactly the states it would report.
   than drawing it did. Reducing work when nobody can see the menu bar happens a layer
   lower, in Energy Guard's sampling policy.
 - ⌘-drag reordering is native; `NSStatusItem.autosaveName` preserves position.
+
+### Single icon
+
+`MectricsStatusItem` has nothing to redraw. Its image is a template drawn in code from the
+app icon's geometry (`MectricsGlyph`), so it is sharp at every backing scale, and AppKit
+tints a template for light, dark, and tinted menu bars on its own. The image, the
+accessibility label, and the tooltip are therefore assigned once, when the item is created,
+and never again — the per-cycle work for this item is none at all. The item's length is
+fixed (the same 26 pt slot the Compact Health item reserves) and even, and the 20 × 14 pt
+image has whole, even sides, so at 1x the logo sits on whole pixels instead of being
+resampled into a blur.
+
+The status item list under the single icon is the logo and, if enabled, Compact Health,
+so very little can change it. `MenuBarStyle.itemKeys` is empty for this style, which means a
+component becoming available underneath it never triggers a rebuild, and turning a
+dashboard module on or off goes through `AppModel.onWatchedModulesChanged` — republish the
+widgets, update Energy Guard, adjust what an open dashboard reports as visible — rather than
+`onModulesChanged`, which would tear down and re-create every status item for a change
+none of them shows. Switching styles is a genuine change in which items exist, and does
+rebuild.
+
+## The dashboard
+
+The single icon opens `DashboardPopoverView` in the same shared `NSPopover` the module and
+Compact Health popovers use, so a click on another item replaces its content rather than
+stacking a second popover, and it is dismissed the same way. It is a popover, not a panel:
+it is on screen from a click until the next click elsewhere, and is not the always-visible
+second surface the floating panel was (see [Compact Health](#compact-health)).
+
+- Cards follow the menu bar's module order, then a Device card that no provider backs:
+  the macOS version, and the uptime from `kern.boottime`, so sleep counts as it does for
+  the `uptime` command (`ProcessInfo.systemUptime` stops while the Mac sleeps). A card
+  without a sample shows a dash and its data state, never a zero. Clicking a card replaces
+  the grid with that module's `DetailPopoverView` inside the same popover, and
+  `DashboardFormat` gives the card and the detail the same primary value.
+- The default cards are CPU, Memory, Battery, Network, and Disk. GPU and Fans are `.heavy`
+  providers, so the dashboard offers them but never turns them on for anyone.
+- The popover's own body reads only settings. Each card is a leaf view that reads the
+  samples, so a new reading re-evaluates the cards and nothing around them. Facts no sample
+  carries — the local address and interface name, the startup volume's name — are read
+  once as the popover appears, never from a view's body.
+- While it is open, `MenuBarController` reports every dashboard module visible. That is
+  what has the SMC's temperatures read while it is open — the CPU and GPU cards show one,
+  and so does the detail behind CPU, Memory, and GPU — and what tells Energy Guard that
+  GPU and Fans readings are on screen, so its protected mode does not suspend them. The
+  report is one batch: `onDetailVisibilityChanged` takes a set and
+  `AppModel.setVisibleDetailModules` replaces the whole set, so opening the dashboard asks
+  the engine for one forced refresh rather than one per card. Back-to-back refreshes would
+  read the SMC several times over and measure CPU load and network rates across a few
+  milliseconds.
+- Every visible report is matched by exactly one hidden report, whichever way the popover
+  ends: toggled closed, replaced by another popover, dismissed by AppKit, or orphaned by a
+  rebuild. A rebuild closes an open popover first, at once, because the button it is
+  anchored to is about to be removed. Popover and detail-window visibility are tracked
+  apart, because both can show the same module, and closing one must not hide what the
+  other still shows.
+- Closing any popover releases its SwiftUI content. A closed popover's window is only
+  ordered out, so a view tree kept inside it would go on observing the model — every
+  dashboard card re-evaluated each cycle — and running `.task` loops such as the top
+  processes list, all off screen. Every opening installs fresh content, so nothing is lost.
 
 ## Windows and the Dock
 
@@ -193,7 +270,10 @@ placement, a global hotkey, and two layout modes.
 The optional **Compact Health** item replaced it — a single stable-width status item that
 stays quiet and turns into a warning only when an alert routed to it activates. Real-time
 viewing therefore lives entirely in the menu bar and its popovers, and no second
-always-visible surface should be reintroduced.
+always-visible surface should be reintroduced. The single icon's dashboard is one of those
+popovers: it gathers every chosen reading in one place, but only between a click and the
+next click elsewhere, and the worst condition routed to Compact Health leads it as a banner.
+The Compact Health item, when enabled, stays in the menu bar in both styles.
 
 The bundled `mectrics` CLI is a read-only automation interface for unattended machines,
 not another dashboard. The app owns configuration. The CLI reads its enabled rules and can:
@@ -263,10 +343,18 @@ the widget is positioned as "at a glance" while the menu bar carries the real-ti
   `SamplingRuntimePolicy`, which Energy Guard widens as conditions tighten. Battery and
   disk are read every second base cycle even in normal mode: both move on the scale of
   minutes and each costs an IOKit round trip.
-- What is on screen decides which providers run at all, not only how often. The SMC is
-  sampled only where a temperature is actually shown — a `.temperature` menu bar
-  component, an open popover or detail window for CPU/Memory/GPU, the menu bar builder,
-  or a rule that watches the CPU temperature directly.
+- What is on screen decides which providers run at all, not only how often. The app
+  samples its *watched* modules (`AppModel.enabledModules`, resolved by
+  `MenuBarStyle.watchedModules`) plus whatever enabled alert rules need. With separate
+  items the watched modules are those with an item in the menu bar; under the single icon
+  they are the dashboard's. Those are sampled even while the popover is closed: the cards
+  open on current values with a history already there to draw, and the widgets and the
+  diagnostics summary consume the same set.
+- The SMC is sampled only where a temperature is actually shown — a `.temperature` menu
+  bar component or the menu bar builder's temperature chips (separate items only; the
+  single icon shows neither), an open popover, dashboard, or detail window for
+  CPU/Memory/GPU, or a rule that watches the CPU temperature directly. Under the single
+  icon, the dashboard therefore has the SMC read only while it is open.
 - The hot path is allocation-free: the ring buffer is pre-allocated.
 - Providers copy the single IORegistry property they need rather than a whole property
   dictionary, and anything that reaches a system daemon (reclaimable disk space) runs on
@@ -280,7 +368,8 @@ the widget is positioned as "at a glance" while the menu bar carries the real-ti
   of that figure. The 60 MB budget
   describes the menu bar's steady state, which is what the app spends its life in.
 - Local points-of-interest signposts cover provider discovery, menu bar readiness, engine
-  start, the first live sample, and popover presentation. They are visible to
+  start, the first live sample, and popover presentation (module, Compact Health, and
+  dashboard). They are visible to
   Instruments but are neither persisted nor transmitted.
 - `scripts/performance/measure.sh` launches an isolated Release app or attaches to an
   explicit PID, records time-series CPU, `phys_footprint`, and connections, and evaluates
@@ -303,11 +392,14 @@ Three things dominate, and none of them is arithmetic on a sample:
    bitmap. An item whose render inputs are unchanged costs nothing, which is why
    `MetricStatusItem` compares them first — a menu bar of items that never change measures
    at 0% CPU. The price is per *changed* item per cycle, so the honest way to reduce it is
-   to change fewer things, not to sample less often.
+   to change fewer things, not to sample less often. The single icon's logo is assigned
+   once and never changes, so under that style only a Compact Health item, if enabled, is
+   left to pay it, and only when its state changes.
 2. **Rebuilding the menu bar.** `MenuBarController.rebuild()` destroys and re-creates every
    `NSStatusItem`, and each one is a window the server has to register. This belongs to a
    change in *which* items exist, never to a change in their values, so component
-   availability only grows within a session (see AGENTS.md §5).
+   availability only grows within a session (see AGENTS.md §5), and a dashboard module
+   turned on or off, which changes no status item, never rebuilds anything.
 3. **Re-rendering a Settings pane on every sample.** SwiftUI re-evaluating a pane rebuilds
    the tooltips and hover regions inside it; AppKit responds to a tracking-area change by
    re-resolving the pointer for the window, and on macOS 27 that re-resolution regenerates
@@ -397,7 +489,8 @@ minutes does not qualify the memory-growth gate and cannot be described as a soa
   provider-failure freshness, stdout/stderr separation, and actual executable processes
   with isolated preferences.
 - `MectricsTests` covers app-layer logic: alert rules, Energy Guard, the Attention Log,
-  diagnostics export redaction, menu bar layout presets, and URL routing.
+  diagnostics export redaction, menu bar layout presets, the menu bar styles and what
+  each one watches, the dashboard's card layout and formatting, and URL routing.
 - XCTest microbenchmarks cover the ring-buffer hot path, menu bar formatting, and Energy
   Guard decisions. Whole-process release gates remain external so the test runner and
   debugger do not contaminate CPU, memory, or wakeup measurements.
@@ -413,8 +506,8 @@ mectrics/
 ├── docs/                     # this document, its assets, and the folder index
 ├── Mectrics/                 # menu bar app (SwiftUI + AppKit)
 │   ├── App/                  # AppDelegate, AppModel, login item, widget snapshots
-│   ├── MenuBar/              # NSStatusItem controllers + live sparkline drawing
-│   ├── UI/                   # popover, sparkline, formatting, themes, localization
+│   ├── MenuBar/              # NSStatusItem controllers, menu bar styles, sparkline drawing
+│   ├── UI/                   # popovers, dashboard, logo, formatting, themes, localization
 │   ├── Onboarding/           # three-step first-launch flow
 │   ├── Alerts/               # alert rules, threshold + system condition monitors
 │   ├── Attention/            # local Attention Log store and window

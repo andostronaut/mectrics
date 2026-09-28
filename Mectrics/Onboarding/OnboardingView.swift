@@ -143,7 +143,7 @@ struct OnboardingView: View {
             )
 
             Form {
-                Section("Menu bar modules") {
+                Section(modulesSectionTitle) {
                     ForEach(recommendedModules, id: \.self) { id in
                         Toggle(isOn: Binding(
                             get: { model.enabledModules.contains(id) },
@@ -158,12 +158,7 @@ struct OnboardingView: View {
                             }
                         }
                         .accessibilityLabel(id.localizedName)
-                        .accessibilityHint(
-                            String(
-                                localized: "onboarding.recommended.hint",
-                                defaultValue: "Recommended menu bar module"
-                            )
-                        )
+                        .accessibilityHint(recommendedHint)
                     }
 
                     if additionalModules.isEmpty == false {
@@ -295,6 +290,35 @@ struct OnboardingView: View {
 
     private var additionalModules: [MetricID] {
         model.availableModules.filter { !Self.recommendedIDs.contains($0) }
+    }
+
+    /// The module switches edit whatever the menu bar style shows: menu bar items, or
+    /// the dashboard's cards under the single icon (onboarding can be reopened later).
+    private var modulesSectionTitle: String {
+        switch model.menuBarStyle {
+        case .items:
+            return String(localized: "Menu bar modules")
+        case .singleIcon:
+            return String(
+                localized: "onboarding.modules.dashboard",
+                defaultValue: "Dashboard modules"
+            )
+        }
+    }
+
+    private var recommendedHint: String {
+        switch model.menuBarStyle {
+        case .items:
+            return String(
+                localized: "onboarding.recommended.hint",
+                defaultValue: "Recommended menu bar module"
+            )
+        case .singleIcon:
+            return String(
+                localized: "onboarding.recommended.dashboardHint",
+                defaultValue: "Recommended dashboard module"
+            )
+        }
     }
 
     private func previewValue(for id: MetricID) -> String {
