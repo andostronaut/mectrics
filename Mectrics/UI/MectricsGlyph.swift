@@ -34,13 +34,28 @@ enum MectricsGlyph {
     /// logo resampled, and softened, to fit. It is rounded down so the M spans it edge to
     /// edge and both stems' outer edges fall on pixel boundaries even at 1x.
     /// The tip is not set apart here; at menu bar size a seam reads as a broken stem.
-    static func templateImage(height: CGFloat) -> NSImage {
+    static func templateImage(height: CGFloat, badge symbolName: String? = nil) -> NSImage {
         let size = NSSize(width: (height * aspectRatio).rounded(.down), height: height)
         let image = NSImage(size: size, flipped: true) { bounds in
             guard let context = NSGraphicsContext.current?.cgContext else { return false }
+            guard let symbolName else {
+                context.addPath(path(in: bounds))
+                context.setFillColor(NSColor.black.cgColor)
+                context.fillPath()
+                return true
+            }
+            let badge = badgeRect(in: bounds)
+            // The M first, with a round gap punched around the badge. Even-odd against
+            // the full bounds turns the disc into a hole rather than a second shape.
+            context.saveGState()
+            context.addRect(bounds)
+            context.addEllipse(in: badge.insetBy(dx: -badgeGap, dy: -badgeGap))
+            context.clip(using: .evenOdd)
             context.addPath(path(in: bounds))
             context.setFillColor(NSColor.black.cgColor)
             context.fillPath()
+            context.restoreGState()
+            drawBadge(symbolName, in: badge, context: context)
             return true
         }
         image.isTemplate = true
@@ -51,6 +66,80 @@ enum MectricsGlyph {
     /// stands a little shorter than a system symbol to carry the same visual weight. Both
     /// sides are even, so it centers on whole pixels in an even-width item and menu bar at 1x.
     static let menuBarImage: NSImage = templateImage(height: 14)
+
+    /// The menu bar logo carrying a state badge, or the plain logo when `symbolName` is nil.
+    ///
+    /// The badge is how the single icon reports health without a second item beside it.
+    /// It is **the same size as the plain logo**, because the item reserves a fixed width
+    /// and a mark that grew when something went wrong would move every item after it.
+    /// Built once per symbol: this changes on a severity transition, which is rare, and
+    /// never on a sampling cycle.
+    @MainActor
+    static func menuBarImage(badge symbolName: String?) -> NSImage {
+        guard let symbolName else { return menuBarImage }
+        if let cached = badgedMenuBarImages[symbolName] { return cached }
+        let image = templateImage(height: menuBarHeight, badge: symbolName)
+        badgedMenuBarImages[symbolName] = image
+        return image
+    }
+
+    /// Height of the menu bar logo, badged or not.
+    static let menuBarHeight: CGFloat = 14
+
+    @MainActor
+    private static var badgedMenuBarImages: [String: NSImage] = [:]
+
+    /// The badge's square, at the trailing-bottom corner: the foot of the right stem,
+    /// which carries the least of what makes the M recognizable.
+    private static func badgeRect(in bounds: CGRect) -> CGRect {
+        let side = (bounds.height * badgeScale).rounded()
+        return CGRect(
+            x: bounds.maxX - side,
+            y: bounds.maxY - side,
+            width: side,
+            height: side
+        )
+    }
+
+    /// Badge side as a fraction of the logo's height. Large enough for a triangle and
+    /// an octagon to read apart at menu bar size, small enough to leave the M standing.
+    private static let badgeScale: CGFloat = 0.62
+
+    /// Clearance punched out of the M around the badge, so the two read as two marks
+    /// rather than one blob. In points at the logo's natural size.
+    private static let badgeGap: CGFloat = 1.2
+
+    /// Draws `symbolName` into `rect` as opaque black, for a template image's alpha.
+    ///
+    /// The enclosing handler's context has y pointing down (`flipped: true`), and
+    /// drawing a bitmap there would mirror it, so the flip is undone around this draw.
+    private static func drawBadge(
+        _ symbolName: String,
+        in rect: CGRect,
+        context: CGContext
+    ) {
+        let configuration = NSImage.SymbolConfiguration(
+            pointSize: rect.height,
+            weight: .bold
+        )
+        guard let symbol = NSImage(
+            systemSymbolName: symbolName,
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(configuration),
+            let cgImage = symbol.cgImage(
+                forProposedRect: nil,
+                context: nil,
+                hints: nil
+            )
+        else { return }
+        context.saveGState()
+        context.translateBy(x: 0, y: rect.minY + rect.maxY)
+        context.scaleBy(x: 1, y: -1)
+        // A symbol is a black glyph on transparent, so its own alpha is the coverage a
+        // template image needs — no mask or fill colour of our own.
+        context.draw(cgImage, in: rect)
+        context.restoreGState()
+    }
 }
 
 /// SwiftUI rendering of the logo, M in `.primary`, tip in the brand pink (or monochrome).

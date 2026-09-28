@@ -15,6 +15,9 @@ struct DashboardPopoverView: View {
     @State private var selectedModule: MetricID? = nil
     /// Facts no sample carries, read once when the popover appears.
     @State private var systemInfo = DashboardSystemInfo()
+    /// True while the grid offers to take its cards off the dashboard.
+    @State private var isEditingCards = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Outer width, padding included. Kept close to a native menu bar popover: the
     /// cards are glanceable summaries, and the full reading is one click away.
@@ -31,23 +34,88 @@ struct DashboardPopoverView: View {
         VStack(alignment: .leading, spacing: 0) {
             if let selectedModule {
                 detail(for: selectedModule)
+                    .transition(Self.drillIn)
             } else {
                 overview
+                    .transition(Self.drillOut)
             }
         }
         .frame(width: Self.width)
+        // The grid and a detail are two depths of one place, so they slide the way a
+        // push and a pop do rather than being swapped out from under the pointer. The
+        // popover's own height follows: AppKit animates a content-size change while
+        // `animates` is on, which it is unless the system asks for less motion.
+        .clipped()
         .onAppear {
             systemInfo = DashboardSystemInfo.read()
         }
     }
 
+    /// Pushes in from the trailing edge and leaves the same way, so the gesture reads
+    /// as going one level deeper and coming back.
+    private static let drillIn = AnyTransition.asymmetric(
+        insertion: .move(edge: .trailing).combined(with: .opacity),
+        removal: .move(edge: .trailing).combined(with: .opacity)
+    )
+
+    private static let drillOut = AnyTransition.asymmetric(
+        insertion: .move(edge: .leading).combined(with: .opacity),
+        removal: .move(edge: .leading).combined(with: .opacity)
+    )
+
+    /// Moves between the grid and a module's detail. Honors Reduce Motion, where the
+    /// swap is immediate rather than merely faster.
+    private func select(_ id: MetricID?) {
+        guard let animation = ExperienceMotion.stateChange(
+            reduceMotion: reduceMotion
+        ) else {
+            selectedModule = id
+            return
+        }
+        withAnimation(animation) { selectedModule = id }
+    }
+
     private var overview: some View {
         VStack(alignment: .leading, spacing: Self.padding) {
-            DashboardHealthBanner(model: model) { selectedModule = $0 }
+            DashboardHealthBanner(model: model) { select($0) }
+            if !model.orderedDashboardModules.isEmpty {
+                editBar
+            }
             cardGrid
             actionFooter
         }
         .padding(Self.padding)
+    }
+
+    /// One quiet control above the grid. It says "Edit" rather than carrying a row of
+    /// remove buttons all the time, because reading the dashboard is what it is for and
+    /// changing it is the rarer errand.
+    private var editBar: some View {
+        HStack(spacing: 0) {
+            Spacer(minLength: 0)
+            Button {
+                toggleEditing()
+            } label: {
+                Text(
+                    isEditingCards
+                        ? String(localized: "dashboard.edit.done", defaultValue: "Done")
+                        : String(localized: "dashboard.edit", defaultValue: "Edit")
+                )
+                .font(.caption.weight(.medium))
+            }
+            .buttonStyle(.borderless)
+            .help(
+                isEditingCards
+                    ? String(
+                        localized: "dashboard.edit.done.help",
+                        defaultValue: "Finish choosing cards"
+                    )
+                    : String(
+                        localized: "dashboard.edit.help",
+                        defaultValue: "Take cards off the dashboard. Add them back in Settings."
+                    )
+            )
+        }
     }
 
     private var cardGrid: some View {
@@ -76,8 +144,10 @@ struct DashboardPopoverView: View {
             DashboardModuleCard(
                 model: model,
                 id: id,
-                systemInfo: systemInfo
-            ) { selectedModule = $0 }
+                systemInfo: systemInfo,
+                isEditing: isEditingCards,
+                onRemove: { removeCard(id) }
+            ) { select($0) }
         case .device:
             DashboardDeviceCard(model: model)
         case .emptyHint:
@@ -91,7 +161,7 @@ struct DashboardPopoverView: View {
     private func detail(for id: MetricID) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Button {
-                selectedModule = nil
+                select(nil)
             } label: {
                 Label(
                     String(localized: "dashboard.back", defaultValue: "Dashboard"),
@@ -126,6 +196,42 @@ struct DashboardPopoverView: View {
             Divider()
             PopoverActionBar { model.onOpenSettings?() }
         }
+    }
+
+    /// Takes a card off the dashboard from the dashboard itself.
+    ///
+    /// Removing is the common errand and belongs next to the card; **adding** stays in
+    /// Settings, where every module this Mac reports is listed with what it costs. That
+    /// asymmetry is deliberate: a popover that also had to offer the modules it is not
+    /// showing would become the settings pane it links to.
+    private func removeCard(_ id: MetricID) {
+        guard let animation = ExperienceMotion.stateChange(
+            reduceMotion: reduceMotion
+        ) else {
+            applyRemoval(id)
+            return
+        }
+        withAnimation(animation) { applyRemoval(id) }
+    }
+
+    private func applyRemoval(_ id: MetricID) {
+        model.toggleDashboardModule(id)
+        // Nothing left to edit once the last card is gone, and the empty hint that
+        // replaces the grid leads to Settings on its own.
+        if model.orderedDashboardModules.isEmpty {
+            isEditingCards = false
+        }
+    }
+
+    /// Turns the grid's remove controls on and off.
+    private func toggleEditing() {
+        guard let animation = ExperienceMotion.stateChange(
+            reduceMotion: reduceMotion
+        ) else {
+            isEditingCards.toggle()
+            return
+        }
+        withAnimation(animation) { isEditingCards.toggle() }
     }
 }
 
@@ -244,6 +350,9 @@ private struct DashboardModuleCard: View {
     let model: AppModel
     let id: MetricID
     let systemInfo: DashboardSystemInfo
+    /// While editing, the card offers to leave the dashboard instead of opening.
+    let isEditing: Bool
+    let onRemove: () -> Void
     let onSelect: (MetricID) -> Void
 
     var body: some View {
@@ -251,7 +360,9 @@ private struct DashboardModuleCard: View {
         let state = model.metricState(for: id, isEnabled: true)
         let facts = sample.map(cardFacts(for:))
         Button {
-            onSelect(id)
+            // One card, one meaning at a time: while editing, a click takes it off
+            // rather than drilling into a card the user is about to remove.
+            if isEditing { onRemove() } else { onSelect(id) }
         } label: {
             DashboardCardLayout(
                 symbol: MetricSymbol.name(for: id),
@@ -271,12 +382,34 @@ private struct DashboardModuleCard: View {
             }
         }
         .buttonStyle(DashboardCardButtonStyle())
+        .overlay(alignment: .topTrailing) {
+            if isEditing { removeBadge }
+        }
         .accessibilityLabel(id.localizedName)
         .accessibilityValue(accessibilityValue(sample: sample, state: state, facts: facts))
-        .accessibilityHint(String(
-            localized: "dashboard.card.hint",
-            defaultValue: "Shows details"
-        ))
+        .accessibilityHint(
+            isEditing
+                ? String(
+                    localized: "dashboard.card.remove.hint",
+                    defaultValue: "Takes this card off the dashboard"
+                )
+                : String(
+                    localized: "dashboard.card.hint",
+                    defaultValue: "Shows details"
+                )
+        )
+    }
+
+    /// The editing affordance. It is drawn, not tappable: the whole card is the target,
+    /// so there is no small control to hit and no second thing to describe to
+    /// VoiceOver — the card's own hint already says what a click will do.
+    private var removeBadge: some View {
+        Image(systemName: "minus.circle.fill")
+            .font(.callout)
+            .symbolRenderingMode(.palette)
+            .foregroundStyle(.white, .red)
+            .padding(ExperienceSpacing.tiny)
+            .accessibilityHidden(true)
     }
 
     private func cardFacts(for sample: MetricSample) -> DashboardCardFacts {
@@ -622,22 +755,27 @@ private struct DashboardDeviceCard: View {
                 Text(String(localized: "cpu.uptime", defaultValue: "Uptime"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text(uptime)
-                    .font(.subheadline.weight(.semibold))
-                    .monospacedDigit()
-                    .lineLimit(1)
+                // The uptime reads in days, hours and minutes, so a minute is as often
+                // as the string can change. Following the sampling cycle instead would
+                // re-evaluate this card sixty times for every time it had news.
+                TimelineView(.periodic(from: .now, by: Self.uptimeInterval)) { _ in
+                    Text(uptime)
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                }
             }
         }
         .background { DashboardCardBackground() }
         .accessibilityElement(children: .combine)
     }
 
+    /// Coarsest interval that still keeps the minutes place honest.
+    private static let uptimeInterval: TimeInterval = 60
+
     private var uptime: String {
-        // Reading the samples ties this card to the sampling cycle, so the uptime
-        // advances with every reading without a timer of its own.
-        _ = model.latest
         // Since boot, sleep included, as `uptime` and System Information count it.
-        return DashboardFormat.uptime(SystemUptime.sinceBoot)
+        DashboardFormat.uptime(SystemUptime.sinceBoot)
     }
 }
 

@@ -35,7 +35,8 @@ stays out of the way otherwise. A click opens a detail popover with the numbers 
 An optional **Compact Health** item collapses the whole machine into a single indicator
 that speaks up only when something needs attention. If you would rather keep the menu bar
 quiet, the **Compact** style puts a single icon in place of every item: one Mectrics logo
-that opens your readings as a dashboard of cards.
+that opens your readings as a dashboard of cards, and that takes on a badge itself when
+something needs attention.
 
 It is built around three commitments:
 
@@ -49,7 +50,8 @@ Those numbers come from half-hour runs of the shipping build, not from one glanc
 Activity Monitor, and they are checked before a release rather than assumed. What you see
 will differ with your Mac, how many items you put in the menu bar, and whether you are on
 battery — more items means more work, because each one redraws every second. The single
-icon's logo never redraws at all.
+icon is redrawn only when its health badge changes, which is not something that happens on
+a timer.
 
 The project holds itself to deliberately tight internal budgets — 60 MB of memory and 3% of
 a core — and publishes where it stands against them rather than only the flattering half.
@@ -113,7 +115,9 @@ throughput for Disk, and so on.
 - **Compact menu bar** — one Mectrics logo in the menu bar instead of an item per reading. A
   click opens a dashboard of cards — CPU, Memory, Battery, Network, and Disk unless you
   choose others, plus your macOS version and uptime — and a click on a card opens its full
-  detail. Switch back and your separate items return exactly as you left them.
+  detail. The logo is the health indicator too, so one icon really means one icon. Take a
+  card off from the dashboard itself; add one back in Settings. Switch back and your
+  separate items return exactly as you left them.
 - **Alert rules** — sustained notifications with a live preview and test delivery, so you
   know what a rule will look like before it fires at 3am. Rules watch either a number you
   pick or a state macOS reports: your Mac slowing its CPU and GPU down to cool off, and

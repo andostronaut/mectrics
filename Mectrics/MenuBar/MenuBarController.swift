@@ -70,6 +70,9 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     @objc private func systemColorsDidChange() {
         for statusItem in items.values { statusItem.invalidateCachedRender() }
         compactHealthItem?.invalidateCachedRender()
+        // The logo's badge tint is a dynamic system colour too, and it keeps its
+        // identity when the user picks a new accent.
+        logoItem?.invalidateCachedRender()
         refresh()
     }
 
@@ -95,21 +98,23 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         logoItem?.remove()
         logoItem = nil
 
-        if model.compactHealthEnabled {
-            let healthItem = CompactHealthStatusItem()
-            healthItem.onClick = { [weak self] in
-                self?.toggleHealthPopover()
-            }
-            compactHealthItem = healthItem
-        }
         switch model.menuBarStyle {
         case .singleIcon:
+            // No Compact Health item here: the logo carries the health state and the
+            // dashboard leads with the condition, so a second icon would say it twice.
             let logo = MectricsStatusItem()
             logo.onClick = { [weak self] in
                 self?.toggleDashboardPopover()
             }
             logoItem = logo
         case .items:
+            if model.compactHealthEnabled {
+                let healthItem = CompactHealthStatusItem()
+                healthItem.onClick = { [weak self] in
+                    self?.toggleHealthPopover()
+                }
+                compactHealthItem = healthItem
+            }
             for (id, component) in model.orderedEnabledItems {
                 let statusItem = MetricStatusItem(id: id, component: component)
                 statusItem.onClick = { [weak self] moduleID in
@@ -121,11 +126,14 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         refresh()
     }
 
-    /// Updates the live values of all items. The logo is a static template image, so
-    /// under the single icon only the Compact Health item has anything to draw.
+    /// Updates the live values of all items. Under the single icon the only thing that
+    /// can change is the logo's health badge, and only on a severity transition — both
+    /// health items drop an update that repeats the state they already show.
     func refresh() {
         let accent = model.accentNSColor
-        compactHealthItem?.update(model.compactHealthState)
+        let health = model.compactHealthState
+        compactHealthItem?.update(health)
+        logoItem?.update(health)
         // History is shared by every item of the same module, and only charted
         // components need it at all.
         var histories: [MetricID: [Double]] = [:]

@@ -19,7 +19,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   for a menu bar that is already crowded, or for anyone who would rather have the numbers
   one click away than always in view. Your separate-items layout is kept exactly as it was
   and comes back when you switch back to **Separate**, and nothing changes on update:
-  separate items stay the default. Compact Health works the same in both styles.
+  separate items stay the default.
+- **The Compact icon is also the health indicator.** It takes on a badge — the same symbol
+  the Attention Log uses — when an alert becomes active, and the dashboard opens with what
+  is wrong at the top. There is no second item beside it to say the same thing, so Compact
+  really is one icon. The separate **Compact Health** item is unchanged for the Separate
+  style, and your choice about it is remembered while you are in Compact.
+- **Cards can be taken off the dashboard from the dashboard.** **Edit** above the grid, then
+  click a card to remove it. Adding stays in **Settings → Menu Bar**, where every module
+  your Mac reports is listed along with what it costs to read.
+- Moving between the grid and a module's detail now slides, so the dashboard reads as one
+  place with two depths instead of two panels swapped under the pointer. It follows Reduce
+  Motion, where the change is immediate rather than merely quicker.
 
 ### Fixed
 

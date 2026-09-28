@@ -79,10 +79,17 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   (`MenuBarStyle.watchedModules`) — modules with an item, or with a dashboard card under the
   single icon. Sampling, widgets, summaries, onboarding, and recovery actions go through
   them, never through `enabledComponents` directly.
-- **The logo item is fixed-width and static.** `MectricsStatusItem` has a fixed, even
-  length, so its even-sided template image sits on whole pixels at 1x. Image, label, and
-  tooltip are assigned once at construction; a template follows light, dark, and tinted
-  menu bars by itself, so it is never reassigned.
+- **The logo item is fixed-width, and it is also the health item.** `MectricsStatusItem`
+  has a fixed, even length, so its even-sided template image sits on whole pixels at 1x.
+  A badge **never changes that size**: a mark that grew when something went wrong would
+  move every item after it. The accessibility label is assigned once; the image, tint,
+  value, and tooltip change only on a severity transition, and an update repeating the
+  state already shown is dropped before it reaches AppKit. The mark stays a template, so
+  it follows light, dark, and tinted menu bars by itself.
+- **Health is a shape, not a colour.** The badge is the same symbol the Attention Log and
+  Compact Health use, punched out of the M so the two read as two marks; the tint only
+  reinforces it. A state that could only be seen as a colour is not readable in a tinted
+  menu bar or with any colour vision.
 
 ## 4. Surfaces and Settings
 
@@ -91,7 +98,17 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   **Compact Health** item, and the single icon's dashboard. The dashboard is a transient
   popover in the shared `NSPopover`, on screen only from a click until the next click
   elsewhere. Do not reintroduce a second always-visible rendering surface.
-- The Compact Health item is independent of the menu bar style and appears in both.
+- **One health indicator per style, never two.** With separate items it is the optional
+  **Compact Health** item. Under the single icon the logo carries the state itself and
+  there is no Compact Health item at all: the dashboard already leads with the condition,
+  so a second icon beside it would put the same thing in the menu bar twice — the
+  duplication that retired the floating panel. `compactHealthEnabled` is kept rather than
+  cleared when the style changes, so switching back restores the menu bar the user had.
+- **Removing is on the surface; adding is in Settings.** The dashboard can take its own
+  cards off, because that is the common errand and the card is right there. It never
+  offers the modules it is *not* showing — a popover that did would become the pane it
+  links to, and the pane is where a module's cost is stated. This is the one deliberate
+  exception to "Settings holds configuration": it edits a set the surface already shows.
 - The bundled CLI is a headless **automation interface**, not a second live dashboard. It
   reuses the app's saved rules, offers event streaming and one-shot checks, and keeps
   standard output pipe-safe. `check` and alert streaming sample only the metrics they need;
@@ -205,6 +222,11 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
 - **A closed popover releases its content.** Its window is only ordered out, so a view
   tree kept in it would go on observing the model and running `.task` loops off screen.
   Every opening installs fresh content.
+- **Follow the sampling cycle only if the value can change that often.** Reading `latest`
+  ties a view to every cycle, which is right for a reading and wrong for anything coarser:
+  the dashboard's uptime reads in minutes, so it is driven by a one-minute `TimelineView`
+  rather than re-evaluated sixty times for every time it has news. The health badge is the
+  same rule at the other end — it changes on a severity transition, not on a cycle.
 - **A Settings pane's own body must never read a value that changes every cycle.**
   Live readings belong to small leaf views (`MenuBarComponentPreview`, `AlertRuleLiveLine`,
   `AlertRuleSummary`), and those leaves reserve a fixed width from the same template the

@@ -151,8 +151,14 @@ chosen under Settings → Menu Bar → Style:
 Each style keeps its own choices: separate items read `enabledComponents`, the single icon
 reads `dashboardModules`, and neither ever writes the other's. Switching back to separate
 items therefore restores the exact layout that was there before, however long the single
-icon was in use. The optional Compact Health item is independent of the style and appears
-in either.
+icon was in use.
+
+Each style also has exactly one health indicator. With separate items it is the optional
+Compact Health item; under the single icon the logo carries the state itself and no Compact
+Health item is created, because the dashboard already leads with the condition and a second
+icon beside it would put the same thing in the menu bar twice. `compactHealthEnabled` is
+kept rather than cleared while the single icon is in use, so switching back restores the
+menu bar the user had.
 
 ### Separate items
 
@@ -178,15 +184,23 @@ in either.
 
 `MectricsStatusItem` has nothing to redraw. Its image is a template drawn in code from the
 app icon's geometry (`MectricsGlyph`), so it is sharp at every backing scale, and AppKit
-tints a template for light, dark, and tinted menu bars on its own. The image, the
-accessibility label, and the tooltip are therefore assigned once, when the item is created,
-and never again — the per-cycle work for this item is none at all. The item's length is
+tints a template for light, dark, and tinted menu bars on its own. The item's length is
 fixed (the same 26 pt slot the Compact Health item reserves) and even, and the 20 × 14 pt
 image has whole, even sides, so at 1x the logo sits on whole pixels instead of being
 resampled into a blur.
 
-The status item list under the single icon is the logo and, if enabled, Compact Health,
-so very little can change it. `MenuBarStyle.itemKeys` is empty for this style, which means a
+This item is also the style's health indicator. When a condition routed to health becomes
+active, the logo takes on a badge — the same symbol the Attention Log and Compact Health
+use — punched out of the M so the two read as two marks, with the severity tint only
+reinforcing a signal the shape already carries. The badged mark is **the same size** as the
+plain one: the item reserves a fixed width, and a logo that grew when something went wrong
+would move every item after it. The accessibility label is assigned once; the image, tint,
+accessibility value, and tooltip change only on a severity transition, and an update that
+repeats the state already shown is dropped before it reaches AppKit. Per-cycle work for
+this item is therefore still none — the badge is not on a timer.
+
+The status item list under the single icon is the logo, and nothing else, so very little
+can change it. `MenuBarStyle.itemKeys` is empty for this style, which means a
 component becoming available underneath it never triggers a rebuild, and turning a
 dashboard module on or off goes through `AppModel.onWatchedModulesChanged` — republish the
 widgets, update Energy Guard, adjust what an open dashboard reports as visible — rather than
@@ -207,7 +221,21 @@ second surface the floating panel was (see [Compact Health](#compact-health)).
   the `uptime` command (`ProcessInfo.systemUptime` stops while the Mac sleeps). A card
   without a sample shows a dash and its data state, never a zero. Clicking a card replaces
   the grid with that module's `DetailPopoverView` inside the same popover, and
-  `DashboardFormat` gives the card and the detail the same primary value.
+  `DashboardFormat` gives the card and the detail the same primary value. The two are one
+  container with two branches, so moving between them is not the popover appearing again;
+  they slide like a push and a pop, the popover's own height following because AppKit
+  animates a content-size change while `animates` is on. Reduce Motion makes the change
+  immediate rather than merely quicker.
+- **The grid can take its own cards off; it cannot add them.** `Edit` above the grid puts
+  every card into a mode where a click removes it instead of drilling in — one card, one
+  meaning at a time, and no small control to hit. Adding stays in the Menu Bar pane, which
+  lists every module this Mac reports along with what it costs to read. A popover that also
+  offered the modules it is *not* showing would become the pane it links to. Removing the
+  last card leaves editing and hands the grid to the empty hint, which links there anyway.
+- The Device card's uptime is driven by a one-minute `TimelineView`, not by the sampling
+  cycle. It reads in days, hours, and minutes, so a minute is as often as the string can
+  change; following `latest` would re-evaluate the card sixty times for every time it had
+  news.
 - The default cards are CPU, Memory, Battery, Network, and Disk. GPU and Fans are `.heavy`
   providers, so the dashboard offers them but never turns them on for anyone.
 - The popover's own body reads only settings. Each card is a leaf view that reads the
@@ -272,8 +300,13 @@ stays quiet and turns into a warning only when an alert routed to it activates. 
 viewing therefore lives entirely in the menu bar and its popovers, and no second
 always-visible surface should be reintroduced. The single icon's dashboard is one of those
 popovers: it gathers every chosen reading in one place, but only between a click and the
-next click elsewhere, and the worst condition routed to Compact Health leads it as a banner.
-The Compact Health item, when enabled, stays in the menu bar in both styles.
+next click elsewhere, and the worst condition routed to health leads it as a banner.
+
+That banner is why the single icon has no Compact Health item of its own. The two would
+read the same `compactHealthConditions` and show the same worst condition, one in a banner
+and one in an icon beside it — the duplication this section exists to record. Under the
+single icon the state rides on the logo as a badge instead, so the style is one icon in
+fact and not only in name. Separate items keep the Compact Health item unchanged.
 
 The bundled `mectrics` CLI is a read-only automation interface for unattended machines,
 not another dashboard. The app owns configuration. The CLI reads its enabled rules and can:

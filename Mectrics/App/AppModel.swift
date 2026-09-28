@@ -191,13 +191,21 @@ final class AppModel {
 
     /// Optional one-item health summary. Existing metric items and their layout are
     /// preserved when this is toggled.
+    /// Whether a separate Compact Health item stands in the menu bar.
+    ///
+    /// Only the separate-items style has one. Under the single icon the logo carries the
+    /// health state itself, so this choice adds no item there — but it is kept rather
+    /// than cleared, so switching back restores the menu bar the user last had.
     var compactHealthEnabled: Bool {
         didSet {
             defaults.set(
                 compactHealthEnabled,
                 forKey: Self.compactHealthEnabledKey
             )
-            if compactHealthEnabled != oldValue { onModulesChanged?() }
+            guard compactHealthEnabled != oldValue else { return }
+            // Under the single icon no status item depends on this, and the menu bar is
+            // rebuilt only when its list of items changes.
+            if menuBarStyle == .items { onModulesChanged?() }
         }
     }
 

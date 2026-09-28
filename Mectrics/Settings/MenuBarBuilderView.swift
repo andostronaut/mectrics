@@ -103,13 +103,43 @@ struct MenuBarBuilderView: View {
                 Text("Appearance")
             }
 
-            Section {
-                Toggle(
-                    "Show Compact Health item",
-                    isOn: $model.compactHealthEnabled
-                )
-            } footer: {
-                Text("One extra menu bar item that stays quiet until an alert sent to it becomes active.")
+            // The single icon has no separate health item: its logo carries the state
+            // and the dashboard leads with the condition, so the switch would offer to
+            // say the same thing twice.
+            switch model.menuBarStyle {
+            case .items:
+                Section {
+                    Toggle(
+                        "Show Compact Health item",
+                        isOn: $model.compactHealthEnabled
+                    )
+                } footer: {
+                    Text("One extra menu bar item that stays quiet until an alert sent to it becomes active.")
+                }
+            case .singleIcon:
+                Section {
+                    LabeledContent(
+                        String(
+                            localized: "builder.health.label",
+                            defaultValue: "Health"
+                        )
+                    ) {
+                        Text(
+                            String(
+                                localized: "builder.health.onTheIcon",
+                                defaultValue: "On the Mectrics icon"
+                            )
+                        )
+                        .foregroundStyle(.secondary)
+                    }
+                } footer: {
+                    Text(
+                        String(
+                            localized: "builder.health.singleIcon.footer",
+                            defaultValue: "The icon takes on a badge when an alert sent to it becomes active, and the dashboard opens with what is wrong. No second item is needed."
+                        )
+                    )
+                }
             }
         }
         .formStyle(.grouped)
@@ -165,7 +195,8 @@ struct MenuBarBuilderView: View {
 
     private var previewStrip: some View {
         HStack(spacing: ExperienceSpacing.medium) {
-            if model.compactHealthEnabled {
+            // Only the separate-items style puts a health item of its own in the bar.
+            if model.compactHealthEnabled && model.menuBarStyle == .items {
                 CompactHealthPreview(model: model)
             }
             switch model.menuBarStyle {
@@ -184,9 +215,9 @@ struct MenuBarBuilderView: View {
                         .foregroundStyle(.secondary)
                 }
             case .singleIcon:
-                // Monochrome, like the template image the menu bar draws.
-                MectricsGlyphView(showsTip: false)
-                    .frame(width: 22, height: 15)
+                // The real mark the menu bar draws, badge and all, rather than a
+                // look-alike: a chip is only honest if it is the thing it previews.
+                MectricsLogoPreview(model: model)
                     .accessibilityElement()
                     .accessibilityLabel(
                         String(
@@ -412,6 +443,30 @@ private struct CompactHealthPreview: View {
         Image(systemName: state.symbolName)
             .accessibilityLabel("Compact Health")
             .accessibilityValue(state.localizedName)
+    }
+}
+
+/// The single icon as the menu bar actually draws it: the same template image, badged
+/// with the same health state, tinted the same way.
+///
+/// Reading the real `NSImage` rather than rebuilding the mark in SwiftUI is what keeps
+/// the chip honest — there is no second copy of the badge geometry to drift out of step.
+/// Its own body reads the health state, which changes on a severity transition and not
+/// on a sampling cycle, so this leaf is not a per-cycle cost.
+private struct MectricsLogoPreview: View {
+    let model: AppModel
+
+    var body: some View {
+        let state = model.compactHealthState
+        let isNormal = state == .normal
+        Image(
+            nsImage: MectricsGlyph.menuBarImage(
+                badge: isNormal ? nil : state.symbolName
+            )
+        )
+        .renderingMode(.template)
+        .foregroundStyle(isNormal ? Color.primary : Color(nsColor: state.tint))
+        .accessibilityValue(state.localizedName)
     }
 }
 

@@ -356,6 +356,99 @@ final class SingleIconMenuBarTests: XCTestCase {
         }
     }
 
+    // MARK: - The logo as the health item
+
+    /// The single icon is also the health item, and the item reserves a fixed width, so
+    /// a badge must not make the mark any bigger. A logo that grew when something went
+    /// wrong would move every item after it — the one thing the menu bar may never do.
+    @MainActor
+    func testBadgingTheLogoNeverChangesItsSize() {
+        let plain = MectricsGlyph.menuBarImage.size
+        for state in CompactHealthState.allCases where state != .normal {
+            let badged = MectricsGlyph.menuBarImage(badge: state.symbolName)
+            XCTAssertEqual(badged.size, plain, "\(state.rawValue)")
+            XCTAssertTrue(badged.isTemplate, "\(state.rawValue)")
+        }
+    }
+
+    /// No state, no badge: nothing is wrong, so the mark is the plain shared logo and
+    /// not a second image that merely looks like it.
+    @MainActor
+    func testNoBadgeIsThePlainSharedLogo() {
+        XCTAssertIdentical(
+            MectricsGlyph.menuBarImage(badge: nil),
+            MectricsGlyph.menuBarImage
+        )
+    }
+
+    /// Built once per symbol. The badge changes on a severity transition, not on a
+    /// sampling cycle, so this stays off the per-cycle path either way — but drawing it
+    /// again on every read would undo that.
+    @MainActor
+    func testBadgedLogosAreBuiltOncePerState() {
+        let symbol = CompactHealthState.critical.symbolName
+        XCTAssertIdentical(
+            MectricsGlyph.menuBarImage(badge: symbol),
+            MectricsGlyph.menuBarImage(badge: symbol)
+        )
+    }
+
+    /// Each state has to be legible as a shape, because colour alone is not a signal
+    /// someone with any colour vision, or a tinted menu bar, can rely on. Every badged
+    /// mark differs from the plain logo, and no two states draw the same thing.
+    @MainActor
+    func testEveryHealthStateDrawsItsOwnMark() throws {
+        var inkedPixels: [String: [Bool]] = [:]
+        let plain = try coverage(of: MectricsGlyph.menuBarImage)
+        for state in CompactHealthState.allCases where state != .normal {
+            let mark = try coverage(
+                of: MectricsGlyph.menuBarImage(badge: state.symbolName)
+            )
+            XCTAssertNotEqual(mark, plain, "\(state.rawValue) is invisible")
+            for (other, otherMark) in inkedPixels {
+                XCTAssertNotEqual(
+                    mark,
+                    otherMark,
+                    "\(state.rawValue) and \(other) draw the same mark"
+                )
+            }
+            inkedPixels[state.rawValue] = mark
+        }
+        XCTAssertEqual(inkedPixels.count, CompactHealthState.allCases.count - 1)
+    }
+
+    /// The badge is punched out of the M rather than laid on top of it, so the two read
+    /// as two marks. A badged logo therefore inks *less* of its trailing-bottom corner
+    /// than a plain one does at the gap, while still inking the corner itself.
+    @MainActor
+    func testTheBadgeIsSetApartFromTheM() throws {
+        let badged = try render(
+            MectricsGlyph.menuBarImage(badge: CompactHealthState.warning.symbolName),
+            scale: 2
+        )
+        let plain = try render(MectricsGlyph.menuBarImage, scale: 2)
+        let width = badged.pixelsWide, height = badged.pixelsHigh
+
+        // The badge lives in the trailing-bottom quarter, and draws something there.
+        // Not the corner pixel itself: a triangle leaves its bounding box's corners
+        // empty, which is the shape doing its job.
+        let quadrant = (width / 2..<width).flatMap { x in
+            (height / 2..<height).map { (x, $0) }
+        }
+        XCTAssertTrue(
+            quadrant.contains { alpha(badged, $0.0, $0.1) > 0 },
+            "The badge drew nothing"
+        )
+        // And the M has been cut away around it, so the two read as two marks rather
+        // than one blob.
+        XCTAssertTrue(
+            quadrant.contains {
+                alpha(plain, $0.0, $0.1) > 0 && alpha(badged, $0.0, $0.1) == 0
+            },
+            "The badge was drawn over the M, not set apart from it"
+        )
+    }
+
     // MARK: - Uptime
 
     /// Uptime counts from boot, sleep included, so it can never be less than the time
@@ -399,6 +492,14 @@ final class SingleIconMenuBarTests: XCTestCase {
     /// Row 0 is the top row.
     private func alpha(_ bitmap: NSBitmapImageRep, _ x: Int, _ y: Int) -> CGFloat {
         bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0
+    }
+
+    /// Which pixels an image inks, as a comparable shape independent of colour.
+    private func coverage(of image: NSImage) throws -> [Bool] {
+        let bitmap = try render(image, scale: 2)
+        return (0..<bitmap.pixelsHigh).flatMap { y in
+            (0..<bitmap.pixelsWide).map { x in alpha(bitmap, x, y) > 0 }
+        }
     }
 
     private func assertBox(
