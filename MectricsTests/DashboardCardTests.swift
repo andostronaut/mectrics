@@ -131,7 +131,7 @@ final class DashboardCardTests: XCTestCase {
             "total": 16 * gigabyte,
             "pressureLevel": Double(MemoryPressureLevel.warning.rawValue),
             "swapTotal": 2 * gigabyte,
-            "swapUsed": 512 * 1024 * 1024
+            "swapUsed": 0.5 * gigabyte
         ])
         XCTAssertEqual(
             memory.caption,
