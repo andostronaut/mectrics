@@ -142,7 +142,13 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   links to, and the pane is where a module's cost is stated. This is the one deliberate
   exception to "Settings holds configuration": it edits a set the surface already shows.
   The Mac's own card is a card like any other here: it can be taken off and put back the
-  same way. One corner, one affordance — the remove control owns the top-trailing corner,
+  same way, and it has a row in the modules list beside the readings — a list that showed
+  every card except one would leave that one adjustable only from inside the popover it
+  appears in. Its placement offers Dashboard and Off, never the menu bar: a version string
+  and an uptime are not a reading that changes, and an item that never moves is a slot
+  spent on nothing. Its name lives in `DeviceCardName`, read by both the card and the row,
+  because two copies of a name drift — they had already drifted to "Device" and
+  "System info". One corner, one affordance — the remove control owns the top-trailing corner,
   so a hovered card shows its "opens details" chevron at the bottom instead.
   The control is a **real button revealed on hover, plus a context menu**, never a drawn
   badge over the card's own button: an overlay swallows the clicks aimed at it, which is

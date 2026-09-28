@@ -52,8 +52,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   add and remove them from there. Each module's placement is a pop-up rather than three
   buttons repeated down the page, and the grouped choice is named for where the module
   goes — **Dashboard** — instead of the unanswerable *Grouped*.
-- The Mac's own card — macOS version and uptime — can be taken off the dashboard like
-  any other, and put back from the Dashboard's row in **Settings → Menu Bar**.
+- The Mac's own **Device** card — macOS version and uptime — can be taken off the
+  dashboard like any other, and it now has a row of its own in **Settings → Menu Bar**
+  beside the readings, rather than being adjustable only from inside the dashboard.
 - Cards can be taken off the dashboard from the dashboard: hover a card for its remove
   button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
   your Mac reports is listed along with what it costs to read.

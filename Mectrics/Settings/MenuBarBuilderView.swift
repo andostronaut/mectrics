@@ -38,6 +38,10 @@ struct MenuBarBuilderView: View {
                 ForEach(model.availableModules, id: \.self) { id in
                     moduleRow(id)
                 }
+                // The Mac's own card is in the Dashboard like any reading, so it is in
+                // this list like any module. It has no live value to draw, so the menu
+                // bar is not one of its choices.
+                DeviceModuleRow(model: model)
             } header: {
                 Text("Modules")
             } footer: {
@@ -175,10 +179,9 @@ private struct DashboardItemRow: View {
     private var addable: [MetricID] {
         model.availableModules.filter { model.placement(of: $0) != .grouped }
     }
-    /// The Mac's own card is a card like any other, so it is listed and added here too.
-    private var systemInfoTitle: String {
-        String(localized: "builder.dashboardRow.systemInfo", defaultValue: "System info")
-    }
+    /// The Mac's own card is a card like any other, so it is listed and added here too,
+    /// under the name the card itself carries.
+    private var systemInfoTitle: String { DeviceCardName.localized }
     private var isEmpty: Bool { grouped.isEmpty && !model.showsDeviceCard }
     private var hasAnythingToAdd: Bool { !addable.isEmpty || !model.showsDeviceCard }
 
@@ -266,6 +269,43 @@ private struct DashboardItemRow: View {
                 ))
             }
         }
+    }
+}
+
+/// The Mac's own card as a row in the modules list.
+///
+/// It sits with the modules because it is one of the things the Dashboard can hold, and
+/// a list that showed every reading except this one would leave it adjustable only from
+/// inside the popover it appears in. Its placement offers Dashboard and Off and not the
+/// menu bar: a macOS version and an uptime are not a reading that changes, and a menu
+/// bar item that never moves is a slot spent on nothing.
+private struct DeviceModuleRow: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        LabeledContent {
+            Picker(
+                String(
+                    localized: "builder.placement.label",
+                    defaultValue: "Placement"
+                ),
+                selection: Binding(
+                    get: { model.showsDeviceCard ? MenuBarPlacement.grouped : .off },
+                    set: { model.showsDeviceCard = $0 == .grouped }
+                )
+            ) {
+                Text(MenuBarPlacement.grouped.localizedName)
+                    .tag(MenuBarPlacement.grouped)
+                Text(MenuBarPlacement.off.localizedName)
+                    .tag(MenuBarPlacement.off)
+            }
+            .pickerStyle(.menu)
+            .labelsHidden()
+            .fixedSize()
+        } label: {
+            Label(DeviceCardName.localized, systemImage: "desktopcomputer")
+        }
+        .accessibilityElement(children: .contain)
     }
 }
 

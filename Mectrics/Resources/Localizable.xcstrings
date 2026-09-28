@@ -148,43 +148,43 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remove System Info from Dashboard"
+            "value": "Remove Device from Dashboard"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sistem bilgisini panelden çıkar"
+            "value": "Aygıtı panelden çıkar"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Убрать сведения о системе с панели"
+            "value": "Убрать «Устройство» с панели"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quitar la info del sistema del panel"
+            "value": "Quitar Dispositivo del panel"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Retirer les infos système du tableau de bord"
+            "value": "Retirer Appareil du tableau de bord"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remover a info do sistema do painel"
+            "value": "Remover Dispositivo do painel"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "从仪表板移除系统信息"
+            "value": "从仪表板移除“设备”"
           }
         }
       }
@@ -19671,53 +19671,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "从仪表板移除 %@"
-          }
-        }
-      }
-    },
-    "builder.dashboardRow.systemInfo": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "System info"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sistem bilgisi"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сведения о системе"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Info del sistema"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Infos système"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Info do sistema"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "系统信息"
           }
         }
       }

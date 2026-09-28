@@ -201,6 +201,14 @@ struct DashboardPopoverView: View {
 
 // MARK: - Layout and formatting
 
+/// What the Mac's own card is called, in the one place both the card and the Settings
+/// row that manages it can read it. Two copies of a name drift.
+enum DeviceCardName {
+    static var localized: String {
+        String(localized: "dashboard.device", defaultValue: "Device")
+    }
+}
+
 /// One cell of the dashboard grid.
 enum DashboardCard: Hashable {
     case module(MetricID)
@@ -696,7 +704,7 @@ private struct DashboardDeviceCard: View {
             symbol: model.availableModules.contains(.battery)
                 ? "laptopcomputer"
                 : "desktopcomputer",
-            title: String(localized: "dashboard.device", defaultValue: "Device")
+            title: DeviceCardName.localized
         ) {
             VStack(alignment: .leading, spacing: ExperienceSpacing.tiny) {
                 DashboardValueText(text: Self.version)
@@ -723,7 +731,7 @@ private struct DashboardDeviceCard: View {
         .dashboardRemovable(
             String(
                 localized: "dashboard.device.remove",
-                defaultValue: "Remove System Info from Dashboard"
+                defaultValue: "Remove Device from Dashboard"
             ),
             onRemove: onRemove
         )
