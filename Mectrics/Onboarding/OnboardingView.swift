@@ -65,7 +65,7 @@ struct OnboardingView: View {
     private var livePreview: some View {
         VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
             HStack {
-                Text("Live menu bar preview")
+                Text("Live preview")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
                 Spacer()

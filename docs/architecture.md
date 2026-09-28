@@ -495,10 +495,17 @@ about twenty minutes, and it is not understood.
 
 ### Where 1.5.0 actually stands
 
-The gate is a gate, so what it currently reports is recorded rather than remembered. Both
-runs below are 31 measured minutes after a five-minute warm-up, five-second sampling, on
+**These numbers are stale and are kept only until they are re-measured.** They were taken
+when a clean install shipped four menu bar items that each redrew every second. It now
+ships one, and that one is a template image that changes on a severity transition rather
+than on a cycle — so by this document's own cost model, the configuration these figures
+describe is no longer the one anybody runs. Re-measure before quoting them anywhere, and
+before the next release: the CPU gate below is failing against a default that no longer
+exists.
+
+Both runs are 31 measured minutes after a five-minute warm-up, five-second sampling, on
 AC power, on the reference Mac, with `scripts/performance/profiles/alerts-ac.json` — ten
-enabled rules over the four menu bar items a clean install ships with.
+enabled rules over the four menu bar items that clean install shipped.
 
 | Gate | Budget | Menu bar only | Settings open |
 |---|---|---|---|

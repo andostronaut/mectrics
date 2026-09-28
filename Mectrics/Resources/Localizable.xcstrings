@@ -11167,46 +11167,6 @@
         }
       }
     },
-    "Live menu bar preview": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Previsualización en directo de la barra de menús"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aperçu en direct de la barre des menus"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pré-visualização da barra de menus em tempo real"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Предпросмотр строки меню"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Canlı menü çubuğu önizlemesi"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "菜单栏实时预览"
-          }
-        }
-      }
-    },
     "macOS may retain the widget’s protected cache after removal and reclaims it once the extension is gone.": {
       "localizations": {
         "es": {
@@ -19791,6 +19751,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "关键数据一直摆在菜单栏里，不用特地打开另一个窗口。"
+          }
+        }
+      }
+    },
+    "Live preview": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canlı önizleme"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Живой просмотр"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa en vivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aperçu en direct"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pré-visualização ao vivo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时预览"
           }
         }
       }
