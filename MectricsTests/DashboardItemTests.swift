@@ -24,13 +24,10 @@ final class DashboardItemTests: XCTestCase {
         }
     }
 
-    func testEveryPlacementHasItsOwnNameAndDescription() {
+    func testEveryPlacementHasItsOwnName() {
         let names = MenuBarPlacement.allCases.map(\.localizedName)
-        let descriptions = MenuBarPlacement.allCases.map(\.localizedDescription)
         XCTAssertFalse(names.contains { $0.isEmpty })
-        XCTAssertFalse(descriptions.contains { $0.isEmpty })
         XCTAssertEqual(Set(names).count, MenuBarPlacement.allCases.count)
-        XCTAssertEqual(Set(descriptions).count, MenuBarPlacement.allCases.count)
     }
 
     /// Grouped wins over left-over components, because a grouped module keeps the
@@ -111,31 +108,35 @@ final class DashboardItemTests: XCTestCase {
             (.network, .netActivity)
         ]
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: false),
-            ["cpu|value", "cpu|temperature", "network|netActivity"]
+            MenuBarPlacement.itemKeys(orderedItems: items),
+            [
+                MenuBarPlacement.dashboardItemKey,
+                "cpu|value", "cpu|temperature", "network|netActivity"
+            ]
         )
+        // The Dashboard is permanent, so the list is never empty.
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: [], showsDashboardItem: false),
-            []
+            MenuBarPlacement.itemKeys(orderedItems: []),
+            [MenuBarPlacement.dashboardItemKey]
         )
     }
 
-    /// The Mectrics item is one entry however many cards it holds, so adding or
-    /// removing a card never tears down and re-creates every status item.
-    func testTheMectricsItemIsOneEntryWhateverItHolds() {
+    /// The Dashboard leads the menu bar and is one entry however many cards it holds,
+    /// so grouping a module never tears down and re-creates every status item.
+    func testTheDashboardLeadsAndIsOneEntryWhateverItHolds() {
         let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
         XCTAssertEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true),
-            ["cpu|value", MenuBarPlacement.dashboardItemKey]
+            MenuBarPlacement.itemKeys(orderedItems: items),
+            [MenuBarPlacement.dashboardItemKey, "cpu|value"]
         )
     }
 
-    /// Gaining or losing the item itself is a genuine change in which items exist.
-    func testTheMectricsItemAppearingChangesTheItemList() {
-        let items: [(module: MetricID, component: MenuBarComponent)] = [(.cpu, .value)]
-        XCTAssertNotEqual(
-            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: false),
-            MenuBarPlacement.itemKeys(orderedItems: items, showsDashboardItem: true)
+    /// It cannot be switched off, so the menu bar can never be emptied completely — an
+    /// app with no items left has no way back into its own settings.
+    func testTheMenuBarAlwaysHasTheDashboard() {
+        XCTAssertTrue(
+            MenuBarPlacement.itemKeys(orderedItems: [])
+                .contains(MenuBarPlacement.dashboardItemKey)
         )
     }
 
@@ -176,7 +177,6 @@ final class DashboardItemTests: XCTestCase {
         ]
         let before = MenuBarPlacement.itemKeys(
             orderedItems: orderedItems(components, grouped: [.disk]),
-            showsDashboardItem: true
         )
         // Taking Disk off the dashboard clears its components.
         var after = components
@@ -185,7 +185,6 @@ final class DashboardItemTests: XCTestCase {
             before,
             MenuBarPlacement.itemKeys(
                 orderedItems: orderedItems(after, grouped: []),
-                showsDashboardItem: true
             ),
             "Removing a card changed the menu bar's item list"
         )
@@ -206,12 +205,17 @@ final class DashboardItemTests: XCTestCase {
 
     // MARK: - Grouped modules as stored
 
-    /// Nothing is grouped unless it was asked for, so an update leaves every existing
-    /// menu bar exactly as it was.
-    func testNothingIsGroupedByDefault() {
-        XCTAssertTrue(MenuBarPlacement.defaultGroupedModules.isEmpty)
+    /// A clean install starts with CPU and memory as cards, so the menu bar holds one
+    /// icon and a first run is not a row of numbers nobody asked for.
+    func testACleanInstallStartsWithCPUAndMemoryAsCards() {
+        XCTAssertEqual(MenuBarPlacement.defaultGroupedModules, [.cpu, .memory])
         XCTAssertEqual(
             MenuBarPlacement.groupedModules(stored: nil, available: laptop),
+            [.cpu, .memory]
+        )
+        // And never a module this Mac cannot report.
+        XCTAssertEqual(
+            MenuBarPlacement.groupedModules(stored: nil, available: [.disk]),
             []
         )
     }
@@ -249,7 +253,7 @@ final class DashboardItemTests: XCTestCase {
                 stored: defaults.array(forKey: "groupedModules") as? [String],
                 available: laptop
             ),
-            []
+            Set(MenuBarPlacement.defaultGroupedModules)
         )
     }
 

@@ -13,7 +13,9 @@ struct OnboardingView: View {
 
     static let contentSize = CGSize(width: 540, height: 430)
     private static let stepCount = 3
-    private static let recommendedIDs: [MetricID] = [.cpu, .memory, .battery, .network]
+    /// The two a first run starts with, matching `MenuBarPlacement.defaultGroupedModules`
+    /// so what onboarding marks is what the Dashboard already holds.
+    private static let recommendedIDs: [MetricID] = [.cpu, .memory]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -138,7 +140,7 @@ struct OnboardingView: View {
                 ),
                 subtitle: String(
                     localized: "onboarding.modules.subtitle",
-                    defaultValue: "Recommended modules are marked. Fine-tune components later in Settings."
+                    defaultValue: "These open in the Dashboard, one click from the menu bar. Give any of them an item of its own later, in Settings."
                 )
             )
 
@@ -292,16 +294,20 @@ struct OnboardingView: View {
         model.availableModules.filter { !Self.recommendedIDs.contains($0) }
     }
 
-    /// Onboarding turns modules on and off; where each one goes is chosen later, in
-    /// the Menu Bar pane, and a module turned on here takes its own item.
+    /// Onboarding asks only what to watch. Everything turned on here opens in the
+    /// Dashboard; giving a module an item of its own is a later, separate choice, made
+    /// in the Menu Bar pane where the cost of a permanent item is stated.
     private var modulesSectionTitle: String {
-        String(localized: "Menu bar modules")
+        String(
+            localized: "onboarding.modules.section",
+            defaultValue: "In the Dashboard"
+        )
     }
 
     private var recommendedHint: String {
         String(
             localized: "onboarding.recommended.hint",
-            defaultValue: "Recommended menu bar module"
+            defaultValue: "Recommended module"
         )
     }
 

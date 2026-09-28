@@ -68,10 +68,6 @@ final class AppModel {
                 forKey: Self.groupedModulesKey
             )
             guard groupedModules != oldValue else { return }
-            let hadItem = Self.showsDashboardItem(
-                grouped: oldValue,
-                enabledForHealth: dashboardItemEnabled
-            )
             resetFailuresForNewlyWatchedModules(
                 previouslyWatched: MenuBarPlacement.watchedModules(
                     available: availableModules,
@@ -80,14 +76,10 @@ final class AppModel {
                 )
             )
             refreshActiveMetrics()
-            // Adding the first card creates the Dashboard, and taking the last one
-            // away can remove it — those are the only card changes the menu bar has to
-            // be rebuilt for. Otherwise the watched set changed and no status item did.
-            if hadItem == showsDashboardItem {
-                onWatchedModulesChanged?()
-            } else {
-                onModulesChanged?()
-            }
+            // The Dashboard is always in the menu bar, so a card can never create or
+            // remove a status item: the watched set changed and the item list did not,
+            // which is the lighter of the two notifications.
+            onWatchedModulesChanged?()
         }
     }
 
@@ -186,25 +178,6 @@ final class AppModel {
 
     /// Optional one-item health summary. Existing metric items and their layout are
     /// preserved when this is toggled.
-    /// Keep the Dashboard in the menu bar even with no module grouped into it, for
-    /// its health badge alone. Grouping a module shows the item whatever this says.
-    ///
-    /// This is what the Compact Health switch became. That item watched the same
-    /// conditions and showed the same worst one as the dashboard's banner, so it was two
-    /// icons answering one question; the answer now rides on the Dashboard, and this
-    /// switch decides whether that icon is there when nothing else calls for it.
-    var dashboardItemEnabled: Bool {
-        didSet {
-            defaults.set(
-                dashboardItemEnabled,
-                forKey: Self.dashboardItemEnabledKey
-            )
-            guard dashboardItemEnabled != oldValue else { return }
-            // Only matters when no card is already keeping the item on screen.
-            if groupedModules.isEmpty { onModulesChanged?() }
-        }
-    }
-
     /// Whether the dashboard shows the card for the Mac itself — its macOS version and
     /// uptime. It is a card like any other, so it can be taken off from the dashboard and
     /// put back from the Dashboard's row in Settings.
@@ -212,22 +185,6 @@ final class AppModel {
         didSet {
             defaults.set(showsDeviceCard, forKey: Self.showsDeviceCardKey)
         }
-    }
-
-    /// Whether the Dashboard is in the menu bar: because a module is grouped into
-    /// it, or because it was asked for on its own.
-    var showsDashboardItem: Bool {
-        Self.showsDashboardItem(
-            grouped: groupedModules,
-            enabledForHealth: dashboardItemEnabled
-        )
-    }
-
-    private static func showsDashboardItem(
-        grouped: Set<MetricID>,
-        enabledForHealth: Bool
-    ) -> Bool {
-        enabledForHealth || !grouped.isEmpty
     }
 
     /// Whether Mectrics looks for a new version on its own.
@@ -450,10 +407,7 @@ final class AppModel {
 
     /// Identity of every metric status item the menu bar shows, in display order.
     private var menuBarItemKeys: [String] {
-        MenuBarPlacement.itemKeys(
-            orderedItems: orderedEnabledItems,
-            showsDashboardItem: showsDashboardItem
-        )
+        MenuBarPlacement.itemKeys(orderedItems: orderedEnabledItems)
     }
 
     /// The same list for a different set of components, so a `didSet` can ask whether the
@@ -472,10 +426,7 @@ final class AppModel {
                     .filter { components[id]?.contains($0) ?? false }
                     .map { (module: id, component: $0) }
             }
-        return MenuBarPlacement.itemKeys(
-            orderedItems: items,
-            showsDashboardItem: showsDashboardItem
-        )
+        return MenuBarPlacement.itemKeys(orderedItems: items)
     }
 
     /// Temperature belonging to a hardware-domain module, if the SMC exposes a
@@ -527,9 +478,6 @@ final class AppModel {
     private static let currentOnboardingVersion = 2
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
-    private static let dashboardItemEnabledKey = "dashboardItemEnabled"
-    /// Read only to migrate someone who had the Compact Health item switched on.
-    private static let legacyCompactHealthEnabledKey = "compactHealthEnabled"
     private static let groupedModulesKey = "groupedModules"
     private static let showsDeviceCardKey = "showsDeviceCard"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
@@ -560,11 +508,6 @@ final class AppModel {
         self.accentChoice = AccentChoice(rawValue: defaults.string(forKey: Self.accentKey) ?? "") ?? .pink
         // Icons default to on; only an explicit user choice turns them off.
         self.showMenuBarIcons = defaults.object(forKey: Self.menuBarIconsKey) as? Bool ?? true
-        // The Compact Health item became the Dashboard, which does strictly more,
-        // so someone who had it keeps an item in the same slot without being asked.
-        self.dashboardItemEnabled = defaults.object(
-            forKey: Self.dashboardItemEnabledKey
-        ) as? Bool ?? defaults.bool(forKey: Self.legacyCompactHealthEnabledKey)
         self.adaptMonitoringToEnergyState =
             defaults.object(forKey: Self.adaptMonitoringKey) as? Bool ?? true
         self.automaticUpdateChecks = defaults.bool(
@@ -601,12 +544,13 @@ final class AppModel {
     /// Module-level switch, for surfaces that ask only whether a module is shown at
     /// all — onboarding, where placement is not a question yet.
     ///
-    /// Enabling gives the module its own items. A surface that knows better says so
-    /// with `setPlacement(_:for:)` instead: a detail inside the Dashboard brings a
-    /// module back as a card, because that is where its reader is standing.
+    /// Enabling puts the module in the Dashboard, because that is where a reading
+    /// starts: the menu bar is the scarce surface, and a module earns its own item by
+    /// being asked for one. A surface that knows better says so with
+    /// `setPlacement(_:for:)`.
     func setEnabled(_ enabled: Bool, for id: MetricID) {
         guard enabled != (placement(of: id) != .off) else { return }
-        setPlacement(enabled ? .ownItems : .off, for: id)
+        setPlacement(enabled ? .grouped : .off, for: id)
     }
 
     /// Normalized history for sparklines.
@@ -732,15 +676,16 @@ final class AppModel {
         }
         // Migrate the one-component-per-module era (enabledModules + moduleComponents).
         let legacyChoices = Self.loadModuleComponents(from: defaults)
-        let legacyEnabled: [MetricID]
-        if let raw = defaults.array(forKey: Self.enabledKey) as? [String] {
-            legacyEnabled = raw.compactMap { MetricID(rawValue: $0) }.filter(available.contains)
-        } else {
-            // A clean install begins with a useful, restrained menu bar. Fine-grained
-            // components remain available in the visual builder.
-            let recommended: Set<MetricID> = [.cpu, .memory, .battery, .network]
-            legacyEnabled = available.filter(recommended.contains)
+        guard let raw = defaults.array(forKey: Self.enabledKey) as? [String] else {
+            // A clean install: no items of their own at all. The menu bar starts with
+            // the Dashboard and nothing else, holding the cards in
+            // `MenuBarPlacement.defaultGroupedModules`, and a module earns an item of
+            // its own by being asked for one.
+            return [:]
         }
+        let legacyEnabled = raw
+            .compactMap { MetricID(rawValue: $0) }
+            .filter(available.contains)
         var result: [MetricID: Set<MenuBarComponent>] = [:]
         for id in (legacyEnabled.isEmpty ? available : legacyEnabled) {
             let choice = legacyChoices[id] ?? .default(for: id)

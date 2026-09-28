@@ -29,13 +29,14 @@ live in your menu bar — readable at a glance, and the bar never jumps around.<
 
 ## What it is
 
-**mectrics** is a native macOS menu bar system monitor. Each module you enable draws a
-readable value — with a live sparkline where a trend actually tells you something — and
-stays out of the way otherwise. A click opens a detail popover with the numbers behind it.
-You choose that per module: CPU can have its own item, always in view, while Disk and
-Battery are grouped behind one Dashboard icon that opens them as a dashboard of cards. That
-icon is also the health indicator — it takes on a badge when something needs attention,
-and the dashboard opens with what is wrong.
+**mectrics** is a native macOS menu bar system monitor. It starts as a single icon: click
+it and your readings open as a dashboard of cards. Give any module an item of its own and
+it draws a readable value in the menu bar — with a live sparkline where a trend actually
+tells you something — and stays out of the way otherwise. So CPU can sit in view every
+second while Disk and Battery stay one click away, and you decide that per module.
+
+That one icon is also the health indicator: it takes on a badge when something needs
+attention, and the dashboard opens with what is wrong at the top.
 
 It is built around three commitments:
 
@@ -49,7 +50,7 @@ Those numbers come from half-hour runs of the shipping build, not from one glanc
 Activity Monitor, and they are checked before a release rather than assumed. What you see
 will differ with your Mac, how many items you put in the menu bar, and whether you are on
 battery — more items means more work, because each one redraws every second. A grouped
-module costs nothing per second at all: the Dashboard item is redrawn only when its health
+module costs nothing per second at all: the Dashboard is redrawn only when its health
 badge changes, which is not something that happens on a timer.
 
 The project holds itself to deliberately tight internal budgets — 60 MB of memory and 3% of
@@ -123,9 +124,8 @@ throughput for Disk, and so on.
   has actually been slowed, and memory can be nearly full with nothing wrong.
 - **Attention Log** — a local, exportable record of what tripped and when.
 - **Energy Guard** — sampling that steps down under Low Power Mode and thermal pressure.
-- **Menu bar builder** — a visual layout editor with presets, where you toggle components
-  by clicking their live preview instead of guessing from a list, and choose whether each
-  module takes the menu bar or the dashboard.
+- **Menu bar builder** — choose where each module goes, and pick the look of the ones in
+  the menu bar by clicking a live preview instead of guessing from a list.
 - **Widgets** — small / medium / large WidgetKit overviews for Notification Center.
 - **Diagnostics** — a local-only system summary you can copy or export as plain text.
 - **Headless CLI** — a read-only automation interface for alert events and one-shot health

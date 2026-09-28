@@ -20,7 +20,6 @@ import MetricsKit
 /// a changing value inside a leaf.
 struct MenuBarBuilderView: View {
     @Bindable var model: AppModel
-    @Environment(\.undoManager) private var undoManager
 
     var body: some View {
         Form {
@@ -40,11 +39,7 @@ struct MenuBarBuilderView: View {
                     moduleRow(id)
                 }
             } header: {
-                HStack {
-                    Text("Modules")
-                    Spacer()
-                    presetsMenu
-                }
+                Text("Modules")
             } footer: {
                 Text(
                     String(
@@ -73,74 +68,20 @@ struct MenuBarBuilderView: View {
         .onDisappear { model.endBuilderPreview() }
     }
 
-    // MARK: - Presets
-
-    private var presetsMenu: some View {
-        Menu("Presets") {
-            ForEach(MenuBarLayoutPreset.all) { preset in
-                // The count is what a preset costs in menu bar space, which is the
-                // scarce resource here, so it is part of the choice.
-                let count = preset.itemCount(
-                    available: Set(model.availableModules)
-                )
-                Button(
-                    String(
-                        localized: "preset.menuTitle",
-                        defaultValue: "\(preset.name) · \(count) items"
-                    )
-                ) {
-                    apply(preset)
-                }
-            }
-        }
-        .menuStyle(.borderlessButton)
-        .fixedSize()
-    }
-
-    /// A preset describes the whole menu bar, so it empties the Dashboard as well as
-    /// setting the components. Writing the components alone would leave a module grouped
-    /// from before, and the preset would claim it was in the menu bar while the icon
-    /// still held it.
-    ///
-    /// The presets themselves stay on one axis — how much detail you want — so none of
-    /// them groups anything. A "one icon" preset would be a second axis, which is the
-    /// mistake this set was rebuilt to undo.
-    private func apply(_ preset: MenuBarLayoutPreset) {
-        let priorComponents = model.enabledComponents
-        let priorGrouped = model.groupedModules
-        let components = preset.resolved(available: Set(model.availableModules))
-        guard components != priorComponents || !priorGrouped.isEmpty else { return }
-        undoManager?.registerUndo(withTarget: model) { target in
-            target.groupedModules = priorGrouped
-            target.enabledComponents = priorComponents
-        }
-        undoManager?.setActionName(
-            String(
-                localized: "preset.undo.action",
-                defaultValue: "Apply Menu Bar Preset"
-            )
-        )
-        // Ungroup first, so no module is briefly in two places at once.
-        model.groupedModules = []
-        model.enabledComponents = components
-    }
-
     // MARK: - Preview strip
 
     private var previewStrip: some View {
         HStack(spacing: ExperienceSpacing.medium) {
             // The menu bar's own order: the Dashboard first, then every module
             // showing items of its own.
-            if model.showsDashboardItem {
-                DashboardItemPreview(model: model)
-                    .accessibilityElement()
-                    .accessibilityLabel(
-                        String(
-                            localized: "dashboard.statusItem.accessibilityLabel",
-                            defaultValue: "Mectrics"
-                        )
+            DashboardItemPreview(model: model)
+                .accessibilityElement()
+                .accessibilityLabel(
+                    String(
+                        localized: "dashboard.statusItem.accessibilityLabel",
+                        defaultValue: "Dashboard"
                     )
-            }
+                )
             ForEach(model.orderedEnabledItems.indices, id: \.self) { index in
                 let entry = model.orderedEnabledItems[index]
                 MenuBarPreviewItem(
@@ -148,11 +89,6 @@ struct MenuBarBuilderView: View {
                     id: entry.module,
                     component: entry.component
                 )
-            }
-            if model.orderedEnabledItems.isEmpty && !model.showsDashboardItem {
-                Text("Nothing in the menu bar yet. Pick a look for a module below.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
         }
@@ -225,16 +161,13 @@ struct MenuBarBuilderView: View {
 /// The Dashboard as a row in the modules list.
 ///
 /// It is one of the things the menu bar holds, so it reads like the modules beside it:
-/// a name, the same placement pop-up, and its contents underneath. What a module shows
-/// as component chips, this shows as the readings grouped into it — and they can be
-/// added and taken out from right here, which is where someone looking at the icon's
-/// row expects to do it.
+/// a name, where it sits, and its contents underneath. What a module shows as component
+/// chips, this shows as the readings grouped into it — added and taken out from right
+/// here, which is where someone looking at this row expects to do it.
 ///
-/// Its placement offers only Menu bar and Off, and even Off is unavailable while
-/// something is grouped inside: an icon holding readings cannot be the one thing not
-/// in the menu bar. A control that cannot act is hidden rather than dimmed elsewhere in
-/// this pane, but here the pop-up still answers "where is this?", so it stays and says
-/// so (AGENTS.md §4).
+/// It is the one row with no placement control, because it is the one item that cannot
+/// move: its health badge is the only thing in the app that speaks up unasked, and a
+/// menu bar that could be emptied completely would leave no way back into Settings.
 private struct DashboardItemRow: View {
     @Bindable var model: AppModel
 
@@ -252,25 +185,11 @@ private struct DashboardItemRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
             LabeledContent {
-                Picker(
-                    String(
-                        localized: "builder.placement.label",
-                        defaultValue: "Placement"
-                    ),
-                    selection: Binding(
-                        get: { model.showsDashboardItem ? MenuBarPlacement.ownItems : .off },
-                        set: { model.dashboardItemEnabled = $0 == .ownItems }
-                    )
-                ) {
-                    Text(MenuBarPlacement.ownItems.localizedName)
-                        .tag(MenuBarPlacement.ownItems)
-                    Text(MenuBarPlacement.off.localizedName)
-                        .tag(MenuBarPlacement.off)
-                }
-                .pickerStyle(.menu)
-                .labelsHidden()
-                .fixedSize()
-                .disabled(!grouped.isEmpty)
+                // No control: this one cannot move. A pop-up that only ever reads
+                // "Menu bar" would be a dimmed thing to click past, so its place is
+                // stated as text instead (AGENTS.md §4).
+                Text(MenuBarPlacement.ownItems.localizedName)
+                    .foregroundStyle(.secondary)
             } label: {
                 HStack(spacing: ExperienceSpacing.small) {
                     DashboardItemPreview(model: model)

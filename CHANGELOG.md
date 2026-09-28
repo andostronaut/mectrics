@@ -20,6 +20,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   one click away than always in view. Your separate-items layout is kept exactly as it was
   and comes back when you switch back to **Separate**, and nothing changes on update:
   separate items stay the default.
+- **Mectrics now starts as a single icon.** A clean install puts CPU and memory in the
+  Dashboard rather than four readings in your menu bar, so a first run spends one slot and
+  you decide what deserves more. Give any module an item of its own whenever you want, in
+  **Settings → Menu Bar**. An update changes nothing: the menu bar you already have is the
+  menu bar you keep.
+- **The Dashboard icon is always there and cannot be switched off.** Its health badge is
+  the only thing in Mectrics that speaks up without being asked, and an app with no menu
+  bar items left would have no way back into its own settings.
+- **Menu bar presets are gone.** A ready-made layout answered "how much detail do you
+  want" while the pane now asks "where does each module go", and replacing every answer at
+  once fits a list you read row by row badly.
 - **The grouped readings live behind one icon called the Dashboard.** It is named for what
   it opens, not for the logo it wears, and the name is the same everywhere: the placement
   you pick, the row in Settings, and the action on a card all say Dashboard.
@@ -34,7 +45,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   already did, so it was two icons answering one question. The icon now takes on a badge —
   the same symbol the Attention Log uses — when an alert becomes active, and the dashboard
   opens with what is wrong at the top. Nothing is lost: the switch that added that item now
-  keeps the Dashboard item in the menu bar when nothing is grouped into it, and a Mac that
+  keeps the Dashboard in the menu bar when nothing is grouped into it, and a Mac that
   had it on keeps an item in the same slot.
 - **Settings → Menu Bar** now reads as a list of what your menu bar holds, with the
   Dashboard as a row of its own: the readings grouped into it sit under it, and you
@@ -42,7 +53,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   buttons repeated down the page, and the grouped choice is named for where the module
   goes — **Dashboard** — instead of the unanswerable *Grouped*.
 - The Mac's own card — macOS version and uptime — can be taken off the dashboard like
-  any other, and put back from the Dashboard item's row in **Settings → Menu Bar**.
+  any other, and put back from the Dashboard's row in **Settings → Menu Bar**.
 - Cards can be taken off the dashboard from the dashboard: hover a card for its remove
   button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
   your Mac reports is listed along with what it costs to read.

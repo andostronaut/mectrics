@@ -47,7 +47,7 @@ final class DashboardStatusItem: NSObject {
         button.setAccessibilityLabel(
             String(
                 localized: "dashboard.statusItem.accessibilityLabel",
-                defaultValue: "Mectrics"
+                defaultValue: "Dashboard"
             )
         )
         update(.normal)

@@ -37,32 +37,14 @@ enum MenuBarPlacement: String, CaseIterable, Identifiable {
             return String(localized: "placement.off", defaultValue: "Off")
         }
     }
-
-    var localizedDescription: String {
-        switch self {
-        case .ownItems:
-            return String(
-                localized: "placement.ownItems.description",
-                defaultValue: "Its own item, always in view."
-            )
-        case .grouped:
-            return String(
-                localized: "placement.grouped.description",
-                defaultValue: "A card in the Dashboard's dashboard."
-            )
-        case .off:
-            return String(
-                localized: "placement.off.description",
-                defaultValue: "Not shown in the menu bar."
-            )
-        }
-    }
 }
 
 extension MenuBarPlacement {
-    /// Modules a clean install groups into the Dashboard. GPU and Fans are `.heavy`
-    /// (SMC/IOKit) providers, so they are offered but never turned on for anyone.
-    static let defaultGroupedModules: [MetricID] = []
+    /// What a clean install puts in the Dashboard: the two readings everyone wants and
+    /// nothing else. They start as cards rather than as items because the menu bar is
+    /// the scarce surface — a first run leaves exactly one icon there, and a module
+    /// earns its own item by being asked for one.
+    static let defaultGroupedModules: [MetricID] = [.cpu, .memory]
 
     /// Where a module currently is, derived from the two sets that actually decide it.
     ///
@@ -96,15 +78,17 @@ extension MenuBarPlacement {
     }
 
     /// Identity of every status item the menu bar shows, in display order, so a rebuild
-    /// happens when the list changes and not when a value does. The Dashboard is one
-    /// entry however many cards it holds — adding a card changes no status item.
+    /// happens when the list changes and not when a value does.
+    ///
+    /// The Dashboard always leads it. It is the app's one permanent item — its health
+    /// badge is the only thing that speaks up unasked, and an app whose whole menu bar
+    /// can be switched off has no way back — so it is one entry here however many cards
+    /// it holds, and grouping a module changes no status item at all.
     static func itemKeys(
-        orderedItems: [(module: MetricID, component: MenuBarComponent)],
-        showsDashboardItem: Bool
+        orderedItems: [(module: MetricID, component: MenuBarComponent)]
     ) -> [String] {
-        var keys = orderedItems.map { "\($0.module.rawValue)|\($0.component.rawValue)" }
-        if showsDashboardItem { keys.append(dashboardItemKey) }
-        return keys
+        [dashboardItemKey]
+            + orderedItems.map { "\($0.module.rawValue)|\($0.component.rawValue)" }
     }
 
     static let dashboardItemKey = "mectrics"

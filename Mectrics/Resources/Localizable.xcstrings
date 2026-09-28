@@ -189,6 +189,53 @@
         }
       }
     },
+    "onboarding.modules.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the Dashboard"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panelde"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На панели"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el panel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans le tableau de bord"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No painel"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在仪表板中"
+          }
+        }
+      }
+    },
     "placement.grouped": {
       "extractionState": "manual",
       "localizations": {
@@ -232,53 +279,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "仪表板"
-          }
-        }
-      }
-    },
-    "placement.grouped.description": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A card in the Dashboard, a click away."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Panelde bir kart, bir tık uzakta."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Карточка на панели, в одном клике."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una tarjeta en el panel, a un clic."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une carte dans le tableau de bord, à un clic."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Um cartão no painel, a um clique."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "仪表板中的一张卡片，一点即达。"
           }
         }
       }
@@ -330,53 +330,6 @@
         }
       }
     },
-    "placement.off.description": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not shown in the menu bar."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Menü çubuğunda gösterilmez."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не отображается в строке меню."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se muestra en la barra de menús."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non affiché dans la barre des menus."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não aparece na barra de menus."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不在菜单栏中显示。"
-          }
-        }
-      }
-    },
     "placement.ownItems": {
       "extractionState": "manual",
       "localizations": {
@@ -420,53 +373,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "菜单栏"
-          }
-        }
-      }
-    },
-    "placement.ownItems.description": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Its own item, always in view."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kendi ögesi, her zaman görünür."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Собственный элемент, всегда на виду."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Su propio elemento, siempre a la vista."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Son propre élément, toujours visible."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Um item próprio, sempre à vista."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "独立项目，始终可见。"
           }
         }
       }
@@ -12117,46 +12023,6 @@
         }
       }
     },
-    "Menu bar modules": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Módulos de la barra de menús"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modules de la barre des menus"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Módulos da barra de menus"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Модули строки меню"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Menü çubuğu modülleri"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "菜单栏模块"
-          }
-        }
-      }
-    },
     "menu.about": {
       "extractionState": "extracted_with_value",
       "localizations": {
@@ -14308,44 +14174,44 @@
       "localizations": {
         "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "Recommended modules are marked. Fine-tune components later in Settings."
-          }
-        },
-        "es": {
-          "stringUnit": {
             "state": "translated",
-            "value": "Los módulos recomendados están marcados. Podrás ajustar los componentes más tarde en Ajustes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les modules recommandés sont signalés. Vous pourrez ajuster les composants plus tard dans Réglages."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os módulos recomendados estão marcados. Você poderá ajustar os componentes depois em Ajustes."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рекомендуемые модули отмечены. Компоненты можно настроить позже в разделе «Настройки»."
+            "value": "These open in the Dashboard, one click from the menu bar. Give any of them an item of its own later, in Settings."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Önerilen modüller işaretlidir. Bileşenleri daha sonra Ayarlar’dan değiştirebilirsiniz."
+            "value": "Bunlar menü çubuğundan bir tık uzaktaki panelde açılır. İstediğine sonradan Ayarlar’dan kendi ögesini verebilirsin."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Они открываются на панели, в одном клике от строки меню. Любому из них можно позже дать собственный элемент в настройках."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se abren en el panel, a un clic de la barra de menús. Luego puedes darle a cualquiera su propio elemento en Ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ils s’ouvrent dans le tableau de bord, à un clic de la barre des menus. Vous pourrez donner à chacun son propre élément plus tard, dans les Réglages."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eles abrem no painel, a um clique da barra de menus. Depois você pode dar a qualquer um deles um item próprio nos Ajustes."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "打勾的是推荐模块。具体样式之后在设置里慢慢调。"
+            "value": "它们在仪表板中打开，距菜单栏一键之遥。之后可以在“设置”中为任意一个单独设立项目。"
           }
         }
       }
@@ -14590,44 +14456,44 @@
       "localizations": {
         "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "Recommended menu bar module"
-          }
-        },
-        "es": {
-          "stringUnit": {
             "state": "translated",
-            "value": "Módulo de barra de menú recomendado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Module de barre de menu recommandé"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Módulo de barra de menu recomendado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рекомендуемый модуль строки меню"
+            "value": "Recommended module"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Önerilen menü çubuğu modülü"
+            "value": "Önerilen modül"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рекомендуемый модуль"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Módulo recomendado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module recommandé"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Módulo recomendado"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "推荐的菜单栏模块"
+            "value": "推荐的模块"
           }
         }
       }
@@ -14955,241 +14821,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "权限"
-          }
-        }
-      }
-    },
-    "preset.detailed.name": {
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Detailed"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Подробный"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ayrıntılı"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detalhado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Détaillé"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detallado"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "详细"
-          }
-        }
-      }
-    },
-    "preset.essentials.name": {
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Essentials"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Основные"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Essentiel"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Essenciais"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esenciales"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "基础"
-          }
-        }
-      }
-    },
-    "preset.menuTitle": {
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ · %2$lld items"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · %2$lld elementos"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · элементов: %2$lld"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · %2$lld öğe"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · %2$lld éléments"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · %2$lld itens"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · %2$lld 个项目"
-          }
-        }
-      }
-    },
-    "preset.recommended.name": {
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Recommended"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recomendado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recommandé"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recomendado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рекомендуемые"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Önerilen"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "推荐"
-          }
-        }
-      }
-    },
-    "preset.undo.action": {
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Apply Menu Bar Preset"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aplicar preajuste de la barra de menús"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appliquer le préréglage de la barre des menus"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aplicar Predefinição da Barra de Menus"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Применить набор для строки меню"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Menü Çubuğu Hazır Ayarını Uygula"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "应用菜单栏预设"
           }
         }
       }

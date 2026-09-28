@@ -94,16 +94,14 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         logoItem?.remove()
         logoItem = nil
 
-        // The Dashboard leads, then every module showing items of its own. There is
-        // no separate health item: the Dashboard carries the state and the dashboard
-        // leads with the condition, so a second icon would say it twice.
-        if model.showsDashboardItem {
-            let logo = DashboardStatusItem()
-            logo.onClick = { [weak self] in
-                self?.toggleDashboardPopover()
-            }
-            logoItem = logo
+        // The Dashboard leads, always. There is no separate health item: it carries the
+        // state itself and its popover leads with the condition, so a second icon would
+        // say the same thing twice.
+        let logo = DashboardStatusItem()
+        logo.onClick = { [weak self] in
+            self?.toggleDashboardPopover()
         }
+        logoItem = logo
         for (id, component) in model.orderedEnabledItems {
             let statusItem = MetricStatusItem(id: id, component: component)
             statusItem.onClick = { [weak self] moduleID in
