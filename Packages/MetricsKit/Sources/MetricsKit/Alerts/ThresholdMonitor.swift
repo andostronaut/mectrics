@@ -80,9 +80,44 @@ public final class ThresholdMonitor {
 
         let enabledIDs = Set(rules.compactMap { $0.value.enabled ? $0.key : nil })
         for id in Set(states.keys).subtracting(enabledIDs) {
-            violationStartedAt[id] = nil
-            states[id] = .normal
+            stopWatching(id, rule: rules[id], latest: latest)
         }
+    }
+
+    /// A rule that is no longer enabled stops being a condition, and everything showing
+    /// it has to be told.
+    ///
+    /// Resetting only this object's own state was not enough: a consumer learns a
+    /// condition is over from an update, so with none sent, a rule switched off while it
+    /// was alerting left its condition on every surface that had been told about it —
+    /// the menu bar, the dashboard's banner, and an Attention Log event that never
+    /// closed. The transition is `.recovered` because that is what it means to every
+    /// consumer: this condition is no longer active. It is the same wording a rule gets
+    /// when its threshold is raised past the current value.
+    private func stopWatching(
+        _ id: MetricID,
+        rule: AlertRule?,
+        latest: [MetricID: MetricSample]
+    ) {
+        let priorState = state(for: id)
+        let startedAt = violationStartedAt[id]
+        violationStartedAt[id] = nil
+        states[id] = .normal
+        guard priorState != .normal else { return }
+        let sample = latest[id]
+        let measured = sample.map {
+            $0.unit == .celsius ? $0.value : $0.value * 100
+        } ?? 0
+        onConditionUpdate?(AlertConditionUpdate(
+            metricID: id,
+            state: .normal,
+            transition: .recovered,
+            measuredValue: measured,
+            thresholdValue: Double(rule?.thresholdPercent ?? 0),
+            durationSeconds: rule?.durationSeconds ?? 0,
+            startedAt: startedAt,
+            destinations: rule?.destinations ?? []
+        ))
     }
 
     /// Battery alerts below its threshold; all other metric rules alert above it.

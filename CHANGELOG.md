@@ -37,6 +37,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Switching an alert rule off while it was alerting now clears it everywhere. The monitors
+  reset themselves but told nobody, and a surface only learns a condition is over from
+  being told — so the condition stayed on the menu bar and at the top of the dashboard, and
+  its Attention Log entry never closed, for a rule that was no longer watching anything. A
+  system signal whose reading becomes unavailable is cleared the same way, because a
+  condition that can no longer be read should not go on claiming your Mac is unwell.
 - Uptime in the CPU detail now counts from startup, sleep included, as the `uptime` command
   and System Information do. It showed the time the Mac had been awake, which stops while
   it sleeps, so on a laptop that sleeps every night it fell further behind every day. Uptime

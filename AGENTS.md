@@ -104,6 +104,12 @@ Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitig
   **Compact Health** item, and the single icon's dashboard. The dashboard is a transient
   popover in the shared `NSPopover`, on screen only from a click until the next click
   elsewhere. Do not reintroduce a second always-visible rendering surface.
+- **A condition that stops being watched must be announced, not just forgotten.** A rule
+  switched off, or a signal whose reading goes away, ends its condition — and every surface
+  showing it learns that only from an `onConditionUpdate`. A monitor that resets its own
+  state without emitting leaves the condition on the menu bar, in the dashboard's banner,
+  and as an Attention Log event that never closes. The transition is `.recovered`: to every
+  consumer it means this condition is no longer active, which is exactly what happened.
 - **One health indicator per style, never two.** With separate items it is the optional
   **Compact Health** item. Under the single icon the logo carries the state itself and
   there is no Compact Health item at all: the dashboard already leads with the condition,

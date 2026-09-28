@@ -460,3 +460,119 @@ final class AlertMonitorTests: XCTestCase {
         XCTAssertEqual(report.unavailable, [.battery])
     }
 }
+
+// MARK: - Switching a rule off ends its condition
+
+/// A rule switched off while it was alerting must tell everything showing it.
+///
+/// The monitors reset their own state for a rule that is no longer enabled, but sent no
+/// update, and a consumer only learns a condition is over from an update. So the
+/// condition stayed on the menu bar and in the dashboard's banner, and its Attention Log
+/// event never closed, for a rule the user had switched off.
+final class RuleDisabledEndsConditionTests: XCTestCase {
+    func testDisablingAnAlertingThresholdRuleEmitsRecovery() {
+        let monitor = ThresholdMonitor()
+        var updates: [AlertConditionUpdate] = []
+        monitor.onConditionUpdate = { updates.append($0) }
+
+        let sample = MetricSample(value: 0.9, unit: .fraction)
+        var rule = AlertRule(
+            enabled: true,
+            thresholdPercent: 70,
+            durationSeconds: 0,
+            cooldownSeconds: 0,
+            destinations: [.compactHealth, .attentionLog]
+        )
+        monitor.evaluate(latest: [.memory: sample], rules: [.memory: rule])
+        XCTAssertEqual(monitor.state(for: .memory), .active)
+
+        updates.removeAll()
+        rule.enabled = false
+        // The reading is still above the threshold: only the rule changed.
+        monitor.evaluate(latest: [.memory: sample], rules: [.memory: rule])
+
+        XCTAssertEqual(monitor.state(for: .memory), .normal)
+        XCTAssertEqual(updates.count, 1)
+        XCTAssertEqual(updates.first?.state, .normal)
+        XCTAssertEqual(updates.first?.transition, .recovered)
+        XCTAssertEqual(updates.first?.metricID, .memory)
+    }
+
+    /// And says it once, not on every cycle afterwards.
+    func testADisabledRuleIsAnnouncedOnceNotEveryCycle() {
+        let monitor = ThresholdMonitor()
+        var updates: [AlertConditionUpdate] = []
+        monitor.onConditionUpdate = { updates.append($0) }
+
+        let sample = MetricSample(value: 0.9, unit: .fraction)
+        var rule = AlertRule(
+            enabled: true,
+            thresholdPercent: 70,
+            durationSeconds: 0,
+            cooldownSeconds: 0
+        )
+        monitor.evaluate(latest: [.memory: sample], rules: [.memory: rule])
+        rule.enabled = false
+        updates.removeAll()
+        for _ in 0..<5 {
+            monitor.evaluate(latest: [.memory: sample], rules: [.memory: rule])
+        }
+        XCTAssertEqual(updates.count, 1)
+    }
+
+    func testDisablingAnAlertingSystemRuleEmitsRecovery() {
+        let monitor = SystemConditionMonitor()
+        var updates: [AlertConditionUpdate] = []
+        monitor.onConditionUpdate = { updates.append($0) }
+
+        let reading = SystemConditionReading(
+            .memoryPressure,
+            value: Double(MemoryPressureLevel.critical.rawValue)
+        )
+        var rule = SystemAlertRule(
+            enabled: true,
+            thresholdValue: Double(MemoryPressureLevel.warning.rawValue),
+            durationSeconds: 0,
+            cooldownSeconds: 0
+        )
+        monitor.evaluate(readings: [.memoryPressure: reading], rules: [.memoryPressure: rule])
+        XCTAssertEqual(monitor.state(for: .memoryPressure), .active)
+
+        updates.removeAll()
+        rule.enabled = false
+        monitor.evaluate(readings: [.memoryPressure: reading], rules: [.memoryPressure: rule])
+
+        XCTAssertEqual(monitor.state(for: .memoryPressure), .normal)
+        XCTAssertEqual(updates.count, 1)
+        XCTAssertEqual(updates.first?.transition, .recovered)
+        XCTAssertEqual(updates.first?.conditionKey, SystemAlertSignal.memoryPressure.conditionKey)
+    }
+
+    /// A signal whose reading disappears must stop claiming the Mac is unwell.
+    func testASignalThatCanNoLongerBeReadEndsItsCondition() {
+        let monitor = SystemConditionMonitor()
+        var updates: [AlertConditionUpdate] = []
+        monitor.onConditionUpdate = { updates.append($0) }
+
+        let rule = SystemAlertRule(
+            enabled: true,
+            thresholdValue: Double(MemoryPressureLevel.warning.rawValue),
+            durationSeconds: 0,
+            cooldownSeconds: 0
+        )
+        monitor.evaluate(
+            readings: [.memoryPressure: SystemConditionReading(
+                .memoryPressure,
+                value: Double(MemoryPressureLevel.critical.rawValue)
+            )],
+            rules: [.memoryPressure: rule]
+        )
+        XCTAssertEqual(monitor.state(for: .memoryPressure), .active)
+
+        updates.removeAll()
+        monitor.evaluate(readings: [:], rules: [.memoryPressure: rule])
+
+        XCTAssertEqual(monitor.state(for: .memoryPressure), .normal)
+        XCTAssertEqual(updates.first?.transition, .recovered)
+    }
+}

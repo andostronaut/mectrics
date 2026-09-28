@@ -32,7 +32,7 @@ public final class SystemConditionMonitor {
     ) {
         for (signal, rule) in rules where rule.enabled {
             guard let reading = readings[signal] else {
-                clearUnavailable(signal)
+                clearUnavailable(signal, rule: rule)
                 continue
             }
 
@@ -78,7 +78,7 @@ public final class SystemConditionMonitor {
             rules.compactMap { $0.value.enabled ? $0.key : nil }
         )
         for signal in Set(states.keys).subtracting(enabledSignals) {
-            clearUnavailable(signal)
+            clearUnavailable(signal, rule: rules[signal])
         }
     }
 
@@ -114,9 +114,35 @@ public final class SystemConditionMonitor {
         ))
     }
 
-    private func clearUnavailable(_ signal: SystemAlertSignal) {
+    /// The signal stopped being watched — its rule was switched off, or its reading
+    /// went away — so every surface showing it has to be told.
+    ///
+    /// Resetting only this object's own state was not enough: a consumer learns a
+    /// condition is over from an update, so with none sent, a signal switched off while
+    /// it was alerting left its condition on the menu bar, in the dashboard's banner,
+    /// and as an Attention Log event that never closed. A signal that can no longer be
+    /// read must stop claiming the Mac is unwell for the same reason.
+    private func clearUnavailable(
+        _ signal: SystemAlertSignal,
+        rule: SystemAlertRule?
+    ) {
+        let priorState = state(for: signal)
+        let startedAt = violationStartedAt[signal]
         violationStartedAt[signal] = nil
         states[signal] = .normal
+        guard priorState != .normal else { return }
+        onConditionUpdate?(AlertConditionUpdate(
+            conditionKey: signal.conditionKey,
+            metricID: signal.metricID,
+            state: .normal,
+            transition: .recovered,
+            measuredValue: 0,
+            unit: signal.unit,
+            thresholdValue: rule?.thresholdValue ?? 0,
+            durationSeconds: rule?.durationSeconds ?? 0,
+            startedAt: startedAt,
+            destinations: rule?.destinations ?? []
+        ))
     }
 
     private func emit(
