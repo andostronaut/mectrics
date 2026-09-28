@@ -39,7 +39,13 @@ may write in Turkish). Nothing from that chat leaks into the repo in another lan
   repository. The release procedure lives in `scripts/release.sh`, which is self-documenting
   through its required environment variables.
 
-Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/` (see `.gitignore`).
+Do **not** commit: `Mectrics.xcodeproj/`, `DerivedData/`, `.build/`, or
+`Packages/MetricsKit/Package.resolved` (see `.gitignore`). That last one is not an
+oversight: `xcodebuild` on the app writes the app's whole package graph into it — Sparkle
+included, though MetricsKit does not depend on Sparkle — and `swift build` in the package
+takes it out again, so whatever is committed is dirty after the next build either way.
+SwiftPM versions also disagree on its `originHash`. The package's one dependency is
+pinned to an exact version in `Package.swift`, so nothing rests on the file.
 
 ## 2. Internationalization (i18n)
 

@@ -7,6 +7,14 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 
+# MetricsKit's resolved graph has no stable committed state in this repo, because two
+# tools resolve it and disagree: `xcodebuild` on the app writes the app's whole graph
+# here — Sparkle included, though the package does not depend on it — and `swift build`
+# in the package removes it again. SwiftPM versions also disagree on `originHash`. The
+# package's one dependency is pinned to an exact version in Package.swift, so nothing
+# about reproducibility rests on this file.
+Packages/MetricsKit/Package.resolved
+
 # macOS
 .DS_Store
 
