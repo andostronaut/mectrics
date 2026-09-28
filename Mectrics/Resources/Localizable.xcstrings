@@ -1,157 +1,6 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": ""
-          }
-        }
-      }
-    },
-    "builder.mectricsItem.footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The icon takes on a badge when an alert becomes active, and opens a dashboard of whatever you group into it. Grouping a module shows it whether this is on or not."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bir uyarı etkinleştiğinde simge bir işaret alır ve içine topladığınız her şeyin panelini açar. Bir modülü topladığınızda simge, bu açık olmasa da görünür."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Когда предупреждение становится активным, значок получает отметку и открывает панель со всем, что вы в него сгруппировали. Сгруппированный модуль показывает значок независимо от этой настройки."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El icono recibe un distintivo cuando una alerta se activa y abre un panel con todo lo que agrupes en él. Agrupar un módulo lo muestra esté esto activado o no."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L’icône reçoit un badge lorsqu’une alerte devient active et ouvre un tableau de bord de tout ce que vous y regroupez. Regrouper un module l’affiche, que ceci soit activé ou non."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O ícone recebe um selo quando um alerta fica ativo e abre um painel com tudo o que você agrupar nele. Agrupar um módulo o exibe, esteja isto ligado ou não."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "当提醒激活时图标会显示标记，点击可打开你归入其中的所有内容的仪表板。归入任一模块后，无论此项是否开启都会显示图标。"
-          }
-        }
-      }
-    },
-    "builder.mectricsItem.footer.grouped": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The icon is in the menu bar because modules are grouped into it. It also carries the health badge."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modüller içine toplandığı için simge menü çubuğunda. Sağlık işaretini de o taşır."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Значок в строке меню, потому что в него сгруппированы модули. Он же несёт отметку состояния."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El icono está en la barra de menús porque hay módulos agrupados en él. También lleva el distintivo de estado."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L’icône est dans la barre des menus parce que des modules y sont regroupés. Elle porte aussi le badge de santé."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O ícone está na barra de menus porque há módulos agrupados nele. Ele também exibe o selo de saúde."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "因为有模块归入其中，图标才出现在菜单栏。健康标记也由它承载。"
-          }
-        }
-      }
-    },
-    "builder.mectricsItem.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Always show the Mectrics icon"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mectrics simgesini her zaman göster"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Всегда показывать значок Mectrics"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostrar siempre el icono de Mectrics"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toujours afficher l’icône Mectrics"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sempre mostrar o ícone do Mectrics"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "始终显示 Mectrics 图标"
-          }
-        }
-      }
-    },
     "builder.modules.placementFooter": {
       "extractionState": "manual",
       "localizations": {
@@ -289,53 +138,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "从仪表板移除"
-          }
-        }
-      }
-    },
-    "dashboard.card.remove.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takes this card off the dashboard"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bu kartı panelden çıkarır"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Убирает эту карточку с панели"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quita esta tarjeta del panel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retire cette carte du tableau de bord"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove este cartão do painel"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将此卡片从仪表板移除"
           }
         }
       }
@@ -5993,53 +5795,6 @@
         }
       }
     },
-    "builder.modules.footer": {
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Modules appear only when this Mac reports the required hardware. Temperatures are available inside CPU, Memory, and GPU."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los módulos solo aparecen cuando este Mac detecta el hardware necesario. Las temperaturas están disponibles dentro de CPU, Memoria y GPU."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les modules apparaissent uniquement lorsque ce Mac détecte le matériel requis. Les températures sont disponibles dans Processeur, Mémoire et GPU."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os módulos aparecem somente quando este Mac detecta o hardware necessário. As temperaturas estão disponíveis em CPU, Memória e GPU."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Модули отображаются только тогда, когда этот Mac обнаруживает необходимое оборудование. Температура доступна в разделах ЦП, Память и ГП."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modüller yalnızca bu Mac gerekli donanımı algıladığında görünür. Sıcaklık seçenekleri CPU, Bellek ve GPU içinde yer alır."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "只有这台 Mac 具备相应硬件时，对应模块才会出现。温度分别藏在 CPU、内存和 GPU 里。"
-          }
-        }
-      }
-    },
     "Cancel": {
       "localizations": {
         "es": {
@@ -6377,46 +6132,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "清除日志"
-          }
-        }
-      }
-    },
-    "Compact Health": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resumen de estado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumé de l’état"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resumo do Estado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сводка состояния"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Durum Özeti"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "精简状态"
           }
         }
       }
@@ -11546,46 +11261,6 @@
         }
       }
     },
-    "Live essentials stay visible in the menu bar without opening a dashboard.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los datos esenciales permanecen visibles en la barra de menús sin abrir otra ventana."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les données essentielles restent visibles dans la barre des menus, sans ouvrir une autre fenêtre."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os dados essenciais ficam visíveis na barra de menus sem abrir outra janela."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Основные показатели всегда видны в строке меню; открывать отдельное окно не нужно."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Önemli canlı değerler, başka bir pencere açmadan menü çubuğunda görünür kalır."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关键数据一直摆在菜单栏里，不用特地打开什么面板去看。"
-          }
-        }
-      }
-    },
     "Live menu bar preview": {
       "localizations": {
         "es": {
@@ -11622,46 +11297,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "菜单栏实时预览"
-          }
-        }
-      }
-    },
-    "macOS is not allowing notifications yet, so rules can only show on the Compact Health item.": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пока macOS не разрешает уведомления, правила могут отображаться только в сводке состояния."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS n’autorise pas encore les notifications ; les règles peuvent donc uniquement apparaître dans le résumé de l’état."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS henüz bildirimlere izin vermediği için kurallar yalnızca Durum Özeti öğesinde gösterilebilir."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS todavía no permite las notificaciones, así que las reglas solo pueden mostrarse en el resumen de estado."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O macOS ainda não permite notificações; por isso, as regras só podem aparecer no Resumo do Estado."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS 还没放行通知，所以规则目前只能显示在精简状态项目上。"
           }
         }
       }
@@ -16963,46 +16598,6 @@
         }
       }
     },
-    "Show Compact Health item": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показывать сводку состояния"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostrar el resumen de estado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afficher le résumé de l’état"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Durum Özeti öğesini göster"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostrar o Resumo do Estado"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示精简状态项目"
-          }
-        }
-      }
-    },
     "Show module icons": {
       "localizations": {
         "ru": {
@@ -19624,46 +19219,6 @@
         }
       }
     },
-    "When a rule alerts it notifies you, marks the Compact Health item, and is recorded in the Attention Log. A rule rests for 15 minutes after it alerts.": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "При срабатывании правила Mectrics отправляет уведомление, отмечает сводку состояния и добавляет событие в журнал предупреждений. После этого правило приостанавливается на 15 минут."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bir kural tetiklendiğinde bildirim gönderilir, Durum Özeti öğesi işaretlenir ve olay Uyarı Geçmişine kaydedilir. Kural, uyarıdan sonra 15 dakika bekler."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lorsqu’une règle se déclenche, Mectrics envoie une notification, signale le résumé de l’état et consigne l’événement dans l’historique des alertes. La règle se met ensuite en pause pendant 15 minutes."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cuando se activa una regla, Mectrics envía una notificación, marca el resumen de estado y registra el evento en el historial de alertas. Después, la regla queda en pausa durante 15 minutos."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quando uma regra é ativada, o Mectrics envia uma notificação, sinaliza o Resumo do Estado e registra o evento no Histórico de Alertas. Depois, a regra fica em pausa por 15 minutos."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "规则触发时，Mectrics 会通知你、标记精简状态项目，并记进关注日志。触发之后，这条规则会先歇 15 分钟。"
-          }
-        }
-      }
-    },
     "Your Mac, clear at a glance": {
       "localizations": {
         "es": {
@@ -20532,6 +20087,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "系统信息"
+          }
+        }
+      }
+    },
+    "When a rule alerts it notifies you, badges the Dashboard icon, and is recorded in the Attention Log. A rule rests for 15 minutes after it alerts.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir kural uyarı verdiğinde sizi bilgilendirir, Panel simgesini işaretler ve Dikkat Günlüğü’ne kaydedilir. Bir kural uyarı verdikten sonra 15 dakika dinlenir."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда правило срабатывает, оно уведомляет вас, помечает значок панели и записывается в журнал внимания. После срабатывания правило отдыхает 15 минут."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando una regla se activa te avisa, marca el icono del panel y queda registrada en el Registro de atención. Una regla descansa 15 minutos tras activarse."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand une règle se déclenche, elle vous avertit, marque l’icône du tableau de bord et est consignée dans le Journal d’attention. Une règle se repose 15 minutes après s’être déclenchée."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando uma regra dispara, ela notifica você, marca o ícone do painel e fica registrada no Registro de atenção. Uma regra descansa 15 minutos após disparar."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "规则触发时会通知你、为仪表板图标加上标记，并记入注意日志。规则触发后会休息 15 分钟。"
+          }
+        }
+      }
+    },
+    "macOS is not allowing notifications yet, so rules can only badge the Dashboard icon.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS henüz bildirimlere izin vermiyor, bu yüzden kurallar yalnızca Panel simgesini işaretleyebilir."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS пока не разрешает уведомления, поэтому правила могут только помечать значок панели."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS aún no permite notificaciones, así que las reglas solo pueden marcar el icono del panel."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS n’autorise pas encore les notifications, les règles ne peuvent donc que marquer l’icône du tableau de bord."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O macOS ainda não permite notificações, então as regras só podem marcar o ícone do painel."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 尚未允许通知，因此规则只能为仪表板图标加上标记。"
+          }
+        }
+      }
+    },
+    "Live essentials stay visible in the menu bar without opening another window.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos esenciales permanecen visibles en la barra de menús sin abrir otra ventana."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les données essentielles restent visibles dans la barre des menus, sans ouvrir une autre fenêtre."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os dados essenciais ficam visíveis na barra de menus sem abrir outra janela."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Основные показатели всегда видны в строке меню; открывать отдельное окно не нужно."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önemli canlı değerler, başka bir pencere açmadan menü çubuğunda görünür kalır."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关键数据一直摆在菜单栏里，不用特地打开另一个窗口。"
           }
         }
       }

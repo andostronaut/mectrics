@@ -598,14 +598,14 @@ final class AppModel {
         return availableModules.filter(enabled.contains)
     }
 
-    /// Module-level switch (onboarding, recovery actions). With separate items,
-    /// enabling adds the default component if the module has none and disabling
-    /// removes all of its components; under the single icon it adds the module to the
-    /// dashboard or takes it out.
+    /// Module-level switch, for surfaces that ask only whether a module is shown at
+    /// all — onboarding, where placement is not a question yet.
+    ///
+    /// Enabling gives the module its own items. A surface that knows better says so
+    /// with `setPlacement(_:for:)` instead: a detail inside the Dashboard brings a
+    /// module back as a card, because that is where its reader is standing.
     func setEnabled(_ enabled: Bool, for id: MetricID) {
         guard enabled != (placement(of: id) != .off) else { return }
-        // Turning a module back on restores where it was, which for a grouped module is
-        // its card; otherwise it takes its own item.
         setPlacement(enabled ? .ownItems : .off, for: id)
     }
 

@@ -7,6 +7,11 @@ struct DetailPopoverView: View {
     let moduleID: MetricID
     var showsGlobalActions = true
     var honorsEnabledState = false
+    /// Where this detail's "Enable" puts a module that is currently off. The surface
+    /// decides, because the answer is wherever the reader already is: a detail opened
+    /// inside the Dashboard brings the module back as a card, not as a menu bar item
+    /// somewhere behind the popover they are looking at.
+    var recoveryPlacement: MenuBarPlacement = .ownItems
     /// Outer width, padding included. The dashboard hosts this view at its own width.
     var width: CGFloat = 290
     @State private var copyConfirmationVisible = false
@@ -226,7 +231,7 @@ struct DetailPopoverView: View {
                 NSWorkspace.shared.open(url)
             }
         case .disabled:
-            return { model.setEnabled(true, for: moduleID) }
+            return { model.setPlacement(recoveryPlacement, for: moduleID) }
         default:
             return nil
         }

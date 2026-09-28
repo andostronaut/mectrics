@@ -157,6 +157,7 @@ struct DashboardPopoverView: View {
                 moduleID: id,
                 showsGlobalActions: false,
                 honorsEnabledState: true,
+                recoveryPlacement: .grouped,
                 width: Self.width
             )
             actionFooter

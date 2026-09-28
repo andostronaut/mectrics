@@ -222,7 +222,7 @@ struct AlertsSettingsTab: View {
                     AlertRuleSummary(model: model, keys: ruleKeys)
                 }
             } footer: {
-                Text("When a rule alerts it notifies you, marks the Compact Health item, and is recorded in the Attention Log. A rule rests for 15 minutes after it alerts.")
+                Text("When a rule alerts it notifies you, badges the Dashboard icon, and is recorded in the Attention Log. A rule rests for 15 minutes after it alerts.")
             }
 
             Section {
@@ -548,7 +548,7 @@ struct AlertsSettingsTab: View {
             || notificationAccess == .notDetermined {
             HStack(spacing: ExperienceSpacing.small) {
                 Label(
-                    "macOS is not allowing notifications yet, so rules can only show on the Compact Health item.",
+                    "macOS is not allowing notifications yet, so rules can only badge the Dashboard icon.",
                     systemImage: "exclamationmark.triangle"
                 )
                 .foregroundStyle(.orange)
@@ -704,7 +704,7 @@ struct AlertsSettingsTab: View {
     }
 
     /// Turning a rule on *is* the request to be told about it, so an alerting rule
-    /// notifies, marks the Compact Health item, and is recorded — there is no second
+    /// notifies, badges the Dashboard icon, and is recorded — there is no second
     /// opt-in to forget.
     static let alertDestinations: Set<AlertDestination> = [
         .notification, .compactHealth, .attentionLog

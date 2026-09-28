@@ -41,7 +41,7 @@ struct OnboardingView: View {
                     .accessibilityHidden(true)
                 Text("Your Mac, clear at a glance")
                     .font(.title.weight(.semibold))
-                Text("Live essentials stay visible in the menu bar without opening a dashboard.")
+                Text("Live essentials stay visible in the menu bar without opening another window.")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
