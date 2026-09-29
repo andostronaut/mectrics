@@ -12,8 +12,10 @@ import MetricsKit
 enum MenuBarPlacement: String, CaseIterable, Identifiable {
     /// One status item per chosen component — a reading always in view.
     case ownItems
-    /// A card in the Dashboard's dashboard, a click away.
+    /// A card in the Dashboard, a click away.
     case grouped
+    /// Both: items in the menu bar and a card in the Dashboard.
+    case both
     /// Not shown, and not sampled for the menu bar's sake.
     case off
 
@@ -33,6 +35,11 @@ enum MenuBarPlacement: String, CaseIterable, Identifiable {
                 localized: "placement.grouped",
                 defaultValue: "Dashboard"
             )
+        case .both:
+            return String(
+                localized: "placement.both",
+                defaultValue: "Both"
+            )
         case .off:
             return String(localized: "placement.off", defaultValue: "Off")
         }
@@ -50,16 +57,25 @@ extension MenuBarPlacement {
     ///
     /// The sets stay the source of truth rather than a stored placement per module,
     /// because a module's components and its card are what the menu bar is built from;
-    /// a third stored value could disagree with them.
+    /// a third stored value could disagree with them. That is also why a module in the
+    /// Dashboard alone holds no components: with them kept "for later", `.grouped` and
+    /// `.both` would look identical here and the pair could not be told apart.
     static func placement(
         of id: MetricID,
         enabledComponents: [MetricID: Set<MenuBarComponent>],
         groupedModules: Set<MetricID>
     ) -> MenuBarPlacement {
-        if groupedModules.contains(id) { return .grouped }
-        if !(enabledComponents[id] ?? []).isEmpty { return .ownItems }
-        return .off
+        let hasItems = !(enabledComponents[id] ?? []).isEmpty
+        switch (groupedModules.contains(id), hasItems) {
+        case (true, true): return .both
+        case (true, false): return .grouped
+        case (false, true): return .ownItems
+        case (false, false): return .off
+        }
     }
+
+    /// Whether a module in this placement draws status items of its own.
+    var showsOwnItems: Bool { self == .ownItems || self == .both }
 
     /// Modules the app watches — samples, publishes to widgets, and lists in summaries.
     /// A module earns this by being visible somewhere, its own item or a card.

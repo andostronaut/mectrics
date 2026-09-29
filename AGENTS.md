@@ -108,9 +108,13 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   the pane now asks "where does each module go", and a control that replaces every answer
   at once is a poor fit for a list you read row by row. Do not reintroduce them without an
   explicit decision.
-- **Placement is exclusive, and moving a module keeps its components.** A module is in one
-  place, so "where do I see Disk?" has one answer. Grouping it leaves `enabledComponents`
-  alone, so moving it back restores the items it was showing instead of resetting it.
+- **Four placements, all derived from the two stores.** `enabledComponents` decides items
+  and `groupedModules` decides cards, and the pair gives `.ownItems`, `.grouped`, `.both`
+  and `.off` without a third value that could disagree with them. That derivation is why
+  **asking for the Dashboard alone clears a module's components**: kept "for later" they
+  would make `.grouped` and `.both` identical here. It is also honest — choosing the
+  Dashboard alone says this module should take no menu bar items — and `.both` is there
+  for anyone who wants to keep them.
 - `enabledModules` and `setEnabled(_:for:)` mean the *watched* set
   (`MenuBarPlacement.watchedModules`) — every module placed anywhere. Sampling, widgets,
   summaries, onboarding, and recovery actions go through them, never through

@@ -18,6 +18,7 @@ final class DashboardItemTests: XCTestCase {
     func testRawValuesArePersistedAndThereforeNeverChange() {
         XCTAssertEqual(MenuBarPlacement.ownItems.rawValue, "ownItems")
         XCTAssertEqual(MenuBarPlacement.grouped.rawValue, "grouped")
+        XCTAssertEqual(MenuBarPlacement.both.rawValue, "both")
         XCTAssertEqual(MenuBarPlacement.off.rawValue, "off")
         for placement in MenuBarPlacement.allCases {
             XCTAssertEqual(MenuBarPlacement(rawValue: placement.rawValue), placement)
@@ -30,13 +31,23 @@ final class DashboardItemTests: XCTestCase {
         XCTAssertEqual(Set(names).count, MenuBarPlacement.allCases.count)
     }
 
-    /// Grouped wins over left-over components, because a grouped module keeps the
-    /// components it had so moving it back restores the items it was showing.
-    func testGroupedWinsOverLeftOverComponents() {
+    /// All four states are told apart by the two stores alone. A module with a card and
+    /// components is in **both** places — which is why asking for the Dashboard alone
+    /// gives the components up: kept "for later" they would make `.grouped` and `.both`
+    /// indistinguishable here.
+    func testEveryPlacementIsDerivedFromTheTwoStores() {
         XCTAssertEqual(
             MenuBarPlacement.placement(
                 of: .disk,
                 enabledComponents: [.disk: [.value, .ring]],
+                groupedModules: [.disk]
+            ),
+            .both
+        )
+        XCTAssertEqual(
+            MenuBarPlacement.placement(
+                of: .disk,
+                enabledComponents: [.disk: []],
                 groupedModules: [.disk]
             ),
             .grouped
@@ -96,6 +107,31 @@ final class DashboardItemTests: XCTestCase {
                 groupedModules: []
             ),
             []
+        )
+    }
+
+    /// A module in both places keeps drawing its items, and one in the Dashboard alone
+    /// draws none — without anything having to filter it out, because it holds no
+    /// components to draw.
+    func testOnlyTheDashboardAloneGivesUpItsItems() {
+        for placement in MenuBarPlacement.allCases {
+            XCTAssertEqual(
+                placement.showsOwnItems,
+                placement == .ownItems || placement == .both,
+                placement.rawValue
+            )
+        }
+    }
+
+    /// Both places is still watched, like either place on its own.
+    func testAModuleInBothPlacesIsWatched() {
+        XCTAssertEqual(
+            MenuBarPlacement.watchedModules(
+                available: desktop,
+                enabledComponents: [.cpu: [.value]],
+                groupedModules: [.cpu, .disk]
+            ),
+            [.cpu, .disk]
         )
     }
 

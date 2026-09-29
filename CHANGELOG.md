@@ -38,6 +38,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **The grouped readings live behind one icon called the Dashboard.** It is named for what
   it opens, not for the logo it wears, and the name is the same everywhere: the placement
   you pick, the row in Settings, and the action on a card all say Dashboard.
+- A module can now be in **both** places at once — its own menu bar item *and* a card in
+  the Dashboard — alongside the existing Menu bar, Dashboard and Off.
 - **Where each reading goes is now a choice per module.** In **Settings → Menu Bar**, every
   module takes either its own menu bar item or a card in the Dashboard — so
   CPU can stay in view every second while Disk and Battery sit behind one icon, which a
@@ -71,6 +73,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Moving a module from the menu bar into the Dashboard now actually takes its menu bar
+  item away. The item was left on screen: the module stopped contributing one, but nothing
+  asked the menu bar to be rebuilt, so the old item stayed until something else did.
 - Taking a card off the dashboard no longer closes the dashboard. Removing it cleared the
   module's menu bar components, and that asked for the whole menu bar to be rebuilt — which
   destroys every status item, and the open popover with them. A grouped module has no menu
