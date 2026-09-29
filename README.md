@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner-light.svg">
-  <img alt="mectrics — a lightweight, private system monitor that lives in your macOS menu bar" src="docs/assets/banner-light.svg" width="100%">
+  <img alt="mectrics, a lightweight and private system monitor that lives in your macOS menu bar" src="docs/assets/banner-light.svg" width="100%">
 </picture>
 
 <p>
@@ -17,7 +17,7 @@
 </p>
 
 <p><b>CPU · Memory · Battery · Network · Disk · GPU · Temperature · Fans</b><br>
-live in your menu bar — readable at a glance, and the bar never jumps around.</p>
+live in your menu bar, readable at a glance, and the bar never jumps around.</p>
 
 <p><a href="https://mectrics.app"><b>mectrics.app</b></a></p>
 
@@ -31,11 +31,11 @@ live in your menu bar — readable at a glance, and the bar never jumps around.<
 
 **mectrics** is a native macOS menu bar system monitor. It starts as a single icon: click
 it and your readings open as a dashboard of cards. Give any module an item of its own and
-it draws a readable value in the menu bar — with a live sparkline where a trend actually
-tells you something — and stays out of the way otherwise. So CPU can sit in view every
-second while Disk and Battery stay one click away, and you decide that per module.
+it draws a readable value in the menu bar, with a live sparkline where a trend tells you
+something. So CPU can sit in view every second while Disk and Battery stay one click
+away. You decide that per module.
 
-That one icon is also the health indicator: it takes on a badge when something needs
+That icon is also the health indicator. It takes on a badge when something needs
 attention, and the dashboard opens with what is wrong at the top.
 
 It is built around three commitments:
@@ -43,24 +43,23 @@ It is built around three commitments:
 | | |
 |---|---|
 | 🔒 **Private by construction** | Zero telemetry. No analytics, no identifiers, no crash reports. The only network request Mectrics ever makes is an update check, and it asks you once whether it may make that check on its own. The request carries nothing about you or your Mac, and an update is never installed without you. |
-| 🪶 **Light on the machine** | About **27 MB** of memory and **a few percent of one CPU core** while it sits in your menu bar — the same memory number Activity Monitor shows you. Sampling slows down on battery and backs off in Low Power Mode and when your Mac runs hot. |
+| 🪶 **Light on the machine** | About **27 MB** of memory and **a few percent of one CPU core** while it sits in your menu bar, the same number Activity Monitor shows you. Sampling slows down on battery and backs off in Low Power Mode and when your Mac runs hot. |
 | 📐 **Stable in the menu bar** | Items reserve a fixed width, so values change without anything shifting sideways. |
 
-Those numbers come from half-hour runs of the shipping build, not from one glance at
-Activity Monitor, and they are checked before a release rather than assumed. What you see
-will differ with your Mac, how many items you put in the menu bar, and whether you are on
-battery — more items means more work, because each one redraws every second. A grouped
-module costs nothing per second at all: the Dashboard is redrawn only when its health
-badge changes, which is not something that happens on a timer.
+Those numbers come from half-hour runs of the shipping build, checked before a release
+rather than assumed. What you see will differ with your Mac, how many items you put in the
+menu bar, and whether you are on battery: more items means more work, because each one
+redraws every second. A grouped module costs nothing per second, because the Dashboard is
+redrawn only when its health badge changes.
 
-The project holds itself to deliberately tight internal budgets — 60 MB of memory and 3% of
-a core — and publishes where it stands against them rather than only the flattering half.
-Memory is comfortably inside; CPU currently sits just above. The
+The budgets are deliberately tight, 60 MB of memory and 3% of a core, and the project
+publishes where it stands against them rather than only the flattering half. Memory is
+comfortably inside; CPU currently sits just above. The
 [measurements and the reasoning](docs/architecture.md#power-and-performance) are written
 down, and so is [how to run them yourself](CONTRIBUTING.md#performance-validation).
 
 <div align="center">
-  <a href="https://github.com/farukkamcici/mectrics/releases/latest/download/Mectrics.dmg"><b>⬇︎ Download Mectrics 1.8.0</b></a><br>
+  <a href="https://github.com/farukkamcici/mectrics/releases/latest/download/Mectrics.dmg"><b>⬇︎ Download Mectrics 1.9.0</b></a><br>
   <sub>macOS 15+ · signed and notarized · 5.4 MB</sub>
 </div>
 
@@ -70,7 +69,7 @@ down, and so is [how to run them yourself](CONTRIBUTING.md#performance-validatio
   <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: CPU with a live sparkline, memory, network throughput, and the Dashboard icon holding everything else" width="548">
 </div>
 
-Unavailable hardware hides itself — no Fans module on a fanless MacBook Air, no Battery on
+Unavailable hardware hides itself. No Fans module on a fanless MacBook Air, no Battery on
 a Mac mini. **A missing reading shows a dash, never a fabricated `0`.**
 
 | Module | What you can put in the menu bar | Sparkline |
@@ -78,84 +77,83 @@ a Mac mini. **A missing reading shows a dash, never a fabricated `0`.**
 | **CPU** | Usage %, per-core bars, temperature | ✅ |
 | **Memory** | Usage %, used memory, temperature | ✅ |
 | **GPU** | Utilization %, temperature | ✅ |
-| **Battery** | Level with charge indicator, icon, health, cycles | — |
+| **Battery** | Level with charge indicator, icon, health, cycles |  |
 | **Network** | Stacked ↓/↑ activity with or without a graph, download only, upload only | ✅ |
-| **Disk** | Usage %, ring, used, free | — |
-| **Fans** | Fastest fan RPM | — |
+| **Disk** | Usage %, ring, used, free |  |
+| **Fans** | Fastest fan RPM |  |
 
-Sparklines are drawn for the four metrics where a trend is genuinely informative. The rest
-show a value, because a chart of your disk's fill level is decoration. The network chart is
-scaled against a fixed 1 MB/s floor rather than against whatever the last minute happened to
-contain, so an idle Mac reads as idle instead of turning background chatter into a peak.
+Sparklines are drawn for the four metrics where a trend is informative. The rest show a
+value, because a chart of your disk's fill level is decoration. The network chart is scaled
+against a fixed 1 MB/s floor rather than whatever the last minute contained, so an idle Mac
+reads as idle.
 
-A module can contribute **several independent items** — Battery can show its icon *and* its
+A module can contribute **several independent items**. Battery can show its icon *and* its
 health side by side. You pick components by clicking a live preview chip in the menu bar
-builder, so you choose from what you can actually see. Each popover adds the detail behind
-the value: per-core load and top processes for CPU, swap and pressure for Memory,
-hardware temperature for CPU, Memory, and GPU when the Mac reports it, read/write
-throughput for Disk, and so on.
+builder, so you choose from what you can see. Each popover adds the detail behind the
+value: per-core load and top processes for CPU, swap and pressure for Memory, hardware
+temperature for CPU, Memory and GPU when the Mac reports it, read/write throughput for
+Disk.
 
 <table>
 <tr>
 <td width="50%" valign="top">
   <img src="docs/assets/popover-cpu.png" alt="The CPU popover: a load sparkline, a bar per core, core count, busiest core, temperature, and uptime" width="100%">
-  <p align="center"><sub><b>CPU</b> — a bar per core, and the top processes behind the disclosure</sub></p>
+  <p align="center"><sub><b>CPU</b>: a bar per core, and the top processes behind the disclosure</sub></p>
 </td>
 <td width="50%" valign="top">
   <img src="docs/assets/popover-disk.png" alt="The Disk popover: a usage ring, a used, purgeable and free bar, capacity figures, and live read and write throughput" width="100%">
-  <p align="center"><sub><b>Disk</b> — capacity split three ways, plus live throughput</sub></p>
+  <p align="center"><sub><b>Disk</b>: capacity split three ways, plus live throughput</sub></p>
 </td>
 </tr>
 </table>
 
 ## Beyond the numbers
 
-- **Grouped readings** — put any module behind one Dashboard icon instead of giving it an
-  item of its own. A click opens them as a dashboard of cards, plus your macOS version and
-  uptime, and a click on a card opens its full detail. The icon is the health indicator
-  too — it badges when something needs attention and surfaces what is off, including the
-  two conditions macOS reports itself. Take a card off from the dashboard itself; add one
-  back in Settings. Move a module back to the menu bar and its items return exactly as you
-  left them.
-- **Alert rules** — sustained notifications with a live preview and test delivery, so you
+- **Grouped readings.** Put any module behind one Dashboard icon instead of giving it an
+  item of its own. A click opens them as cards, plus your macOS version and uptime, and a
+  click on a card opens its full detail. The icon is the health indicator too: it badges
+  when something needs attention and surfaces what is off, including the two conditions
+  macOS reports itself. Take a card off from the dashboard; add one back in Settings. Move
+  a module back to the menu bar and its items return as you left them.
+- **Alert rules.** Sustained notifications with a live preview and test delivery, so you
   know what a rule will look like before it fires at 3am. Rules watch either a number you
   pick or a state macOS reports: your Mac slowing its CPU and GPU down to cool off, and
   the kernel's own memory pressure. A hot sensor is not the same thing as a machine that
-  has actually been slowed, and memory can be nearly full with nothing wrong.
-- **Attention Log** — a local, exportable record of what tripped and when.
-- **Energy Guard** — sampling that steps down under Low Power Mode and thermal pressure.
-- **Menu bar builder** — choose where each module goes, and pick the look of the ones in
-  the menu bar by clicking a live preview instead of guessing from a list.
-- **Widgets** — small / medium / large WidgetKit overviews for Notification Center.
-- **Diagnostics** — a local-only system summary you can copy or export as plain text.
-- **Headless CLI** — a read-only automation interface for alert events and one-shot health
+  has been slowed, and memory can be nearly full with nothing wrong.
+- **Attention Log.** A local, exportable record of what tripped and when.
+- **Energy Guard.** Sampling that steps down under Low Power Mode and thermal pressure.
+- **Menu bar builder.** Choose where each module goes, and pick the look of the ones in the
+  menu bar by clicking a live preview instead of guessing from a list.
+- **Widgets.** Small, medium and large WidgetKit overviews for Notification Center.
+- **Diagnostics.** A local-only system summary you can copy or export as plain text.
+- **Headless CLI.** A read-only automation interface for alert events and one-shot health
   checks on Macs whose menu bar is not visible.
 - **Three-step onboarding**, accent themes, and launch at login.
 
 <div align="center">
   <img src="docs/assets/dashboard.png" alt="The Dashboard: cards for CPU, memory, battery, network, disk and the Mac itself, opened from a single menu bar icon" width="346">
-  <p><sub><b>The Dashboard</b> — everything you did not put in the menu bar, one click away</sub></p>
+  <p><sub><b>The Dashboard</b>: everything you did not put in the menu bar, one click away</sub></p>
 </div>
 
 <table>
 <tr>
 <td width="50%" valign="top">
   <img src="docs/assets/settings-menubar.png" alt="The Menu Bar settings pane: a live preview of the menu bar, the Dashboard and its cards, and each module's placement and looks" width="100%">
-  <p align="center"><sub><b>Menu bar builder</b> — where each module goes, and how it looks</sub></p>
+  <p align="center"><sub><b>Menu bar builder</b>: where each module goes, and how it looks</sub></p>
 </td>
 <td width="50%" valign="top">
   <img src="docs/assets/settings-alerts.png" alt="The Alerts settings pane: threshold rules for CPU, memory, battery, disk, GPU, and temperature, each with a sustained duration" width="100%">
-  <p align="center"><sub><b>Alert rules</b> — with the current reading next to each threshold</sub></p>
+  <p align="center"><sub><b>Alert rules</b>: with the current reading next to each threshold</sub></p>
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
   <img src="docs/assets/attention-log.png" alt="The Attention Log: a local record of alert conditions with when each started, how long it lasted, and where it was delivered" width="100%">
-  <p align="center"><sub><b>Attention Log</b> — what tripped, when, and for how long</sub></p>
+  <p align="center"><sub><b>Attention Log</b>: what tripped, when, and for how long</sub></p>
 </td>
 <td width="50%" valign="top">
   <img src="docs/assets/diagnostics.png" alt="The Diagnostics window: a local-only system summary showing hardware, modules, alert rules and sampling state as plain text" width="100%">
-  <p align="center"><sub><b>Diagnostics</b> — a local-only summary you can copy or export</sub></p>
+  <p align="center"><sub><b>Diagnostics</b>: a local-only summary you can copy or export</sub></p>
 </td>
 </tr>
 </table>
@@ -169,7 +167,7 @@ from the [latest release](https://github.com/farukkamcici/mectrics/releases/late
 and drag Mectrics to Applications. The app is signed with a Developer ID and notarized by
 Apple, so it opens without a Gatekeeper detour.
 
-Mectrics has no Dock icon and no window — after launching, look for it in the menu bar.
+Mectrics has no Dock icon and no window. After launching, look for it in the menu bar.
 
 Updates are checked only when you ask, under **Settings → General → Check for Updates…**.
 
@@ -256,7 +254,7 @@ enabled rules when it starts, so restart it after changing rules in the app.
 
 ### Uninstall
 
-Dragging Mectrics to the Trash removes the app but not its settings — macOS keeps those
+Dragging Mectrics to the Trash removes the app but not its settings. macOS keeps those
 for every app, which is why a reinstall goes straight back to your old layout instead of
 showing onboarding again. For a clean removal, choose **Settings → General → Uninstall…**.
 Mectrics unregisters its login item, quits, then removes the app, its settings, alert rules,
@@ -288,7 +286,7 @@ Full setup notes, including code signing, are in [`CONTRIBUTING.md`](CONTRIBUTIN
 
 ## Privacy
 
-Zero telemetry — not "anonymized", not "opt-out". No usage data, hardware information,
+Zero telemetry. Not "anonymized", not "opt-out". No usage data, hardware information,
 metric history, or alert configuration ever leaves the device. Every number comes from a
 local, read-only system interface.
 
@@ -320,23 +318,23 @@ Forks are welcome to disagree with every line of this. That is what the MIT lice
 
 ## Contributing
 
-Contributions are welcome — new hardware coverage and translations especially.
+Contributions are welcome, new hardware coverage and translations especially.
 
 If Mectrics is useful to you, you can [support its ongoing development through GitHub
 Sponsors](https://github.com/sponsors/farukkamcici).
 
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, the development loop, how to add a metric
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): setup, the development loop, how to add a metric
   provider or a translation
-- [`AGENTS.md`](AGENTS.md) — the conventions this repository enforces, and the source of
+- [`AGENTS.md`](AGENTS.md): the conventions this repository enforces, and the source of
   truth for them
-- [`docs/architecture.md`](docs/architecture.md) — how the app and the metric engine fit
+- [`docs/architecture.md`](docs/architecture.md): how the app and the metric engine fit
   together, and where each number comes from
 
 The translation workflow is documented in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Security
 
-Found a vulnerability? Please report it privately — see [`SECURITY.md`](SECURITY.md).
+Found a vulnerability? Please report it privately, see [`SECURITY.md`](SECURITY.md).
 
 ## Acknowledgements
 
