@@ -67,7 +67,7 @@ down, and so is [how to run them yourself](CONTRIBUTING.md#performance-validatio
 ## Modules
 
 <div align="center">
-  <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: free disk space, memory, CPU with a sparkline, and network activity" width="872">
+  <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: CPU with a live sparkline, memory, network throughput, and the Dashboard icon holding everything else" width="570">
 </div>
 
 Unavailable hardware hides itself — no Fans module on a fanless MacBook Air, no Battery on
@@ -133,15 +133,15 @@ throughput for Disk, and so on.
 - **Three-step onboarding**, accent themes, and launch at login.
 
 <div align="center">
-  <img src="docs/assets/compact-health.png" alt="The health popover reading All systems normal, with CPU, Memory, Network and Disk summarized in one list" width="620">
-  <p><sub><b>Health</b> — the whole machine in one item, quiet until it is not</sub></p>
+  <img src="docs/assets/dashboard.png" alt="The Dashboard: cards for Battery, Disk, GPU and the Mac itself, opened from a single menu bar icon" width="340">
+  <p><sub><b>The Dashboard</b> — everything you did not put in the menu bar, one click away</sub></p>
 </div>
 
 <table>
 <tr>
 <td width="50%" valign="top">
-  <img src="docs/assets/settings-menubar.png" alt="The Menu Bar settings pane: a live preview of the menu bar, and every module's components as clickable chips" width="100%">
-  <p align="center"><sub><b>Menu bar builder</b> — click a live chip to add or remove it</sub></p>
+  <img src="docs/assets/settings-menubar.png" alt="The Menu Bar settings pane: a live preview of the menu bar, the Dashboard and its cards, and each module's placement and looks" width="100%">
+  <p align="center"><sub><b>Menu bar builder</b> — where each module goes, and how it looks</sub></p>
 </td>
 <td width="50%" valign="top">
   <img src="docs/assets/settings-alerts.png" alt="The Alerts settings pane: threshold rules for CPU, memory, battery, disk, GPU, and temperature, each with a sustained duration" width="100%">
