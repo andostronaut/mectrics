@@ -67,7 +67,7 @@ down, and so is [how to run them yourself](CONTRIBUTING.md#performance-validatio
 ## Modules
 
 <div align="center">
-  <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: CPU with a live sparkline, memory, network throughput, and the Dashboard icon holding everything else" width="570">
+  <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: CPU with a live sparkline, memory, network throughput, and the Dashboard icon holding everything else" width="548">
 </div>
 
 Unavailable hardware hides itself — no Fans module on a fanless MacBook Air, no Battery on
@@ -133,7 +133,7 @@ throughput for Disk, and so on.
 - **Three-step onboarding**, accent themes, and launch at login.
 
 <div align="center">
-  <img src="docs/assets/dashboard.png" alt="The Dashboard: cards for Battery, Disk, GPU and the Mac itself, opened from a single menu bar icon" width="340">
+  <img src="docs/assets/dashboard.png" alt="The Dashboard: cards for CPU, memory, battery, network, disk and the Mac itself, opened from a single menu bar icon" width="346">
   <p><sub><b>The Dashboard</b> — everything you did not put in the menu bar, one click away</sub></p>
 </div>
 
@@ -146,6 +146,16 @@ throughput for Disk, and so on.
 <td width="50%" valign="top">
   <img src="docs/assets/settings-alerts.png" alt="The Alerts settings pane: threshold rules for CPU, memory, battery, disk, GPU, and temperature, each with a sustained duration" width="100%">
   <p align="center"><sub><b>Alert rules</b> — with the current reading next to each threshold</sub></p>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+  <img src="docs/assets/attention-log.png" alt="The Attention Log: a local record of alert conditions with when each started, how long it lasted, and where it was delivered" width="100%">
+  <p align="center"><sub><b>Attention Log</b> — what tripped, when, and for how long</sub></p>
+</td>
+<td width="50%" valign="top">
+  <img src="docs/assets/diagnostics.png" alt="The Diagnostics window: a local-only system summary showing hardware, modules, alert rules and sampling state as plain text" width="100%">
+  <p align="center"><sub><b>Diagnostics</b> — a local-only summary you can copy or export</sub></p>
 </td>
 </tr>
 </table>
