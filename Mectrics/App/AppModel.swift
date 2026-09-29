@@ -554,6 +554,8 @@ final class AppModel {
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
     private static let dashboardItemEnabledKey = "dashboardItemEnabled"
+    /// Read only to carry an upgrading Mac's Compact Health item over to the Dashboard.
+    private static let legacyCompactHealthEnabledKey = "compactHealthEnabled"
     private static let groupedModulesKey = "groupedModules"
     private static let showsDeviceCardKey = "showsDeviceCard"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
@@ -598,17 +600,31 @@ final class AppModel {
             from: defaults, available: available.filter { $0 != .sensors })
         // Nothing is grouped unless it was asked for, so an existing menu bar is
         // exactly as it was: every module keeps the items it had.
-        // Kept while empty unless it was turned off, so a menu bar never goes silently
-        // blank behind someone who cleared the Dashboard out.
+        // A Mac that already has a Mectrics menu bar is upgrading, and an upgrade may not
+        // rearrange it: no cards move into the Dashboard, and its icon appears only where
+        // the Compact Health item it replaces already stood.
+        let hasExistingMenuBar = defaults.data(forKey: Self.enabledComponentsKey) != nil
+            || defaults.array(forKey: Self.enabledKey) != nil
         self.dashboardItemEnabled =
-            defaults.object(forKey: Self.dashboardItemEnabledKey) as? Bool ?? true
+            defaults.object(forKey: Self.dashboardItemEnabledKey) as? Bool
+            ?? MenuBarPlacement.firstRunDashboardItemEnabled(
+                hasExistingMenuBar: hasExistingMenuBar,
+                hadCompactHealthItem: defaults.bool(
+                    forKey: Self.legacyCompactHealthEnabledKey
+                )
+            )
         // On unless it was turned off, so the dashboard has something to say about the
         // Mac even before a module is grouped into it.
         self.showsDeviceCard =
             defaults.object(forKey: Self.showsDeviceCardKey) as? Bool ?? true
+        let groupable = available.filter { $0 != .sensors }
         self.groupedModules = MenuBarPlacement.groupedModules(
             stored: defaults.array(forKey: Self.groupedModulesKey) as? [String],
-            available: available.filter { $0 != .sensors }
+            available: groupable,
+            whenUnset: MenuBarPlacement.firstRunGroupedModules(
+                hasExistingMenuBar: hasExistingMenuBar,
+                available: groupable
+            )
         )
         refreshComponentOptions()
         refreshActiveMetrics()

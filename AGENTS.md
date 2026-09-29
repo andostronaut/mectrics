@@ -82,6 +82,21 @@ pinned to an exact version in `Package.swift`, so nothing rests on the file.
   second and Disk only when asked can have exactly that, which a single global mode could
   not express. The two sets stay the source of truth rather than a third stored placement
   that could disagree with them, and the persisted raw values never change.
+- **An upgrade may not rearrange a menu bar its owner arranged.** Every version before
+  1.9 had no Dashboard, so a Mac arriving from one has never been asked which readings
+  belong in it: nothing moves into cards, and its icon appears only where the Compact
+  Health item it replaces already stood — the one slot where a new icon is not a change
+  nobody asked for. A stored `enabledComponents`, or the legacy `enabledModules`, is what
+  says a Mac already has a menu bar (`firstRunGroupedModules`,
+  `firstRunDashboardItemEnabled`). Someone who never had that item gets no new icon and
+  hears about the Dashboard from What's New, which is what What's New is for. **Check this
+  against a real upgraded preference domain before a release, not only in tests**: the
+  first attempt passed every test and still gave every existing install an icon nobody
+  asked for.
+- **A clean install starts with one icon.** `MenuBarPlacement.defaultGroupedModules` is
+  CPU and memory, as cards; no module takes an item of its own until it is asked for. The
+  menu bar is the scarce surface, and a first run that fills it with readings nobody
+  picked spends it before the user has said anything.
 - **The Dashboard can be switched off, but only once it is empty.** With cards inside
   there is nothing to decide — they would have nowhere to be shown — so its row states its
   place as text and the pop-up appears when the last card leaves. Empty it first, then

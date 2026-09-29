@@ -109,15 +109,43 @@ extension MenuBarPlacement {
 
     static let dashboardItemKey = "mectrics"
 
-    /// The grouped modules as stored: the defaults when nothing was ever stored, and
-    /// never a module this Mac cannot report. An empty stored list is a choice.
+    /// The grouped modules as stored, falling back to `whenUnset`, and never a module
+    /// this Mac cannot report. An empty stored list is a choice and stays empty.
     static func groupedModules(
         stored: [String]?,
+        available: [MetricID],
+        whenUnset: Set<MetricID>
+    ) -> Set<MetricID> {
+        guard let stored else { return whenUnset.intersection(available) }
+        return Set(stored.compactMap(MetricID.init(rawValue:)).filter(available.contains))
+    }
+
+    /// What the Dashboard holds on a Mac that has never run Mectrics — and on one that
+    /// has, which is nothing.
+    ///
+    /// **An upgrade must leave the menu bar exactly as it was.** Versions before this one
+    /// had no Dashboard, so a Mac arriving from one has never been asked which readings
+    /// belong in it, and moving its CPU and memory into cards would rearrange a menu bar
+    /// its owner arranged. A first run has no menu bar to preserve, so it starts with the
+    /// two readings everyone wants behind one icon.
+    static func firstRunGroupedModules(
+        hasExistingMenuBar: Bool,
         available: [MetricID]
     ) -> Set<MetricID> {
-        guard let stored else {
-            return Set(defaultGroupedModules.filter(available.contains))
-        }
-        return Set(stored.compactMap(MetricID.init(rawValue:)).filter(available.contains))
+        guard !hasExistingMenuBar else { return [] }
+        return Set(defaultGroupedModules.filter(available.contains))
+    }
+
+    /// Whether the Dashboard icon is in the menu bar before anyone has said either way.
+    ///
+    /// On an upgrade it stands exactly where the Compact Health item it replaces stood:
+    /// that item is gone, and its slot is the one place a new icon can appear without
+    /// being a menu bar change nobody asked for. Someone who never had it gets no new
+    /// icon and hears about the Dashboard from What's New instead.
+    static func firstRunDashboardItemEnabled(
+        hasExistingMenuBar: Bool,
+        hadCompactHealthItem: Bool
+    ) -> Bool {
+        hasExistingMenuBar ? hadCompactHealthItem : true
     }
 }

@@ -277,25 +277,108 @@ final class DashboardItemTests: XCTestCase {
     /// icon and a first run is not a row of numbers nobody asked for.
     func testACleanInstallStartsWithCPUAndMemoryAsCards() {
         XCTAssertEqual(MenuBarPlacement.defaultGroupedModules, [.cpu, .memory])
-        XCTAssertEqual(
-            MenuBarPlacement.groupedModules(stored: nil, available: laptop),
-            [.cpu, .memory]
-        )
-        // And never a module this Mac cannot report.
-        XCTAssertEqual(
-            MenuBarPlacement.groupedModules(stored: nil, available: [.disk]),
-            []
-        )
     }
 
     func testStoredModulesDropUnknownAndUnavailableValues() {
         XCTAssertEqual(
             MenuBarPlacement.groupedModules(
                 stored: ["gpu", "battery", "bogus", "CPU", "", "disk", "disk"],
-                available: desktop
+                available: desktop,
+                whenUnset: []
             ),
             [.gpu, .disk]
         )
+    }
+
+    // MARK: - Upgrading from a version that had no Dashboard
+
+    /// **An upgrade may not rearrange a menu bar its owner arranged.** Every version
+    /// before this one had no Dashboard, so a Mac arriving from one has never been asked
+    /// which readings belong in it — moving its CPU and memory into cards would be a
+    /// change nobody asked for, on a menu bar that is already set up.
+    func testAnUpgradeMovesNothingIntoTheDashboard() {
+        XCTAssertEqual(
+            MenuBarPlacement.firstRunGroupedModules(
+                hasExistingMenuBar: true,
+                available: laptop
+            ),
+            []
+        )
+    }
+
+    /// A first run has no menu bar to preserve, so it starts with the two readings
+    /// everyone wants, behind one icon.
+    func testAFirstRunStartsWithCPUAndMemoryAsCards() {
+        XCTAssertEqual(
+            MenuBarPlacement.firstRunGroupedModules(
+                hasExistingMenuBar: false,
+                available: laptop
+            ),
+            [.cpu, .memory]
+        )
+        // And never a module this Mac cannot report.
+        XCTAssertEqual(
+            MenuBarPlacement.firstRunGroupedModules(
+                hasExistingMenuBar: false,
+                available: [.disk]
+            ),
+            []
+        )
+    }
+
+    /// The Dashboard icon takes the Compact Health item's slot, and only that slot.
+    /// Someone who had that item keeps an icon in the same place; someone who did not
+    /// gets no new icon at all and hears about the Dashboard from What's New.
+    func testTheDashboardIconOnlyInheritsTheCompactHealthSlot() {
+        XCTAssertTrue(
+            MenuBarPlacement.firstRunDashboardItemEnabled(
+                hasExistingMenuBar: true,
+                hadCompactHealthItem: true
+            ),
+            "A Mac that had Compact Health keeps an item in the same slot"
+        )
+        XCTAssertFalse(
+            MenuBarPlacement.firstRunDashboardItemEnabled(
+                hasExistingMenuBar: true,
+                hadCompactHealthItem: false
+            ),
+            "An upgrade must not add an icon nobody asked for"
+        )
+        XCTAssertTrue(
+            MenuBarPlacement.firstRunDashboardItemEnabled(
+                hasExistingMenuBar: false,
+                hadCompactHealthItem: false
+            ),
+            "A first run is the Dashboard"
+        )
+    }
+
+    /// The whole promise in one assertion: an upgrading Mac's menu bar comes out of the
+    /// update showing exactly the items it went in with.
+    func testAnUpgradedMenuBarIsUnchanged() {
+        let theirComponents: [MetricID: Set<MenuBarComponent>] = [
+            .cpu: [.valueGraph],
+            .memory: [.value],
+            .disk: [.freeBytes]
+        ]
+        let grouped = MenuBarPlacement.firstRunGroupedModules(
+            hasExistingMenuBar: true,
+            available: laptop
+        )
+        let before = ["cpu|valueGraph", "memory|value", "disk|freeBytes"]
+        let after = MenuBarPlacement.itemKeys(
+            orderedItems: laptop.flatMap { id in
+                MenuBarComponent.available(for: id)
+                    .filter { theirComponents[id]?.contains($0) ?? false }
+                    .map { (module: id, component: $0) }
+            },
+            showsDashboardItem: MenuBarPlacement.firstRunDashboardItemEnabled(
+                hasExistingMenuBar: true,
+                hadCompactHealthItem: false
+            )
+        )
+        XCTAssertEqual(after, before)
+        XCTAssertTrue(grouped.isEmpty)
     }
 
     /// AppModel stores the set as sorted raw values; reading that back through a real
@@ -310,7 +393,8 @@ final class DashboardItemTests: XCTestCase {
             XCTAssertEqual(
                 MenuBarPlacement.groupedModules(
                     stored: defaults.array(forKey: "groupedModules") as? [String],
-                    available: laptop
+                    available: laptop,
+                    whenUnset: []
                 ),
                 chosen
             )
@@ -319,9 +403,10 @@ final class DashboardItemTests: XCTestCase {
         XCTAssertEqual(
             MenuBarPlacement.groupedModules(
                 stored: defaults.array(forKey: "groupedModules") as? [String],
-                available: laptop
+                available: laptop,
+                whenUnset: [.cpu]
             ),
-            Set(MenuBarPlacement.defaultGroupedModules)
+            [.cpu]
         )
     }
 
