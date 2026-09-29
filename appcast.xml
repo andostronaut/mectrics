@@ -3,6 +3,14 @@
     <channel>
         <title>Mectrics</title>
         <item>
+            <title>1.9.0</title>
+            <pubDate>Tue, 29 Sep 2026 17:39:46 +0300</pubDate>
+            <sparkle:version>12</sparkle:version>
+            <sparkle:shortVersionString>1.9.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/farukkamcici/mectrics/releases/download/v1.9.0/Mectrics.dmg" length="5611494" type="application/octet-stream" sparkle:edSignature="dMAnI5nmwazXbb5lDNHnBM5tuX3voWokhbPmkSm9/Ro3zymUC5EKJ+oCcDeIqonze/9FSX/E3Rqti2m+8uRwCg=="/>
+        </item>
+        <item>
             <title>1.8.0</title>
             <pubDate>Thu, 10 Sep 2026 14:22:01 +0300</pubDate>
             <sparkle:version>11</sparkle:version>
@@ -33,14 +41,6 @@
             <sparkle:shortVersionString>1.6.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <enclosure url="https://github.com/farukkamcici/mectrics/releases/download/v1.6.0/Mectrics.dmg" length="5364591" type="application/octet-stream" sparkle:edSignature="19upB8nrTow9KusIiK/KOQaIKShtUTRpIaw6BxSRDHVzduLyctV8lTDZjCtSDR2GmrZ4zPRe4vyCwAEChn9eDA=="/>
-        </item>
-        <item>
-            <title>1.5.0</title>
-            <pubDate>Tue, 04 Aug 2026 01:09:50 +0300</pubDate>
-            <sparkle:version>7</sparkle:version>
-            <sparkle:shortVersionString>1.5.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/farukkamcici/mectrics/releases/download/v1.5.0/Mectrics.dmg" length="5351738" type="application/octet-stream" sparkle:edSignature="UI468Vef/G7/jQu/s6W3QFelg83nBnVQm2EXuCxPUUIDq64UnWWr/201/aOdqSjTXcgeRloBGm/I3loFkHCnBA=="/>
         </item>
     </channel>
 </rss>
