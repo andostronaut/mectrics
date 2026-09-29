@@ -114,11 +114,11 @@ final class AppModel {
 
     /// Menu bar items in display order: module order, then the component order
     /// defined by `MenuBarComponent.available(for:)`.
+    /// A module in the Dashboard alone holds no components, so it contributes nothing
+    /// here without needing to be filtered out — and a module in both places keeps the
+    /// items it chose.
     var orderedEnabledItems: [(module: MetricID, component: MenuBarComponent)] {
         availableModules
-            // A grouped module keeps its components for when it comes back, but it is
-            // showing a card right now, not items.
-            .filter { !groupedModules.contains($0) }
             .flatMap { id in
                 availableComponents(for: id)
                     .filter { enabledComponents[id]?.contains($0) ?? false }
@@ -346,7 +346,7 @@ final class AppModel {
     /// True when this look is the only one left, so the chip showing it says it cannot
     /// be switched off rather than swallowing the click.
     func isOnlyEnabledComponent(_ component: MenuBarComponent, for id: MetricID) -> Bool {
-        placement(of: id) == .ownItems
+        placement(of: id).showsOwnItems
             && enabledComponents[id] == [component]
     }
 
@@ -370,14 +370,25 @@ final class AppModel {
         switch placement {
         case .grouped:
             groupedModules.insert(id)
+            // Asking for the Dashboard alone is a statement that this module should not
+            // take menu bar items, so it gives them up. Keeping them "for later" is what
+            // made a grouped module indistinguishable from one that is in both places.
+            enabledComponents[id] = []
         case .ownItems:
             groupedModules.remove(id)
-            if (enabledComponents[id] ?? []).isEmpty {
-                enabledComponents[id] = [.default(for: id)]
-            }
+            ensureHasComponent(id)
+        case .both:
+            groupedModules.insert(id)
+            ensureHasComponent(id)
         case .off:
             groupedModules.remove(id)
             enabledComponents[id] = []
+        }
+    }
+
+    private func ensureHasComponent(_ id: MetricID) {
+        if (enabledComponents[id] ?? []).isEmpty {
+            enabledComponents[id] = [.default(for: id)]
         }
     }
 
@@ -480,13 +491,11 @@ final class AppModel {
     private func menuBarItemKeys(
         for components: [MetricID: Set<MenuBarComponent>]
     ) -> [String] {
-        let items = availableModules
-            .filter { !groupedModules.contains($0) }
-            .flatMap { id in
-                availableComponents(for: id)
-                    .filter { components[id]?.contains($0) ?? false }
-                    .map { (module: id, component: $0) }
-            }
+        let items = availableModules.flatMap { id in
+            availableComponents(for: id)
+                .filter { components[id]?.contains($0) ?? false }
+                .map { (module: id, component: $0) }
+        }
         // Editing components cannot move the Dashboard, so its presence is passed
         // through rather than recomputed from the components alone.
         return MenuBarPlacement.itemKeys(
@@ -545,6 +554,8 @@ final class AppModel {
     private static let accentKey = "accentChoice"
     private static let menuBarIconsKey = "showMenuBarIcons"
     private static let dashboardItemEnabledKey = "dashboardItemEnabled"
+    /// Read only to carry an upgrading Mac's Compact Health item over to the Dashboard.
+    private static let legacyCompactHealthEnabledKey = "compactHealthEnabled"
     private static let groupedModulesKey = "groupedModules"
     private static let showsDeviceCardKey = "showsDeviceCard"
     private static let adaptMonitoringKey = "adaptMonitoringToEnergyState"
@@ -589,17 +600,31 @@ final class AppModel {
             from: defaults, available: available.filter { $0 != .sensors })
         // Nothing is grouped unless it was asked for, so an existing menu bar is
         // exactly as it was: every module keeps the items it had.
-        // Kept while empty unless it was turned off, so a menu bar never goes silently
-        // blank behind someone who cleared the Dashboard out.
+        // A Mac that already has a Mectrics menu bar is upgrading, and an upgrade may not
+        // rearrange it: no cards move into the Dashboard, and its icon appears only where
+        // the Compact Health item it replaces already stood.
+        let hasExistingMenuBar = defaults.data(forKey: Self.enabledComponentsKey) != nil
+            || defaults.array(forKey: Self.enabledKey) != nil
         self.dashboardItemEnabled =
-            defaults.object(forKey: Self.dashboardItemEnabledKey) as? Bool ?? true
+            defaults.object(forKey: Self.dashboardItemEnabledKey) as? Bool
+            ?? MenuBarPlacement.firstRunDashboardItemEnabled(
+                hasExistingMenuBar: hasExistingMenuBar,
+                hadCompactHealthItem: defaults.bool(
+                    forKey: Self.legacyCompactHealthEnabledKey
+                )
+            )
         // On unless it was turned off, so the dashboard has something to say about the
         // Mac even before a module is grouped into it.
         self.showsDeviceCard =
             defaults.object(forKey: Self.showsDeviceCardKey) as? Bool ?? true
+        let groupable = available.filter { $0 != .sensors }
         self.groupedModules = MenuBarPlacement.groupedModules(
             stored: defaults.array(forKey: Self.groupedModulesKey) as? [String],
-            available: available.filter { $0 != .sensors }
+            available: groupable,
+            whenUnset: MenuBarPlacement.firstRunGroupedModules(
+                hasExistingMenuBar: hasExistingMenuBar,
+                available: groupable
+            )
         )
         refreshComponentOptions()
         refreshActiveMetrics()
@@ -707,7 +732,7 @@ final class AppModel {
         let showsTemperature = [MetricID.cpu, .memory, .gpu].contains { id in
             // A grouped module's components are not on screen; its card is, and a card
             // asks for its temperature by being visible, not by existing.
-            placement(of: id) == .ownItems
+            placement(of: id).showsOwnItems
                 && (enabledComponents[id]?.contains(.temperature) ?? false)
         }
         if showsTemperature

@@ -145,14 +145,19 @@ Bar:
 
 - **Menu bar** (`.ownItems`) — one status item per chosen component, always in view.
 - **Dashboard** (`.grouped`) — a card in [the Dashboard](#the-dashboard), a click away.
+- **Both** (`.both`) — items in the menu bar *and* a card.
 - **Off** — not shown, and not sampled for the menu bar's sake.
 
 A single global style could not express what people actually want: CPU in view every
 second, Disk and Battery gathered behind one icon. Placement is exclusive, so "where do I
 see Disk?" has one answer, and the two sets that decide it — `enabledComponents` and
 `groupedModules` — stay the source of truth rather than a third stored value that could
-disagree with them. Grouping a module leaves its components alone, so moving it back
-restores the items it was showing instead of resetting it to a default. An upgrade changes
+disagree with them. All four states come from those two stores alone, which is why asking for the Dashboard
+alone clears a module's components: kept "for later" they would make `.grouped` and
+`.both` indistinguishable. It is also what the choice means — the Dashboard alone says
+this module takes no menu bar items — and `.both` exists for anyone who wants to keep
+them. A module in the Dashboard alone therefore contributes nothing to
+`orderedEnabledItems` without needing to be filtered out of it. An upgrade changes
 nothing: a stored `enabledComponents` is read as it always was, and `groupedModules`
 starts empty for anyone who already had a menu bar.
 

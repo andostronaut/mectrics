@@ -35,6 +35,7 @@ struct ReleaseHighlight: Identifiable {
 enum ReleaseHighlights {
     static func notes(for version: String) -> [ReleaseHighlight] {
         switch version {
+        case "1.9.0": return oneNineZero
         case "1.8.0": return oneEightZero
         case "1.7.0": return oneSevenZero
         case "1.6.1": return oneSixZero + oneSixOne
@@ -46,6 +47,47 @@ enum ReleaseHighlights {
 
     static var current: [ReleaseHighlight] {
         notes(for: Bundle.main.marketingVersion)
+    }
+
+    private static var oneNineZero: [ReleaseHighlight] {
+        [
+            ReleaseHighlight(
+                id: "dashboard",
+                symbol: "square.grid.2x2",
+                title: String(
+                    localized: "whatsNew.1_9_0.dashboard.title",
+                    defaultValue: "One icon, and everything behind it"
+                ),
+                description: String(
+                    localized: "whatsNew.1_9_0.dashboard.description",
+                    defaultValue: "Readings you do not need in view every second can live in the Dashboard instead — one menu bar icon that opens them as cards. Your menu bar keeps whatever it has today; move anything into the Dashboard under Settings → Menu Bar."
+                )
+            ),
+            ReleaseHighlight(
+                id: "placement",
+                symbol: "slider.horizontal.3",
+                title: String(
+                    localized: "whatsNew.1_9_0.placement.title",
+                    defaultValue: "Each reading picks its own place"
+                ),
+                description: String(
+                    localized: "whatsNew.1_9_0.placement.description",
+                    defaultValue: "CPU can sit in the menu bar every second while Disk and Battery wait in the Dashboard — or take both. Every module chooses on its own row."
+                )
+            ),
+            ReleaseHighlight(
+                id: "health",
+                symbol: "exclamationmark.shield",
+                title: String(
+                    localized: "whatsNew.1_9_0.health.title",
+                    defaultValue: "Health moved onto that icon"
+                ),
+                description: String(
+                    localized: "whatsNew.1_9_0.health.description",
+                    defaultValue: "The Dashboard icon takes on a badge when an alert becomes active, and opens with what is wrong. The separate Compact Health item is gone — it was saying the same thing twice."
+                )
+            )
+        ]
     }
 
     private static var oneEightZero: [ReleaseHighlight] {

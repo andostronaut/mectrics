@@ -126,8 +126,9 @@ struct MenuBarBuilderView: View {
 
     /// One module: where it goes, and — when it takes items of its own — which of them.
     ///
-    /// The chips stay hidden while the module is grouped or off rather than being dimmed:
-    /// a look it cannot show right now is not a choice to be made (AGENTS.md §4).
+    /// The chips appear whenever the module draws items — on its own or in both places —
+    /// and stay hidden otherwise rather than being dimmed: a look it cannot show right
+    /// now is not a choice to be made (AGENTS.md §4).
     private func moduleRow(_ id: MetricID) -> some View {
         VStack(alignment: .leading, spacing: ExperienceSpacing.small) {
             LabeledContent {
@@ -159,7 +160,7 @@ struct MenuBarBuilderView: View {
                     ModuleHealthBadge(model: model, id: id)
                 }
             }
-            if model.placement(of: id) == .ownItems {
+            if model.placement(of: id).showsOwnItems {
                 HStack(spacing: ExperienceSpacing.small) {
                     ForEach(model.availableComponents(for: id)) { component in
                         MenuBarComponentChip(
