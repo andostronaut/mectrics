@@ -11,98 +11,58 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **A compact menu bar: one icon instead of separate items.** Choose **Settings → Menu Bar →
-  Style → Compact** and the menu bar holds one Dashboard icon in place of an item per reading.
-  Clicking it opens a dashboard of cards — CPU, Memory, Battery, Network, and Disk unless
-  you choose otherwise — each showing its value with a chart, a ring, or the figures behind
-  it, and a last card with the macOS version and uptime. GPU and Fans can be added in the
-  same pane but start switched off, because they are among the most expensive readings the
-  app takes. Clicking a card opens that module's full detail inside the same popover. It is
-  for a menu bar that is already crowded, or for anyone who would rather have the numbers
-  one click away than always in view. Your separate-items layout is kept exactly as it was
-  and comes back when you switch back to **Separate**, and nothing changes on update:
-  separate items stay the default.
-- **Mectrics now starts as a single icon.** A clean install puts CPU and memory in the
-  Dashboard rather than four readings in your menu bar, so a first run spends one slot and
-  you decide what deserves more. Give any module an item of its own whenever you want, in
-  **Settings → Menu Bar**. An update changes nothing: the menu bar you already have is the
-  menu bar you keep.
-- **The Dashboard icon can be switched off once nothing is grouped into it.** With cards
-  inside there is nothing to decide, so its row shows where it is; empty it and the choice
-  appears. You can end up with an empty menu bar, and that is fine — opening Mectrics
-  again from Spotlight brings Settings back, and the pane says so.
-- A module's last look can no longer be switched off from the chips. Clearing it used to
-  drop the module out of the menu bar, so the row collapsed while you were still editing
-  it. The pop-up beside the chips is what takes a module out.
-- **Menu bar presets are gone.** A ready-made layout answered "how much detail do you
-  want" while the pane now asks "where does each module go", and replacing every answer at
-  once fits a list you read row by row badly.
-- **The grouped readings live behind one icon called the Dashboard.** It is named for what
-  it opens, not for the logo it wears, and the name is the same everywhere: the placement
-  you pick, the row in Settings, and the action on a card all say Dashboard.
-- A module can now be in **both** places at once — its own menu bar item *and* a card in
-  the Dashboard — alongside the existing Menu bar, Dashboard and Off.
-- **Where each reading goes is now a choice per module.** In **Settings → Menu Bar**, every
-  module takes either its own menu bar item or a card in the Dashboard — so
-  CPU can stay in view every second while Disk and Battery sit behind one icon, which a
-  single Separate/Compact switch could not express. Move a module back and the items it was
-  showing return exactly as they were. Nothing is grouped unless you ask, so your menu bar
-  is unchanged on update.
-- **The Dashboard icon is also the health indicator, and the separate Compact Health item
-  is gone.** It watched the same conditions and showed the same worst one as the dashboard
-  already did, so it was two icons answering one question. The icon now takes on a badge —
-  the same symbol the Attention Log uses — when an alert becomes active, and the dashboard
-  opens with what is wrong at the top. Nothing is lost: the switch that added that item now
-  keeps the Dashboard in the menu bar when nothing is grouped into it, and a Mac that
-  had it on keeps an item in the same slot.
-- **Settings → Menu Bar** now reads as a list of what your menu bar holds, with the
-  Dashboard as a row of its own: the readings grouped into it sit under it, and you
-  add and remove them from there. Each module's placement is a pop-up rather than three
-  buttons repeated down the page, and the grouped choice is named for where the module
-  goes — **Dashboard** — instead of the unanswerable *Grouped*.
-- The Mac's own **Device** card — macOS version and uptime — can be taken off the
-  dashboard like any other, and it now has a row of its own in **Settings → Menu Bar**
-  beside the readings, rather than being adjustable only from inside the dashboard.
-- Cards can be taken off the dashboard from the dashboard: hover a card for its remove
-  button, or right-click it. Adding stays in **Settings → Menu Bar**, where every module
-  your Mac reports is listed along with what it costs to read.
-- Moving between the grid and a module's detail now slides, so the dashboard reads as one
-  place with two depths instead of two panels swapped under the pointer. It follows Reduce
-  Motion, where the change is immediate rather than merely quicker.
-- The dashboard's cards sit a little further from the popover's edge, matching the spacing
-  the rest of the app uses — and the spacing its own detail view already used, two points
-  apart across a single click.
+- **The Dashboard: one menu bar icon holding whatever you do not need in view.** Click it
+  and those readings open as cards, each with its value, a chart or a ring, and your
+  macOS version and uptime beside them. Click a card for that module's full detail in the
+  same popover. Cards come off from the dashboard itself, by hovering one or right-clicking
+  it; you add them back in **Settings → Menu Bar**.
+- **Where each reading goes is a choice per module.** Menu bar, Dashboard, both, or off,
+  on each module's own row. CPU can sit in view every second while Disk and Battery stay
+  one click away, which a single setting for the whole menu bar could not express.
+- **The Dashboard icon is also the health indicator**, and the separate Compact Health
+  item is gone. It watched the same conditions and showed the same worst one as the
+  dashboard already did, so it was two icons answering one question. The icon takes on a
+  badge when an alert becomes active, and the dashboard opens with what is wrong at the
+  top. A Mac that had Compact Health switched on keeps an item in the same slot.
+- **Settings → Menu Bar reads as a list of what your menu bar holds**, the Dashboard
+  included: the readings grouped into it sit under its row, and you add and remove them
+  there. Each module's placement is a pop-up beside its name.
+- A **Device** card for the Mac itself, its macOS version and uptime, which can be taken
+  off the dashboard like any other card.
+- A new install starts as a single icon with CPU and memory inside it, rather than filling
+  the menu bar with readings nobody picked.
+
+### Changed
+
+- **Your menu bar comes through the update unchanged.** Nothing moves into the Dashboard
+  on its own, and its icon appears only where the Compact Health item it replaces already
+  stood. Everything new is a choice waiting in Settings.
+- Menu bar presets are gone. A ready-made layout answered "how much detail do you want",
+  and the pane now asks where each module goes; replacing every answer at once fits a list
+  you read row by row badly.
+- Moving between the dashboard's cards and a module's detail slides rather than cutting,
+  so the popover reads as one place with two depths. It follows Reduce Motion.
+- French now says **Cœurs** for CPU cores, matching *Cœur le plus sollicité*.
 
 ### Fixed
 
-- Moving a module from the menu bar into the Dashboard now actually takes its menu bar
-  item away. The item was left on screen: the module stopped contributing one, but nothing
-  asked the menu bar to be rebuilt, so the old item stayed until something else did.
-- Taking a card off the dashboard no longer closes the dashboard. Removing it cleared the
-  module's menu bar components, and that asked for the whole menu bar to be rebuilt — which
-  destroys every status item, and the open popover with them. A grouped module has no menu
-  bar items to change, so there was nothing to rebuild.
-- A hovered card no longer draws its remove button on top of the chevron that says a click
-  opens details. The chevron sits at the bottom of the card now, so both can be aimed at.
 - Switching an alert rule off while it was alerting now clears it everywhere. The monitors
   reset themselves but told nobody, and a surface only learns a condition is over from
-  being told — so the condition stayed on the menu bar and at the top of the dashboard, and
-  its Attention Log entry never closed, for a rule that was no longer watching anything. A
-  system signal whose reading becomes unavailable is cleared the same way, because a
-  condition that can no longer be read should not go on claiming your Mac is unwell.
-- Uptime in the CPU detail now counts from startup, sleep included, as the `uptime` command
-  and System Information do. It showed the time the Mac had been awake, which stops while
-  it sleeps, so on a laptop that sleeps every night it fell further behind every day. Uptime
-  and battery time estimates are also written with your language's own unit abbreviations
-  rather than English letters in every language.
-- The Battery detail now says **Plugged in** when the Mac is on its adapter without
-  charging — held at a charge limit, or full — and leaves out a time estimate it has no use
-  for. It went by the charging flag alone, so a Mac sitting on its charger at 80% was
-  reported as **On battery**, with a time-remaining row that did not apply.
-- Closing a module's popover no longer stops the readings that module's detail window still
-  shows. Both reported to one list of what was on screen, so closing either one took the
-  module off it, and a CPU, Memory, or GPU detail window left open went on showing the
-  temperature from the moment the popover closed.
+  being told, so the condition stayed on the menu bar and its Attention Log entry never
+  closed for a rule that was no longer watching anything. A system signal whose reading
+  becomes unavailable is cleared the same way: a condition nobody can read should not go on
+  claiming your Mac is unwell.
+- Uptime now counts from startup, sleep included, as the `uptime` command and System
+  Information do. It showed the time the Mac had been awake, which stops while it sleeps,
+  so on a laptop that sleeps every night it fell further behind every day. Uptime and
+  battery estimates are also written with your language's own unit abbreviations.
+- The Battery detail says **Plugged in** when the Mac is on its adapter without charging,
+  held at a charge limit or full, and leaves out a time estimate it has no use for. It went
+  by the charging flag alone, so a Mac sitting on its charger at 80% was reported as **On
+  battery**.
+- Closing a module's popover no longer stops the readings its detail window still shows.
+  Both reported to one list of what was on screen, so closing either took the module off it.
+- The Fans detail shows a dash rather than `0 RPM` when the Mac reports no maximum speed.
 
 ## [1.8.0] — 2026-09-10
 
