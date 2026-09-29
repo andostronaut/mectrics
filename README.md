@@ -66,7 +66,7 @@ down, and so is [how to run them yourself](CONTRIBUTING.md#performance-validatio
 ## Modules
 
 <div align="center">
-  <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: CPU with a live sparkline, memory, network throughput, and the Dashboard icon holding everything else" width="548">
+  <img src="docs/assets/menubar.png" alt="Mectrics in the macOS menu bar: CPU with a live sparkline, memory, network throughput, and the Dashboard icon holding everything else" width="570">
 </div>
 
 Unavailable hardware hides itself. No Fans module on a fanless MacBook Air, no Battery on
