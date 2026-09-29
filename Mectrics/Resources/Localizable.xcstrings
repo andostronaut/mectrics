@@ -518,6 +518,288 @@
         }
       }
     },
+    "whatsNew.1_9_0.dashboard.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Readings you do not need in view every second can live in the Dashboard instead — one menu bar icon that opens them as cards. Your menu bar keeps whatever it has today; move anything into the Dashboard under Settings → Menu Bar."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her saniye görmen gerekmeyen okumalar artık panelde durabilir — onları kart olarak açan tek bir menü çubuğu simgesi. Menü çubuğun bugünkü hâlini koruyor; istediğini Ayarlar → Menü Çubuğu’ndan panele taşı."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показатели, которые не нужны на виду каждую секунду, теперь могут жить на панели — один значок в строке меню открывает их карточками. Ваша строка меню остаётся прежней; перенести что угодно можно в «Настройки → Строка меню»."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las lecturas que no necesitas ver cada segundo pueden vivir en el panel: un icono en la barra de menús que las abre como tarjetas. Tu barra de menús se queda como está; mueve lo que quieras en Ajustes → Barra de menús."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les mesures que vous n’avez pas besoin de voir chaque seconde peuvent vivre dans le tableau de bord — une icône dans la barre des menus qui les ouvre en cartes. Votre barre des menus ne change pas ; déplacez ce que vous voulez dans Réglages → Barre des menus."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As leituras que você não precisa ver a cada segundo podem ficar no painel — um ícone na barra de menus que as abre como cartões. Sua barra de menus continua como está; mova o que quiser em Ajustes → Barra de menus."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不需要时刻在眼前的读数，现在可以放进仪表板——菜单栏中的一个图标，点开即以卡片呈现。你的菜单栏保持原样；在“设置 → 菜单栏”中把任意模块移进去。"
+          }
+        }
+      }
+    },
+    "whatsNew.1_9_0.dashboard.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One icon, and everything behind it"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tek simge, gerisi onun arkasında"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Один значок, и всё за ним"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un icono, y todo detrás"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une icône, et tout derrière"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um ícone, e tudo atrás dele"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个图标，其余都在后面"
+          }
+        }
+      }
+    },
+    "whatsNew.1_9_0.health.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Dashboard icon takes on a badge when an alert becomes active, and opens with what is wrong. The separate Compact Health item is gone — it was saying the same thing twice."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir uyarı etkinleştiğinde panel simgesi bir işaret alıyor ve neyin yanlış olduğuyla açılıyor. Ayrı Compact Health ögesi kaldırıldı — aynı şeyi iki kez söylüyordu."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда предупреждение становится активным, значок панели получает отметку и открывается с описанием проблемы. Отдельный элемент Compact Health убран — он говорил то же самое дважды."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El icono del panel recibe un distintivo cuando una alerta se activa y se abre mostrando el problema. El elemento Compact Health independiente ha desaparecido: decía lo mismo dos veces."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’icône du tableau de bord reçoit un badge lorsqu’une alerte devient active et s’ouvre sur le problème. L’élément Compact Health séparé a disparu — il disait deux fois la même chose."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O ícone do painel recebe um selo quando um alerta fica ativo e abre mostrando o problema. O item Compact Health separado foi removido — ele dizia a mesma coisa duas vezes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提醒激活时，仪表板图标会显示标记，并直接打开指出问题所在。独立的 Compact Health 项目已移除——它把同一件事说了两遍。"
+          }
+        }
+      }
+    },
+    "whatsNew.1_9_0.health.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health moved onto that icon"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sağlık o simgeye taşındı"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние переехало на этот значок"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El estado se mudó a ese icono"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La santé a migré sur cette icône"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A saúde passou para esse ícone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康状态移到了该图标上"
+          }
+        }
+      }
+    },
+    "whatsNew.1_9_0.placement.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU can sit in the menu bar every second while Disk and Battery wait in the Dashboard — or take both. Every module chooses on its own row."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU her saniye menü çubuğunda dururken Disk ve Pil panelde bekleyebilir — ya da ikisi birden. Her modül kendi satırında seçiyor."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU может быть в строке меню каждую секунду, пока диск и батарея ждут на панели — или и то и другое. Каждый модуль выбирает в своей строке."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La CPU puede estar en la barra de menús cada segundo mientras el disco y la batería esperan en el panel, o ambas cosas. Cada módulo elige en su propia fila."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le processeur peut rester dans la barre des menus à chaque seconde pendant que le disque et la batterie attendent dans le tableau de bord — ou les deux. Chaque module choisit sur sa propre ligne."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A CPU pode ficar na barra de menus a cada segundo enquanto disco e bateria esperam no painel — ou ambos. Cada módulo escolhe na própria linha."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 可以每秒都留在菜单栏，而磁盘和电池在仪表板中等待——也可以两者兼有。每个模块在自己那行选择。"
+          }
+        }
+      }
+    },
+    "whatsNew.1_9_0.placement.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each reading picks its own place"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her okuma kendi yerini seçiyor"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый показатель выбирает своё место"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada lectura elige su sitio"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque mesure choisit sa place"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada leitura escolhe seu lugar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每项读数自选位置"
+          }
+        }
+      }
+    },
     "·": {
       "localizations": {
         "es": {
